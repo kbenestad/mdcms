@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MD-CMS — Sample site &amp; theme picker</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --ink: #1e293b; --muted: #64748b;
+    --line: #e2e8f0; --accent: #2563eb; --accent-ink: #ffffff; --chip: #eef2ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a; --card: #1e293b; --ink: #f1f5f9; --muted: #94a3b8;
+      --line: #334155; --accent: #60a5fa; --accent-ink: #0f172a; --chip: #1e293b;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+  header h1 { font-size: 1.9rem; letter-spacing: -0.02em; }
+  header p { color: var(--muted); margin-top: 0.4rem; max-width: 60ch; }
+
+  .theme-bar {
+    position: sticky; top: 0; z-index: 5; margin: 1.75rem 0;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1rem 1.1rem; display: flex; gap: 0.9rem; align-items: center; flex-wrap: wrap;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .theme-bar label { font-weight: 600; font-size: 0.9rem; }
+  .theme-bar select, .theme-bar input {
+    font: inherit; padding: 0.45rem 0.6rem; border: 1px solid var(--line);
+    border-radius: 8px; background: var(--bg); color: var(--ink); min-width: 180px;
+  }
+  .theme-bar select { min-width: 240px; }
+  .theme-bar .grow { flex: 1; min-width: 160px; }
+  .theme-bar .hint { color: var(--muted); font-size: 0.82rem; width: 100%; }
+  button.ghost {
+    font: inherit; padding: 0.45rem 0.8rem; border: 1px solid var(--line);
+    border-radius: 8px; background: var(--bg); color: var(--ink); cursor: pointer;
+  }
+  button.ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.1rem; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.15rem 1.2rem 1.2rem; display: flex; flex-direction: column;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .card h2 { font-size: 1.12rem; letter-spacing: -0.01em; }
+  .card .desc { color: var(--muted); font-size: 0.9rem; margin: 0.4rem 0 0.9rem; flex: 1; }
+  .chip {
+    display: inline-block; font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.04em; color: var(--accent); background: var(--chip);
+    border-radius: 999px; padding: 0.15rem 0.55rem; margin-bottom: 0.6rem;
+  }
+  .actions { display: flex; gap: 0.5rem; }
+  a.btn {
+    text-decoration: none; font-size: 0.9rem; font-weight: 600; padding: 0.5rem 0.9rem;
+    border-radius: 8px; text-align: center; flex: 1;
+  }
+  a.btn.primary { background: var(--accent); color: var(--accent-ink); }
+  a.btn.primary:hover { filter: brightness(1.05); }
+  a.btn.sec { border: 1px solid var(--line); color: var(--ink); }
+  a.btn.sec:hover { border-color: var(--accent); color: var(--accent); }
+  footer { margin-top: 2.5rem; color: var(--muted); font-size: 0.85rem; }
+  footer code { background: var(--chip); padding: 0.1rem 0.35rem; border-radius: 5px; }
+  .count { color: var(--muted); font-size: 0.82rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>MD-CMS sample sites</h1>
+    <p>Live reference sites built with MD-CMS. Pick a theme below to preview any
+       site in a different palette, or open a site with its own default theme.</p>
+  </header>
+
+  <div class="theme-bar">
+    <label for="family">Theme family</label>
+    <select id="family"><option value="">— site default —</option></select>
+    <select id="theme" class="grow" disabled><option value="">(all default)</option></select>
+    <button class="ghost" id="random" type="button">🎲 Random</button>
+    <button class="ghost" id="reset" type="button">Reset</button>
+    <div class="hint" id="hint">No theme selected — each site opens with its own <code>theme.yml</code>.</div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    <p>Themes: <span id="tcount">…</span> across <span id="fcount">…</span> families.
+       Previews use the renderer's <code>?theme=</code> override — the markdown is
+       identical, only colours, fonts and layout change.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // Sample sites live in sibling folders. `nav` is informational only.
+  var SITES = [
+    { dir: "showcase",            name: "MD-CMS Showcase",            nav: "topbar",
+      desc: "A guided tour of the renderer — topbar nav, callouts, tabs, accordions, TOC and posts." },
+    { dir: "techpulse",           name: "TechPulse",                  nav: "topbar",
+      desc: "Independent technology news and analysis, with a paginated post archive." },
+    { dir: "kitchen-table",       name: "The Kitchen Table",          nav: "topbar",
+      desc: "Recipes, techniques, and stories from Amelia Fontaine." },
+    { dir: "neuraldb-docs",       name: "NeuralDB",                   nav: "topbar",
+      desc: "Product documentation for an AI-native vector + relational database." },
+    { dir: "modern-philosophy",   name: "Foundations of Modern Philosophy", nav: "sidebar",
+      desc: "A systematic long-form textbook with nested sidebar sections." },
+    { dir: "velox-docs",          name: "Velox Framework",            nav: "sidebar",
+      desc: "Developer docs for a high-performance TypeScript web framework." },
+    { dir: "wandering-algorithm", name: "The Wandering Algorithm",    nav: "sidebar",
+      desc: "A novel by Elena Marchetti, chapter by chapter." }
+  ];
+
+  var familySel = document.getElementById("family");
+  var themeSel  = document.getElementById("theme");
+  var hint      = document.getElementById("hint");
+  var grid      = document.getElementById("grid");
+  var themes = [];          // [{family, file, path, label}]
+  var byFamily = {};        // family -> [theme]
+
+  function relThemeForSite(path) {
+    // path is repo-relative, e.g. "themes/Blue/x.yaml".
+    // A site index lives at sample-sites/<dir>/index.html, so from there the
+    // repo root is two levels up.
+    return "../../" + path;
+  }
+
+  function currentTheme() {
+    var fam = familySel.value;
+    if (!fam) return null;
+    var file = themeSel.value;
+    var list = byFamily[fam] || [];
+    var t = file ? list.find(function (x) { return x.path === file; }) : list[0];
+    return t || null;
+  }
+
+  function siteUrl(site) {
+    var base = encodeURIComponent(site.dir) + "/index.html";
+    var t = currentTheme();
+    if (!t) return base;
+    return base + "?theme=" + encodeURIComponent(relThemeForSite(t.path));
+  }
+
+  function renderCards() {
+    var t = currentTheme();
+    grid.innerHTML = "";
+    SITES.forEach(function (site) {
+      var card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML =
+        '<span class="chip">' + site.nav + "</span>" +
+        "<h2></h2><p class='desc'></p>" +
+        '<div class="actions">' +
+          '<a class="btn primary" target="_blank" rel="noopener"></a>' +
+          '<a class="btn sec" target="_blank" rel="noopener">Default</a>' +
+        "</div>";
+      card.querySelector("h2").textContent = site.name;
+      card.querySelector(".desc").textContent = site.desc;
+      var primary = card.querySelector(".btn.primary");
+      primary.href = siteUrl(site);
+      primary.textContent = t ? "Open with theme" : "Open";
+      var sec = card.querySelector(".btn.sec");
+      sec.href = encodeURIComponent(site.dir) + "/index.html";
+      sec.style.display = t ? "" : "none";
+      grid.appendChild(card);
+    });
+    hint.innerHTML = t
+      ? 'Previewing <strong>' + escapeHtml(t.label) + "</strong> <span class='count'>(" +
+        escapeHtml(t.family) + " · " + escapeHtml(t.file) + ")</span>."
+      : "No theme selected — each site opens with its own <code>theme.yml</code>.";
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function populateThemeSel() {
+    var fam = familySel.value;
+    themeSel.innerHTML = "";
+    if (!fam) {
+      themeSel.disabled = true;
+      themeSel.innerHTML = "<option value=''>(all default)</option>";
+      return;
+    }
+    themeSel.disabled = false;
+    (byFamily[fam] || []).forEach(function (t) {
+      var o = document.createElement("option");
+      o.value = t.path; o.textContent = t.label;
+      themeSel.appendChild(o);
+    });
+  }
+
+  familySel.addEventListener("change", function () { populateThemeSel(); renderCards(); });
+  themeSel.addEventListener("change", renderCards);
+  document.getElementById("reset").addEventListener("click", function () {
+    familySel.value = ""; populateThemeSel(); renderCards();
+  });
+  document.getElementById("random").addEventListener("click", function () {
+    if (!themes.length) return;
+    var t = themes[Math.floor(Math.random() * themes.length)];
+    familySel.value = t.family; populateThemeSel();
+    themeSel.value = t.path; renderCards();
+  });
+
+  fetch("themes.json")
+    .then(function (r) { return r.ok ? r.json() : []; })
+    .then(function (data) {
+      themes = data || [];
+      themes.forEach(function (t) { (byFamily[t.family] = byFamily[t.family] || []).push(t); });
+      Object.keys(byFamily).sort().forEach(function (fam) {
+        var o = document.createElement("option");
+        o.value = fam; o.textContent = fam + " (" + byFamily[fam].length + ")";
+        familySel.appendChild(o);
+      });
+      document.getElementById("tcount").textContent = themes.length;
+      document.getElementById("fcount").textContent = Object.keys(byFamily).length;
+      renderCards();
+    })
+    .catch(function () { renderCards(); });
+
+  renderCards();
+})();
+</script>
+</body>
+</html>

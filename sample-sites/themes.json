@@ -1,0 +1,1346 @@
+[
+  {
+    "family": "Accessibility-first",
+    "file": "a11y-aaa.yaml",
+    "path": "themes/Accessibility-first/a11y-aaa.yaml",
+    "label": "a11y · aaa contrast"
+  },
+  {
+    "family": "Accessibility-first",
+    "file": "a11y-calm.yaml",
+    "path": "themes/Accessibility-first/a11y-calm.yaml",
+    "label": "a11y · calm"
+  },
+  {
+    "family": "Accessibility-first",
+    "file": "a11y-readable.yaml",
+    "path": "themes/Accessibility-first/a11y-readable.yaml",
+    "label": "a11y · readable"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-ba-bold.yaml",
+    "path": "themes/Airliner/air-ba-bold.yaml",
+    "label": "british airways · bold"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-ba-muted.yaml",
+    "path": "themes/Airliner/air-ba-muted.yaml",
+    "label": "british airways · muted"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-emirates-bold.yaml",
+    "path": "themes/Airliner/air-emirates-bold.yaml",
+    "label": "emirates · bold"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-emirates-muted.yaml",
+    "path": "themes/Airliner/air-emirates-muted.yaml",
+    "label": "emirates · muted"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-etihad-bold.yaml",
+    "path": "themes/Airliner/air-etihad-bold.yaml",
+    "label": "etihad · bold"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-etihad-muted.yaml",
+    "path": "themes/Airliner/air-etihad-muted.yaml",
+    "label": "etihad · muted"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-icelandair-bold.yaml",
+    "path": "themes/Airliner/air-icelandair-bold.yaml",
+    "label": "icelandair · bold"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-icelandair-muted.yaml",
+    "path": "themes/Airliner/air-icelandair-muted.yaml",
+    "label": "icelandair · muted"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-ita-bold.yaml",
+    "path": "themes/Airliner/air-ita-bold.yaml",
+    "label": "ita airways · bold"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-ita-muted.yaml",
+    "path": "themes/Airliner/air-ita-muted.yaml",
+    "label": "ita airways · muted"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-klm-bold.yaml",
+    "path": "themes/Airliner/air-klm-bold.yaml",
+    "label": "klm · bold"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-klm-muted.yaml",
+    "path": "themes/Airliner/air-klm-muted.yaml",
+    "label": "klm · muted"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-lufthansa-bold.yaml",
+    "path": "themes/Airliner/air-lufthansa-bold.yaml",
+    "label": "lufthansa · bold"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-lufthansa-muted.yaml",
+    "path": "themes/Airliner/air-lufthansa-muted.yaml",
+    "label": "lufthansa · muted"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-norse-bold.yaml",
+    "path": "themes/Airliner/air-norse-bold.yaml",
+    "label": "norse atlantic · bold"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-norse-muted.yaml",
+    "path": "themes/Airliner/air-norse-muted.yaml",
+    "label": "norse atlantic · muted"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-qatar-bold.yaml",
+    "path": "themes/Airliner/air-qatar-bold.yaml",
+    "label": "qatar airways · bold"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-qatar-muted.yaml",
+    "path": "themes/Airliner/air-qatar-muted.yaml",
+    "label": "qatar airways · muted"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-sas-bold.yaml",
+    "path": "themes/Airliner/air-sas-bold.yaml",
+    "label": "sas · bold"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-sas-muted.yaml",
+    "path": "themes/Airliner/air-sas-muted.yaml",
+    "label": "sas · muted"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-singapore-bold.yaml",
+    "path": "themes/Airliner/air-singapore-bold.yaml",
+    "label": "singapore · bold"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-singapore-muted.yaml",
+    "path": "themes/Airliner/air-singapore-muted.yaml",
+    "label": "singapore · muted"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-swiss-bold.yaml",
+    "path": "themes/Airliner/air-swiss-bold.yaml",
+    "label": "swiss · bold"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-swiss-muted.yaml",
+    "path": "themes/Airliner/air-swiss-muted.yaml",
+    "label": "swiss · muted"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-thai-bold.yaml",
+    "path": "themes/Airliner/air-thai-bold.yaml",
+    "label": "thai airways · bold"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-thai-muted.yaml",
+    "path": "themes/Airliner/air-thai-muted.yaml",
+    "label": "thai airways · muted"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-ups-bold.yaml",
+    "path": "themes/Airliner/air-ups-bold.yaml",
+    "label": "ups · bold"
+  },
+  {
+    "family": "Airliner",
+    "file": "air-ups-muted.yaml",
+    "path": "themes/Airliner/air-ups-muted.yaml",
+    "label": "ups · muted"
+  },
+  {
+    "family": "Anglican",
+    "file": "lit-festal-bold.yaml",
+    "path": "themes/Anglican/lit-festal-bold.yaml",
+    "label": "festal · bold"
+  },
+  {
+    "family": "Anglican",
+    "file": "lit-festal.yaml",
+    "path": "themes/Anglican/lit-festal.yaml",
+    "label": "festal"
+  },
+  {
+    "family": "Anglican",
+    "file": "lit-ordinary-bold.yaml",
+    "path": "themes/Anglican/lit-ordinary-bold.yaml",
+    "label": "ordinary · bold"
+  },
+  {
+    "family": "Anglican",
+    "file": "lit-ordinary.yaml",
+    "path": "themes/Anglican/lit-ordinary.yaml",
+    "label": "ordinary"
+  },
+  {
+    "family": "Anglican",
+    "file": "lit-pentecost-bold.yaml",
+    "path": "themes/Anglican/lit-pentecost-bold.yaml",
+    "label": "pentecost · bold"
+  },
+  {
+    "family": "Anglican",
+    "file": "lit-pentecost.yaml",
+    "path": "themes/Anglican/lit-pentecost.yaml",
+    "label": "pentecost"
+  },
+  {
+    "family": "Anglican",
+    "file": "lit-requiem-bold.yaml",
+    "path": "themes/Anglican/lit-requiem-bold.yaml",
+    "label": "requiem · bold"
+  },
+  {
+    "family": "Anglican",
+    "file": "lit-requiem.yaml",
+    "path": "themes/Anglican/lit-requiem.yaml",
+    "label": "requiem"
+  },
+  {
+    "family": "Anglican",
+    "file": "lit-rose-bold.yaml",
+    "path": "themes/Anglican/lit-rose-bold.yaml",
+    "label": "rose · bold"
+  },
+  {
+    "family": "Anglican",
+    "file": "lit-rose.yaml",
+    "path": "themes/Anglican/lit-rose.yaml",
+    "label": "rose"
+  },
+  {
+    "family": "Anglican",
+    "file": "lit-sarum-bold.yaml",
+    "path": "themes/Anglican/lit-sarum-bold.yaml",
+    "label": "sarum · bold"
+  },
+  {
+    "family": "Anglican",
+    "file": "lit-sarum.yaml",
+    "path": "themes/Anglican/lit-sarum.yaml",
+    "label": "sarum"
+  },
+  {
+    "family": "Anglican",
+    "file": "lit-violet-bold.yaml",
+    "path": "themes/Anglican/lit-violet-bold.yaml",
+    "label": "violet · bold"
+  },
+  {
+    "family": "Anglican",
+    "file": "lit-violet.yaml",
+    "path": "themes/Anglican/lit-violet.yaml",
+    "label": "violet"
+  },
+  {
+    "family": "Blue",
+    "file": "blue-charcoal.yaml",
+    "path": "themes/Blue/blue-charcoal.yaml",
+    "label": "blue · charcoal"
+  },
+  {
+    "family": "Blue",
+    "file": "blue-paper.yaml",
+    "path": "themes/Blue/blue-paper.yaml",
+    "label": "blue · paper"
+  },
+  {
+    "family": "Blue",
+    "file": "blue-tinted.yaml",
+    "path": "themes/Blue/blue-tinted.yaml",
+    "label": "blue · tinted"
+  },
+  {
+    "family": "Brown",
+    "file": "brown-charcoal.yaml",
+    "path": "themes/Brown/brown-charcoal.yaml",
+    "label": "brown · charcoal"
+  },
+  {
+    "family": "Brown",
+    "file": "brown-paper.yaml",
+    "path": "themes/Brown/brown-paper.yaml",
+    "label": "brown · paper"
+  },
+  {
+    "family": "Brown",
+    "file": "brown-tinted.yaml",
+    "path": "themes/Brown/brown-tinted.yaml",
+    "label": "brown · tinted"
+  },
+  {
+    "family": "CAP",
+    "file": "amber-bold.yaml",
+    "path": "themes/CAP/amber-bold.yaml",
+    "label": "amber · bold"
+  },
+  {
+    "family": "CAP",
+    "file": "amber-charcoal.yaml",
+    "path": "themes/CAP/amber-charcoal.yaml",
+    "label": "amber · charcoal"
+  },
+  {
+    "family": "CAP",
+    "file": "amber-mono.yaml",
+    "path": "themes/CAP/amber-mono.yaml",
+    "label": "amber · mono"
+  },
+  {
+    "family": "CAP",
+    "file": "amber-paper.yaml",
+    "path": "themes/CAP/amber-paper.yaml",
+    "label": "amber · paper"
+  },
+  {
+    "family": "CAP",
+    "file": "amber-sun.yaml",
+    "path": "themes/CAP/amber-sun.yaml",
+    "label": "amber · sun"
+  },
+  {
+    "family": "CAP",
+    "file": "indigo-bold.yaml",
+    "path": "themes/CAP/indigo-bold.yaml",
+    "label": "indigo · bold"
+  },
+  {
+    "family": "CAP",
+    "file": "indigo-contrast.yaml",
+    "path": "themes/CAP/indigo-contrast.yaml",
+    "label": "indigo · contrast"
+  },
+  {
+    "family": "CAP",
+    "file": "indigo-dusk.yaml",
+    "path": "themes/CAP/indigo-dusk.yaml",
+    "label": "indigo dusk"
+  },
+  {
+    "family": "CAP",
+    "file": "indigo-monochrome.yaml",
+    "path": "themes/CAP/indigo-monochrome.yaml",
+    "label": "indigo · monochrome"
+  },
+  {
+    "family": "CAP",
+    "file": "indigo-paper.yaml",
+    "path": "themes/CAP/indigo-paper.yaml",
+    "label": "indigo · paper"
+  },
+  {
+    "family": "CAP",
+    "file": "indigo-warm.yaml",
+    "path": "themes/CAP/indigo-warm.yaml",
+    "label": "indigo · warm"
+  },
+  {
+    "family": "Childrens",
+    "file": "kids-crayon.yaml",
+    "path": "themes/Childrens/kids-crayon.yaml",
+    "label": "kids · crayon"
+  },
+  {
+    "family": "Childrens",
+    "file": "kids-meadow.yaml",
+    "path": "themes/Childrens/kids-meadow.yaml",
+    "label": "kids · meadow"
+  },
+  {
+    "family": "Childrens",
+    "file": "kids-storybook.yaml",
+    "path": "themes/Childrens/kids-storybook.yaml",
+    "label": "kids · storybook"
+  },
+  {
+    "family": "Coffee shop",
+    "file": "coffee-cortado.yaml",
+    "path": "themes/Coffee shop/coffee-cortado.yaml",
+    "label": "coffee · cortado"
+  },
+  {
+    "family": "Coffee shop",
+    "file": "coffee-espresso.yaml",
+    "path": "themes/Coffee shop/coffee-espresso.yaml",
+    "label": "coffee · espresso"
+  },
+  {
+    "family": "Coffee shop",
+    "file": "coffee-latte.yaml",
+    "path": "themes/Coffee shop/coffee-latte.yaml",
+    "label": "coffee · latte"
+  },
+  {
+    "family": "Developer",
+    "file": "dev-catppuccin.yaml",
+    "path": "themes/Developer/dev-catppuccin.yaml",
+    "label": "catppuccin"
+  },
+  {
+    "family": "Developer",
+    "file": "dev-dracula.yaml",
+    "path": "themes/Developer/dev-dracula.yaml",
+    "label": "dracula"
+  },
+  {
+    "family": "Developer",
+    "file": "dev-gruvbox.yaml",
+    "path": "themes/Developer/dev-gruvbox.yaml",
+    "label": "gruvbox"
+  },
+  {
+    "family": "Developer",
+    "file": "dev-monokai.yaml",
+    "path": "themes/Developer/dev-monokai.yaml",
+    "label": "monokai"
+  },
+  {
+    "family": "Developer",
+    "file": "dev-nord.yaml",
+    "path": "themes/Developer/dev-nord.yaml",
+    "label": "nord"
+  },
+  {
+    "family": "Developer",
+    "file": "dev-one-dark.yaml",
+    "path": "themes/Developer/dev-one-dark.yaml",
+    "label": "one dark"
+  },
+  {
+    "family": "Developer",
+    "file": "dev-solarized.yaml",
+    "path": "themes/Developer/dev-solarized.yaml",
+    "label": "solarized"
+  },
+  {
+    "family": "Developer",
+    "file": "dev-tokyo-night.yaml",
+    "path": "themes/Developer/dev-tokyo-night.yaml",
+    "label": "tokyo night"
+  },
+  {
+    "family": "Government-Institutional",
+    "file": "gov-civic.yaml",
+    "path": "themes/Government-Institutional/gov-civic.yaml",
+    "label": "gov · civic"
+  },
+  {
+    "family": "Government-Institutional",
+    "file": "gov-eu.yaml",
+    "path": "themes/Government-Institutional/gov-eu.yaml",
+    "label": "gov · eu"
+  },
+  {
+    "family": "Government-Institutional",
+    "file": "gov-uk.yaml",
+    "path": "themes/Government-Institutional/gov-uk.yaml",
+    "label": "gov · uk"
+  },
+  {
+    "family": "Gray",
+    "file": "gray-mono.yaml",
+    "path": "themes/Gray/gray-mono.yaml",
+    "label": "gray · mono"
+  },
+  {
+    "family": "Gray",
+    "file": "gray-paper.yaml",
+    "path": "themes/Gray/gray-paper.yaml",
+    "label": "gray · paper"
+  },
+  {
+    "family": "Gray",
+    "file": "gray-tinted.yaml",
+    "path": "themes/Gray/gray-tinted.yaml",
+    "label": "gray · tinted"
+  },
+  {
+    "family": "Green",
+    "file": "green-charcoal.yaml",
+    "path": "themes/Green/green-charcoal.yaml",
+    "label": "green · charcoal"
+  },
+  {
+    "family": "Green",
+    "file": "green-paper.yaml",
+    "path": "themes/Green/green-paper.yaml",
+    "label": "green · paper"
+  },
+  {
+    "family": "Green",
+    "file": "green-tinted.yaml",
+    "path": "themes/Green/green-tinted.yaml",
+    "label": "green · tinted"
+  },
+  {
+    "family": "International flags",
+    "file": "canada-bold.yaml",
+    "path": "themes/International flags/canada-bold.yaml",
+    "label": "canada · bold"
+  },
+  {
+    "family": "International flags",
+    "file": "canada-muted.yaml",
+    "path": "themes/International flags/canada-muted.yaml",
+    "label": "canada · muted"
+  },
+  {
+    "family": "International flags",
+    "file": "china-bold.yaml",
+    "path": "themes/International flags/china-bold.yaml",
+    "label": "china · bold"
+  },
+  {
+    "family": "International flags",
+    "file": "china-muted.yaml",
+    "path": "themes/International flags/china-muted.yaml",
+    "label": "china · muted"
+  },
+  {
+    "family": "International flags",
+    "file": "ireland-bold.yaml",
+    "path": "themes/International flags/ireland-bold.yaml",
+    "label": "ireland · bold"
+  },
+  {
+    "family": "International flags",
+    "file": "ireland-muted.yaml",
+    "path": "themes/International flags/ireland-muted.yaml",
+    "label": "ireland · muted"
+  },
+  {
+    "family": "International flags",
+    "file": "italy-bold.yaml",
+    "path": "themes/International flags/italy-bold.yaml",
+    "label": "italy · bold"
+  },
+  {
+    "family": "International flags",
+    "file": "italy-muted.yaml",
+    "path": "themes/International flags/italy-muted.yaml",
+    "label": "italy · muted"
+  },
+  {
+    "family": "International flags",
+    "file": "kenya-bold.yaml",
+    "path": "themes/International flags/kenya-bold.yaml",
+    "label": "kenya · bold"
+  },
+  {
+    "family": "International flags",
+    "file": "kenya-muted.yaml",
+    "path": "themes/International flags/kenya-muted.yaml",
+    "label": "kenya · muted"
+  },
+  {
+    "family": "International flags",
+    "file": "netherlands-bold.yaml",
+    "path": "themes/International flags/netherlands-bold.yaml",
+    "label": "the netherlands · bold"
+  },
+  {
+    "family": "International flags",
+    "file": "netherlands-muted.yaml",
+    "path": "themes/International flags/netherlands-muted.yaml",
+    "label": "the netherlands · muted"
+  },
+  {
+    "family": "International flags",
+    "file": "south-africa-bold.yaml",
+    "path": "themes/International flags/south-africa-bold.yaml",
+    "label": "south africa · bold"
+  },
+  {
+    "family": "International flags",
+    "file": "south-africa-muted.yaml",
+    "path": "themes/International flags/south-africa-muted.yaml",
+    "label": "south africa · muted"
+  },
+  {
+    "family": "International flags",
+    "file": "south-korea-bold.yaml",
+    "path": "themes/International flags/south-korea-bold.yaml",
+    "label": "south korea · bold"
+  },
+  {
+    "family": "International flags",
+    "file": "south-korea-muted.yaml",
+    "path": "themes/International flags/south-korea-muted.yaml",
+    "label": "south korea · muted"
+  },
+  {
+    "family": "International flags",
+    "file": "thailand-bold.yaml",
+    "path": "themes/International flags/thailand-bold.yaml",
+    "label": "thailand · bold"
+  },
+  {
+    "family": "International flags",
+    "file": "thailand-muted.yaml",
+    "path": "themes/International flags/thailand-muted.yaml",
+    "label": "thailand · muted"
+  },
+  {
+    "family": "International flags",
+    "file": "ukraine-bold.yaml",
+    "path": "themes/International flags/ukraine-bold.yaml",
+    "label": "ukraine · bold"
+  },
+  {
+    "family": "International flags",
+    "file": "ukraine-muted.yaml",
+    "path": "themes/International flags/ukraine-muted.yaml",
+    "label": "ukraine · muted"
+  },
+  {
+    "family": "Legal-formal",
+    "file": "legal-bar.yaml",
+    "path": "themes/Legal-formal/legal-bar.yaml",
+    "label": "legal · bar"
+  },
+  {
+    "family": "Legal-formal",
+    "file": "legal-counsel.yaml",
+    "path": "themes/Legal-formal/legal-counsel.yaml",
+    "label": "legal · counsel"
+  },
+  {
+    "family": "Legal-formal",
+    "file": "legal-court.yaml",
+    "path": "themes/Legal-formal/legal-court.yaml",
+    "label": "legal · court"
+  },
+  {
+    "family": "Medical-Clinical",
+    "file": "med-clinic-bold.yaml",
+    "path": "themes/Medical-Clinical/med-clinic-bold.yaml",
+    "label": "medical · clinic · bold"
+  },
+  {
+    "family": "Medical-Clinical",
+    "file": "med-clinic.yaml",
+    "path": "themes/Medical-Clinical/med-clinic.yaml",
+    "label": "medical · clinic"
+  },
+  {
+    "family": "Medical-Clinical",
+    "file": "med-pharmacy-bold.yaml",
+    "path": "themes/Medical-Clinical/med-pharmacy-bold.yaml",
+    "label": "medical · pharmacy · bold"
+  },
+  {
+    "family": "Medical-Clinical",
+    "file": "med-pharmacy.yaml",
+    "path": "themes/Medical-Clinical/med-pharmacy.yaml",
+    "label": "medical · pharmacy"
+  },
+  {
+    "family": "Medical-Clinical",
+    "file": "med-wellness-bold.yaml",
+    "path": "themes/Medical-Clinical/med-wellness-bold.yaml",
+    "label": "medical · wellness · bold"
+  },
+  {
+    "family": "Medical-Clinical",
+    "file": "med-wellness.yaml",
+    "path": "themes/Medical-Clinical/med-wellness.yaml",
+    "label": "medical · wellness"
+  },
+  {
+    "family": "Modern",
+    "file": "mono-press.yaml",
+    "path": "themes/Modern/mono-press.yaml",
+    "label": "mono · press"
+  },
+  {
+    "family": "Modern",
+    "file": "sage.yaml",
+    "path": "themes/Modern/sage.yaml",
+    "label": "sage"
+  },
+  {
+    "family": "Modern",
+    "file": "sunset.yaml",
+    "path": "themes/Modern/sunset.yaml",
+    "label": "sunset"
+  },
+  {
+    "family": "Newspaper-inspired",
+    "file": "broadsheet.yaml",
+    "path": "themes/Newspaper-inspired/broadsheet.yaml",
+    "label": "broadsheet"
+  },
+  {
+    "family": "Newspaper-inspired",
+    "file": "ledger.yaml",
+    "path": "themes/Newspaper-inspired/ledger.yaml",
+    "label": "ledger"
+  },
+  {
+    "family": "Nordic flags",
+    "file": "aland-bold.yaml",
+    "path": "themes/Nordic flags/aland-bold.yaml",
+    "label": "åland · bold"
+  },
+  {
+    "family": "Nordic flags",
+    "file": "aland-muted.yaml",
+    "path": "themes/Nordic flags/aland-muted.yaml",
+    "label": "åland · muted"
+  },
+  {
+    "family": "Nordic flags",
+    "file": "denmark-bold.yaml",
+    "path": "themes/Nordic flags/denmark-bold.yaml",
+    "label": "denmark · bold"
+  },
+  {
+    "family": "Nordic flags",
+    "file": "denmark-muted.yaml",
+    "path": "themes/Nordic flags/denmark-muted.yaml",
+    "label": "denmark · muted"
+  },
+  {
+    "family": "Nordic flags",
+    "file": "faroe-bold.yaml",
+    "path": "themes/Nordic flags/faroe-bold.yaml",
+    "label": "faroe islands · bold"
+  },
+  {
+    "family": "Nordic flags",
+    "file": "faroe-muted.yaml",
+    "path": "themes/Nordic flags/faroe-muted.yaml",
+    "label": "faroe islands · muted"
+  },
+  {
+    "family": "Nordic flags",
+    "file": "finland-bold.yaml",
+    "path": "themes/Nordic flags/finland-bold.yaml",
+    "label": "finland · bold"
+  },
+  {
+    "family": "Nordic flags",
+    "file": "finland-muted.yaml",
+    "path": "themes/Nordic flags/finland-muted.yaml",
+    "label": "finland · muted"
+  },
+  {
+    "family": "Nordic flags",
+    "file": "greenland-bold.yaml",
+    "path": "themes/Nordic flags/greenland-bold.yaml",
+    "label": "greenland · bold"
+  },
+  {
+    "family": "Nordic flags",
+    "file": "greenland-muted.yaml",
+    "path": "themes/Nordic flags/greenland-muted.yaml",
+    "label": "greenland · muted"
+  },
+  {
+    "family": "Nordic flags",
+    "file": "iceland-bold.yaml",
+    "path": "themes/Nordic flags/iceland-bold.yaml",
+    "label": "iceland · bold"
+  },
+  {
+    "family": "Nordic flags",
+    "file": "iceland-muted.yaml",
+    "path": "themes/Nordic flags/iceland-muted.yaml",
+    "label": "iceland · muted"
+  },
+  {
+    "family": "Nordic flags",
+    "file": "sweden-bold.yaml",
+    "path": "themes/Nordic flags/sweden-bold.yaml",
+    "label": "sweden · bold"
+  },
+  {
+    "family": "Nordic flags",
+    "file": "sweden-muted.yaml",
+    "path": "themes/Nordic flags/sweden-muted.yaml",
+    "label": "sweden · muted"
+  },
+  {
+    "family": "Norge - 17 mai",
+    "file": "norge-banner.yaml",
+    "path": "themes/Norge - 17 mai/norge-banner.yaml",
+    "label": "norge · banner"
+  },
+  {
+    "family": "Norge - 17 mai",
+    "file": "norge-classic.yaml",
+    "path": "themes/Norge - 17 mai/norge-classic.yaml",
+    "label": "norge · classic"
+  },
+  {
+    "family": "Norge - 17 mai",
+    "file": "norge-crisp.yaml",
+    "path": "themes/Norge - 17 mai/norge-crisp.yaml",
+    "label": "norge · crisp"
+  },
+  {
+    "family": "Norge - 17 mai",
+    "file": "norge-festive.yaml",
+    "path": "themes/Norge - 17 mai/norge-festive.yaml",
+    "label": "norge · festive"
+  },
+  {
+    "family": "Operating Systems",
+    "file": "os-adwaita.yaml",
+    "path": "themes/Operating Systems/os-adwaita.yaml",
+    "label": "os-adwaita"
+  },
+  {
+    "family": "Operating Systems",
+    "file": "os-aero.yaml",
+    "path": "themes/Operating Systems/os-aero.yaml",
+    "label": "os-aero"
+  },
+  {
+    "family": "Operating Systems",
+    "file": "os-amiga.yaml",
+    "path": "themes/Operating Systems/os-amiga.yaml",
+    "label": "os-amiga"
+  },
+  {
+    "family": "Operating Systems",
+    "file": "os-beos.yaml",
+    "path": "themes/Operating Systems/os-beos.yaml",
+    "label": "os-beos"
+  },
+  {
+    "family": "Operating Systems",
+    "file": "os-breeze.yaml",
+    "path": "themes/Operating Systems/os-breeze.yaml",
+    "label": "os-breeze"
+  },
+  {
+    "family": "Operating Systems",
+    "file": "os-chromeos.yaml",
+    "path": "themes/Operating Systems/os-chromeos.yaml",
+    "label": "os-chromeos"
+  },
+  {
+    "family": "Operating Systems",
+    "file": "os-cupertino-graphite.yaml",
+    "path": "themes/Operating Systems/os-cupertino-graphite.yaml",
+    "label": "os-cupertino-graphite"
+  },
+  {
+    "family": "Operating Systems",
+    "file": "os-cupertino.yaml",
+    "path": "themes/Operating Systems/os-cupertino.yaml",
+    "label": "os-cupertino"
+  },
+  {
+    "family": "Operating Systems",
+    "file": "os-elementary.yaml",
+    "path": "themes/Operating Systems/os-elementary.yaml",
+    "label": "os-elementary"
+  },
+  {
+    "family": "Operating Systems",
+    "file": "os-fluent-dark.yaml",
+    "path": "themes/Operating Systems/os-fluent-dark.yaml",
+    "label": "os-fluent-dark"
+  },
+  {
+    "family": "Operating Systems",
+    "file": "os-fluent.yaml",
+    "path": "themes/Operating Systems/os-fluent.yaml",
+    "label": "os-fluent"
+  },
+  {
+    "family": "Operating Systems",
+    "file": "os-ios.yaml",
+    "path": "themes/Operating Systems/os-ios.yaml",
+    "label": "os-ios"
+  },
+  {
+    "family": "Operating Systems",
+    "file": "os-material-you.yaml",
+    "path": "themes/Operating Systems/os-material-you.yaml",
+    "label": "os-material-you"
+  },
+  {
+    "family": "Operating Systems",
+    "file": "os-nextstep.yaml",
+    "path": "themes/Operating Systems/os-nextstep.yaml",
+    "label": "os-nextstep"
+  },
+  {
+    "family": "Operating Systems",
+    "file": "os-pop.yaml",
+    "path": "themes/Operating Systems/os-pop.yaml",
+    "label": "os-pop"
+  },
+  {
+    "family": "Operating Systems",
+    "file": "os-system-7.yaml",
+    "path": "themes/Operating Systems/os-system-7.yaml",
+    "label": "os-system-7"
+  },
+  {
+    "family": "Orange",
+    "file": "orange-charcoal.yaml",
+    "path": "themes/Orange/orange-charcoal.yaml",
+    "label": "orange · charcoal"
+  },
+  {
+    "family": "Orange",
+    "file": "orange-paper.yaml",
+    "path": "themes/Orange/orange-paper.yaml",
+    "label": "orange · paper"
+  },
+  {
+    "family": "Orange",
+    "file": "orange-tinted.yaml",
+    "path": "themes/Orange/orange-tinted.yaml",
+    "label": "orange · tinted"
+  },
+  {
+    "family": "Painters and art movements",
+    "file": "art-bauhaus.yaml",
+    "path": "themes/Painters and art movements/art-bauhaus.yaml",
+    "label": "bauhaus"
+  },
+  {
+    "family": "Painters and art movements",
+    "file": "art-hokusai.yaml",
+    "path": "themes/Painters and art movements/art-hokusai.yaml",
+    "label": "hokusai"
+  },
+  {
+    "family": "Painters and art movements",
+    "file": "art-klein.yaml",
+    "path": "themes/Painters and art movements/art-klein.yaml",
+    "label": "klein"
+  },
+  {
+    "family": "Painters and art movements",
+    "file": "art-matisse.yaml",
+    "path": "themes/Painters and art movements/art-matisse.yaml",
+    "label": "matisse"
+  },
+  {
+    "family": "Painters and art movements",
+    "file": "art-memphis.yaml",
+    "path": "themes/Painters and art movements/art-memphis.yaml",
+    "label": "memphis"
+  },
+  {
+    "family": "Painters and art movements",
+    "file": "art-mondrian.yaml",
+    "path": "themes/Painters and art movements/art-mondrian.yaml",
+    "label": "mondrian"
+  },
+  {
+    "family": "Painters and art movements",
+    "file": "art-okeeffe.yaml",
+    "path": "themes/Painters and art movements/art-okeeffe.yaml",
+    "label": "o'keeffe"
+  },
+  {
+    "family": "Painters and art movements",
+    "file": "art-rothko.yaml",
+    "path": "themes/Painters and art movements/art-rothko.yaml",
+    "label": "rothko"
+  },
+  {
+    "family": "Pink",
+    "file": "pink-charcoal.yaml",
+    "path": "themes/Pink/pink-charcoal.yaml",
+    "label": "pink · charcoal"
+  },
+  {
+    "family": "Pink",
+    "file": "pink-paper.yaml",
+    "path": "themes/Pink/pink-paper.yaml",
+    "label": "pink · paper"
+  },
+  {
+    "family": "Pink",
+    "file": "pink-tinted.yaml",
+    "path": "themes/Pink/pink-tinted.yaml",
+    "label": "pink · tinted"
+  },
+  {
+    "family": "Purple",
+    "file": "purple-charcoal.yaml",
+    "path": "themes/Purple/purple-charcoal.yaml",
+    "label": "purple · charcoal"
+  },
+  {
+    "family": "Purple",
+    "file": "purple-paper.yaml",
+    "path": "themes/Purple/purple-paper.yaml",
+    "label": "purple · paper"
+  },
+  {
+    "family": "Purple",
+    "file": "purple-tinted.yaml",
+    "path": "themes/Purple/purple-tinted.yaml",
+    "label": "purple · tinted"
+  },
+  {
+    "family": "Reading",
+    "file": "read-mono.yaml",
+    "path": "themes/Reading/read-mono.yaml",
+    "label": "reading · mono"
+  },
+  {
+    "family": "Reading",
+    "file": "read-paper.yaml",
+    "path": "themes/Reading/read-paper.yaml",
+    "label": "reading · paper"
+  },
+  {
+    "family": "Reading",
+    "file": "read-sepia.yaml",
+    "path": "themes/Reading/read-sepia.yaml",
+    "label": "reading · sepia"
+  },
+  {
+    "family": "Red",
+    "file": "red-charcoal.yaml",
+    "path": "themes/Red/red-charcoal.yaml",
+    "label": "red · charcoal"
+  },
+  {
+    "family": "Red",
+    "file": "red-paper.yaml",
+    "path": "themes/Red/red-paper.yaml",
+    "label": "red · paper"
+  },
+  {
+    "family": "Red",
+    "file": "red-tinted.yaml",
+    "path": "themes/Red/red-tinted.yaml",
+    "label": "red · tinted"
+  },
+  {
+    "family": "Retro terminals",
+    "file": "term-pdp.yaml",
+    "path": "themes/Retro terminals/term-pdp.yaml",
+    "label": "terminal · pdp"
+  },
+  {
+    "family": "Retro terminals",
+    "file": "term-robco.yaml",
+    "path": "themes/Retro terminals/term-robco.yaml",
+    "label": "terminal · robco"
+  },
+  {
+    "family": "Retro terminals",
+    "file": "term-teletype.yaml",
+    "path": "themes/Retro terminals/term-teletype.yaml",
+    "label": "terminal · teletype"
+  },
+  {
+    "family": "Retro terminals",
+    "file": "term-vt100.yaml",
+    "path": "themes/Retro terminals/term-vt100.yaml",
+    "label": "terminal · vt100"
+  },
+  {
+    "family": "Subway maps and cartography",
+    "file": "map-nautical-bold.yaml",
+    "path": "themes/Subway maps and cartography/map-nautical-bold.yaml",
+    "label": "nautical chart · bold"
+  },
+  {
+    "family": "Subway maps and cartography",
+    "file": "map-nautical-muted.yaml",
+    "path": "themes/Subway maps and cartography/map-nautical-muted.yaml",
+    "label": "nautical chart · muted"
+  },
+  {
+    "family": "Subway maps and cartography",
+    "file": "map-nyc-subway-bold.yaml",
+    "path": "themes/Subway maps and cartography/map-nyc-subway-bold.yaml",
+    "label": "nyc subway · bold"
+  },
+  {
+    "family": "Subway maps and cartography",
+    "file": "map-nyc-subway-muted.yaml",
+    "path": "themes/Subway maps and cartography/map-nyc-subway-muted.yaml",
+    "label": "nyc subway · muted"
+  },
+  {
+    "family": "Subway maps and cartography",
+    "file": "map-osm-bold.yaml",
+    "path": "themes/Subway maps and cartography/map-osm-bold.yaml",
+    "label": "openstreetmap · bold"
+  },
+  {
+    "family": "Subway maps and cartography",
+    "file": "map-osm-muted.yaml",
+    "path": "themes/Subway maps and cartography/map-osm-muted.yaml",
+    "label": "openstreetmap · muted"
+  },
+  {
+    "family": "Subway maps and cartography",
+    "file": "map-paris-metro-bold.yaml",
+    "path": "themes/Subway maps and cartography/map-paris-metro-bold.yaml",
+    "label": "paris métro · bold"
+  },
+  {
+    "family": "Subway maps and cartography",
+    "file": "map-paris-metro-muted.yaml",
+    "path": "themes/Subway maps and cartography/map-paris-metro-muted.yaml",
+    "label": "paris métro · muted"
+  },
+  {
+    "family": "Subway maps and cartography",
+    "file": "map-swisstopo-bold.yaml",
+    "path": "themes/Subway maps and cartography/map-swisstopo-bold.yaml",
+    "label": "swisstopo · bold"
+  },
+  {
+    "family": "Subway maps and cartography",
+    "file": "map-swisstopo-muted.yaml",
+    "path": "themes/Subway maps and cartography/map-swisstopo-muted.yaml",
+    "label": "swisstopo · muted"
+  },
+  {
+    "family": "Subway maps and cartography",
+    "file": "map-tokyo-metro-bold.yaml",
+    "path": "themes/Subway maps and cartography/map-tokyo-metro-bold.yaml",
+    "label": "tokyo metro · bold"
+  },
+  {
+    "family": "Subway maps and cartography",
+    "file": "map-tokyo-metro-muted.yaml",
+    "path": "themes/Subway maps and cartography/map-tokyo-metro-muted.yaml",
+    "label": "tokyo metro · muted"
+  },
+  {
+    "family": "Subway maps and cartography",
+    "file": "map-tube-bold.yaml",
+    "path": "themes/Subway maps and cartography/map-tube-bold.yaml",
+    "label": "london underground · bold"
+  },
+  {
+    "family": "Subway maps and cartography",
+    "file": "map-tube-muted.yaml",
+    "path": "themes/Subway maps and cartography/map-tube-muted.yaml",
+    "label": "london underground · muted"
+  },
+  {
+    "family": "Subway maps and cartography",
+    "file": "map-tunnelbana-bold.yaml",
+    "path": "themes/Subway maps and cartography/map-tunnelbana-bold.yaml",
+    "label": "stockholm tunnelbana · bold"
+  },
+  {
+    "family": "Subway maps and cartography",
+    "file": "map-tunnelbana-muted.yaml",
+    "path": "themes/Subway maps and cartography/map-tunnelbana-muted.yaml",
+    "label": "stockholm tunnelbana · muted"
+  },
+  {
+    "family": "Teal",
+    "file": "teal-charcoal.yaml",
+    "path": "themes/Teal/teal-charcoal.yaml",
+    "label": "teal · charcoal"
+  },
+  {
+    "family": "Teal",
+    "file": "teal-paper.yaml",
+    "path": "themes/Teal/teal-paper.yaml",
+    "label": "teal · paper"
+  },
+  {
+    "family": "Teal",
+    "file": "teal-tinted.yaml",
+    "path": "themes/Teal/teal-tinted.yaml",
+    "label": "teal · tinted"
+  },
+  {
+    "family": "Time of day",
+    "file": "tod-dawn.yaml",
+    "path": "themes/Time of day/tod-dawn.yaml",
+    "label": "time · dawn"
+  },
+  {
+    "family": "Time of day",
+    "file": "tod-dusk.yaml",
+    "path": "themes/Time of day/tod-dusk.yaml",
+    "label": "time · dusk"
+  },
+  {
+    "family": "Time of day",
+    "file": "tod-midnight.yaml",
+    "path": "themes/Time of day/tod-midnight.yaml",
+    "label": "time · midnight"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-bvg-bold.yaml",
+    "path": "themes/Transportation/tx-bvg-bold.yaml",
+    "label": "bvg · bold"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-bvg-muted.yaml",
+    "path": "themes/Transportation/tx-bvg-muted.yaml",
+    "label": "bvg · muted"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-db-bold.yaml",
+    "path": "themes/Transportation/tx-db-bold.yaml",
+    "label": "deutsche bahn · bold"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-db-ice-bold.yaml",
+    "path": "themes/Transportation/tx-db-ice-bold.yaml",
+    "label": "deutsche bahn · ice · bold"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-db-ice-muted.yaml",
+    "path": "themes/Transportation/tx-db-ice-muted.yaml",
+    "label": "deutsche bahn · ice · muted"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-db-muted.yaml",
+    "path": "themes/Transportation/tx-db-muted.yaml",
+    "label": "deutsche bahn · muted"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-dsb-bold.yaml",
+    "path": "themes/Transportation/tx-dsb-bold.yaml",
+    "label": "dsb · bold"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-dsb-muted.yaml",
+    "path": "themes/Transportation/tx-dsb-muted.yaml",
+    "label": "dsb · muted"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-evergreen-bold.yaml",
+    "path": "themes/Transportation/tx-evergreen-bold.yaml",
+    "label": "evergreen marine · bold"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-evergreen-muted.yaml",
+    "path": "themes/Transportation/tx-evergreen-muted.yaml",
+    "label": "evergreen marine · muted"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-hapag-bold.yaml",
+    "path": "themes/Transportation/tx-hapag-bold.yaml",
+    "label": "hapag-lloyd · bold"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-hapag-muted.yaml",
+    "path": "themes/Transportation/tx-hapag-muted.yaml",
+    "label": "hapag-lloyd · muted"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-maersk-bold.yaml",
+    "path": "themes/Transportation/tx-maersk-bold.yaml",
+    "label": "maersk · bold"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-maersk-muted.yaml",
+    "path": "themes/Transportation/tx-maersk-muted.yaml",
+    "label": "maersk · muted"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-vy-bold.yaml",
+    "path": "themes/Transportation/tx-vy-bold.yaml",
+    "label": "vy · bold"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-vy-muted.yaml",
+    "path": "themes/Transportation/tx-vy-muted.yaml",
+    "label": "vy · muted"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-zim-bold.yaml",
+    "path": "themes/Transportation/tx-zim-bold.yaml",
+    "label": "zim · bold"
+  },
+  {
+    "family": "Transportation",
+    "file": "tx-zim-muted.yaml",
+    "path": "themes/Transportation/tx-zim-muted.yaml",
+    "label": "zim · muted"
+  },
+  {
+    "family": "UN Blue",
+    "file": "un-blue-bold.yaml",
+    "path": "themes/UN Blue/un-blue-bold.yaml",
+    "label": "un blue · bold"
+  },
+  {
+    "family": "UN Blue",
+    "file": "un-blue-charcoal.yaml",
+    "path": "themes/UN Blue/un-blue-charcoal.yaml",
+    "label": "un blue · charcoal"
+  },
+  {
+    "family": "UN Blue",
+    "file": "un-blue-paper.yaml",
+    "path": "themes/UN Blue/un-blue-paper.yaml",
+    "label": "un blue · paper"
+  },
+  {
+    "family": "UN Blue",
+    "file": "un-blue-tinted.yaml",
+    "path": "themes/UN Blue/un-blue-tinted.yaml",
+    "label": "un blue · tinted"
+  }
+]

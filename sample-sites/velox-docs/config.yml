@@ -1,7 +1,8 @@
-# mdcms v0.3 | DO NOT REMOVE THIS COMMENT
+# mdcms v0.6.0 | DO NOT REMOVE THIS COMMENT
 sitename: Velox Framework
 sitedescription: The high-performance TypeScript web framework
 navigation: sidebar
+homepage: pages/index.md
 nav-position: left
 search: true
 footer: "© 2026 Velox Contributors. Licensed under MIT."

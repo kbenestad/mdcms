@@ -1,6 +1,6 @@
-<!-- Minimum supported version: mdcms v0.3.8 | DO NOT REMOVE THIS COMMENT -->
+<!-- mdcms v0.6.0 | DO NOT REMOVE THIS COMMENT -->
 <!--
-  MD-CMS v0.3.8 — Renderer
+  MD-CMS v0.6.0 — Renderer
 
   Copyright 2026 Kristian Benestad | kbenestad.codeberg.page
 
@@ -21,9 +21,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MD-CMS</title>
+<title>Velox Framework</title>
 <meta name="description" content="">
 <link rel="icon" href="assets/images/favicon.png">
+<link rel="manifest" href="manifest.json">
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+  });
+}
+</script>
 
 <!-- Libraries (CDN) -->
 <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
@@ -48,13 +56,19 @@
   --bg-main: #FFFFFF;
   --bg-nav: #F8FAFC;
   --nav-font-colour: var(--font-colour);
+  --nav-link-colour: var(--nav-font-colour);
+  --nav-link-active-colour: var(--accent);
+  --nav-section-heading-colour: var(--font-colour-muted);
+  --nav-sitename-colour: var(--nav-link-colour);
+  --nav-description-colour: var(--nav-section-heading-colour);
+  --nav-toggle-colour: var(--nav-section-heading-colour);
   --nav-active-bg: rgba(var(--accent-rgb), 0.10);
   --nav-hover-bg: rgba(var(--accent-rgb), 0.05);
   --font-colour: #1E293B;
   --font-colour-muted: #64748B;
   --code-bg: #F1F5F9;
   --code-font: #1E293B;
-  --divider: #CBD5E1;
+  --divider: color-mix(in srgb, var(--bg-main) 85%, var(--font-colour));
   --table-header-bg: rgba(var(--accent-rgb), 0.08);
   --table-border: #E2E8F0;
   --link-colour: #2563EB;
@@ -62,7 +76,7 @@
   --link-visited-colour: #7C3AED;
   --link-decoration: underline;
   --link-hover-decoration: underline;
-  --link-hover-weight: 700;
+  --link-hover-weight: normal;
   --link-visited-decoration: underline;
   --search-bg: #FFFFFF;
   --search-border: #E2E8F0;
@@ -79,13 +93,19 @@
   --bg-main: #0F172A;
   --bg-nav: #1E293B;
   --nav-font-colour: #E2E8F0;
+  --nav-link-colour: var(--nav-font-colour);
+  --nav-sitename-colour: var(--nav-link-colour);
+  --nav-description-colour: var(--nav-section-heading-colour);
+  --nav-toggle-colour: var(--nav-section-heading-colour);
+  --nav-link-active-colour: var(--accent);
+  --nav-section-heading-colour: var(--font-colour-muted);
   --nav-active-bg: rgba(96, 165, 250, 0.15);
   --nav-hover-bg: rgba(96, 165, 250, 0.08);
   --font-colour: #F1F5F9;
   --font-colour-muted: #94A3B8;
   --code-bg: #1E293B;
   --code-font: #E2E8F0;
-  --divider: #334155;
+  --divider: color-mix(in srgb, var(--bg-main) 85%, var(--font-colour));
   --table-header-bg: rgba(96, 165, 250, 0.10);
   --table-border: #334155;
   --link-colour: #60A5FA;
@@ -93,7 +113,7 @@
   --link-visited-colour: #A78BFA;
   --link-decoration: underline;
   --link-hover-decoration: underline;
-  --link-hover-weight: 700;
+  --link-hover-weight: normal;
   --link-visited-decoration: underline;
   --search-bg: #1E293B;
   --search-border: #334155;
@@ -151,7 +171,7 @@ body {
   flex-direction: column;
   overflow-y: auto;
   z-index: 100;
-  transition: background-color 0.2s ease, transform 0.3s ease;
+  transition: background-color 0.2s ease, transform 0.3s ease, visibility 0s ease 0.3s;
 }
 
 .layout-sidebar.nav-left .sidebar { left: 0; }
@@ -167,12 +187,13 @@ body {
 .sidebar::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 2px; }
 .sidebar::-webkit-scrollbar-track { background: var(--scrollbar-track); }
 
+.layout-sidebar .mobile-header { display: none; }
+
 /* ═══════════════════════════════════════════
    SIDEBAR CONTENT
    ═══════════════════════════════════════════ */
 .sidebar-header {
   padding: 1.5rem 1.25rem 1rem;
-  border-bottom: 1px solid var(--divider);
   flex-shrink: 0;
 }
 
@@ -182,14 +203,14 @@ body {
   font-family: var(--font-title);
   font-weight: var(--font-title-weight);
   font-size: 1.15rem;
-  color: var(--font-colour);
+  color: var(--nav-sitename-colour);
   line-height: 1.3;
   text-decoration: none;
   display: block;
 }
-.sidebar-sitename:hover { color: var(--accent); }
+.sidebar-sitename:hover { color: var(--nav-link-active-colour, var(--accent)); }
 
-.sidebar-description { font-size: 0.8rem; color: var(--font-colour-muted); margin-top: 0.25rem; line-height: 1.4; }
+.sidebar-description { font-size: 0.8rem; color: var(--nav-description-colour); margin-top: 0.25rem; line-height: 1.4; }
 
 /* Search */
 .search-container { padding: 0.75rem 1.25rem; flex-shrink: 0; }
@@ -267,7 +288,7 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--font-colour-muted);
+  color: var(--nav-section-heading-colour, var(--font-colour-muted));
   padding: 1rem 1.25rem 0.35rem;
   user-select: none;
   border-left: 3px solid transparent;
@@ -300,7 +321,7 @@ body {
   display: block;
   padding: 0.45rem 1.25rem;
   font-size: 0.875rem;
-  color: var(--nav-font-colour, var(--font-colour));
+  color: var(--nav-link-colour, var(--nav-font-colour, var(--font-colour)));
   text-decoration: none;
   transition: background 0.1s, color 0.1s;
   border-left: 3px solid transparent;
@@ -309,15 +330,14 @@ body {
 .nav-item:hover { background: var(--nav-hover-bg); }
 .nav-item.active {
   background: var(--nav-active-bg);
-  border-left-color: var(--accent);
-  color: var(--accent);
+  border-left-color: var(--nav-link-active-colour, var(--accent));
+  color: var(--nav-link-active-colour, var(--accent));
   font-weight: 600;
 }
 
 /* Sidebar footer */
 .sidebar-footer {
   padding: 0.75rem 1.25rem;
-  border-top: 1px solid var(--divider);
   flex-shrink: 0;
 }
 
@@ -327,9 +347,9 @@ body {
   gap: 0.5rem;
   padding: 0.4rem 0.6rem;
   font-size: 0.8rem;
-  color: var(--font-colour-muted);
+  color: var(--nav-toggle-colour);
   background: none;
-  border: 1px solid var(--divider);
+  border: 1px solid color-mix(in srgb, var(--bg-nav) 70%, var(--nav-toggle-colour));
   border-radius: 6px;
   cursor: pointer;
   font-family: var(--font-body);
@@ -337,7 +357,7 @@ body {
   width: 100%;
   justify-content: center;
 }
-.theme-toggle:hover { color: var(--font-colour); border-color: var(--font-colour-muted); }
+.theme-toggle:hover { color: var(--nav-link-colour, var(--font-colour)); border-color: var(--nav-toggle-colour); }
 .theme-toggle svg { width: 16px; height: 16px; flex-shrink: 0; }
 
 /* ═══════════════════════════════════════════
@@ -426,7 +446,7 @@ body {
   border: none;
   cursor: pointer;
   padding: 0.4rem;
-  color: var(--font-colour);
+  color: var(--nav-link-colour, var(--font-colour));
   z-index: 150;
 }
 .hamburger svg { width: 22px; height: 22px; }
@@ -605,17 +625,17 @@ body {
   padding: 0.55rem 0.85rem;
   cursor: pointer;
   font-size: 0.88rem;
-  color: var(--font-colour);
+  color: var(--nav-link-colour, var(--font-colour));
   border-bottom: 1px solid var(--divider);
   transition: background 0.1s;
 }
 .category-option:last-child { border-bottom: none; }
 .category-option:hover { background: var(--nav-hover-bg); }
-.category-option.active { background: var(--nav-active-bg); color: var(--accent); font-weight: 600; }
+.category-option.active { background: var(--nav-active-bg); color: var(--nav-link-active-colour, var(--accent)); font-weight: 600; }
 .category-option .secondary {
   display: block;
   font-size: 0.75rem;
-  color: var(--font-colour-muted);
+  color: var(--nav-section-heading-colour, var(--font-colour-muted));
   margin-top: 0.15rem;
 }
 
@@ -718,12 +738,13 @@ body {
 
   .layout-sidebar .sidebar {
     transform: translateX(-100%);
+    visibility: hidden;
     width: 80vw;
     max-width: 320px;
     box-shadow: var(--shadow-md);
   }
   .layout-sidebar.nav-right .sidebar { transform: translateX(100%); }
-  .layout-sidebar .sidebar.open { transform: translateX(0); }
+  .layout-sidebar .sidebar.open { transform: translateX(0); visibility: visible; transition: background-color 0.2s ease, transform 0.3s ease; }
   .layout-sidebar .main-area { margin-left: 0 !important; margin-right: 0 !important; }
   .main-content { padding: 1rem 1.25rem 3rem; }
 
@@ -896,6 +917,146 @@ body {
 }
 .post-load-more:hover { background: var(--nav-hover-bg); }
 
+/* ═══════════════════════════════════════════
+   TAG SYSTEM: TABS
+   ═══════════════════════════════════════════ */
+.mdcms-tabs { margin: 1.25rem 0; }
+
+/* Underline variant */
+.mdcms-tabs-underline .mdcms-tabs-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 18px;
+  border-bottom: 1px solid var(--mdcms-strip-border, color-mix(in srgb, var(--font-colour) 12%, transparent));
+}
+.mdcms-tabs-underline .mdcms-tab-btn {
+  padding: 8px 2px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: transparent;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--font-colour-muted);
+  line-height: inherit;
+  transition: color 0.15s;
+}
+.mdcms-tabs-underline .mdcms-tab-btn:hover { color: var(--font-colour); }
+.mdcms-tabs-underline .mdcms-tab-btn[aria-selected="true"] {
+  font-weight: 600;
+  color: var(--font-colour);
+  border-bottom-color: var(--accent);
+}
+
+/* Filled variant */
+.mdcms-tabs-filled .mdcms-tabs-strip { display: flex; flex-wrap: wrap; gap: 4px; }
+.mdcms-tabs-filled .mdcms-tab-btn {
+  padding: 6px 11px;
+  border-radius: 4px;
+  border: 1px solid var(--mdcms-filled-border, rgba(var(--accent-rgb), 0.30));
+  background: var(--mdcms-filled-bg, rgba(var(--accent-rgb), 0.10));
+  color: var(--mdcms-filled-fg-muted, var(--font-colour-muted));
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: 400;
+  line-height: inherit;
+  transition: color 0.15s;
+}
+.mdcms-tabs-filled .mdcms-tab-btn:hover { color: var(--mdcms-filled-fg, var(--font-colour)); }
+.mdcms-tabs-filled .mdcms-tab-btn[aria-selected="true"] {
+  background: var(--mdcms-bg, var(--bg-main));
+  border-color: rgba(var(--accent-rgb), 0.55);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Shared panel */
+.mdcms-tabs-panel { padding-top: 1rem; }
+.mdcms-tabs-panel[hidden] { display: none; }
+.mdcms-tabs-panel > *:first-child { margin-top: 0; }
+.mdcms-tabs-panel > *:last-child  { margin-bottom: 0; }
+
+/* ═══════════════════════════════════════════
+   TAG SYSTEM: ACCORDIONS
+   ═══════════════════════════════════════════ */
+.mdcms-accordion { margin: 1.25rem 0; }
+.mdcms-accordion-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  text-align: left;
+  line-height: inherit;
+}
+.mdcms-accordion-chevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 1.1em;
+  height: 1.1em;
+  transition: transform 0.2s ease;
+  transform: rotate(0deg);
+}
+.mdcms-accordion-item[data-open="false"] .mdcms-accordion-chevron { transform: rotate(-90deg); }
+.mdcms-accordion-body[hidden] { display: none; }
+.mdcms-accordion-body > *:first-child { margin-top: 0; }
+.mdcms-accordion-body > *:last-child  { margin-bottom: 0; }
+
+/* Underline variant */
+.mdcms-accordion-underline .mdcms-accordion-item { margin-bottom: 6px; }
+.mdcms-accordion-underline .mdcms-accordion-btn {
+  padding: 8px 2px 9px;
+  border-bottom: 2px solid var(--mdcms-bar, var(--accent));
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--font-colour);
+}
+.mdcms-accordion-underline .mdcms-accordion-chevron { color: var(--mdcms-bar, var(--accent)); }
+.mdcms-accordion-underline .mdcms-accordion-body {
+  border-left: 1px solid var(--mdcms-bar, var(--accent));
+  border-right: 1px solid var(--mdcms-bar, var(--accent));
+  border-bottom: 1px solid var(--mdcms-bar, var(--accent));
+  border-radius: 0 0 3px 3px;
+  padding: 8px 10px 9px;
+  color: var(--font-colour-muted);
+}
+
+/* Filled variant — closed */
+.mdcms-accordion-filled .mdcms-accordion-item { margin-bottom: 6px; }
+.mdcms-accordion-filled .mdcms-accordion-item[data-open="true"] { margin-bottom: 8px; }
+.mdcms-accordion-filled .mdcms-accordion-btn {
+  padding: 8px 11px;
+  border-radius: 4px;
+  border: 1px solid var(--mdcms-filled-border, rgba(var(--accent-rgb), 0.30));
+  background: var(--mdcms-filled-bg, rgba(var(--accent-rgb), 0.10));
+  color: var(--mdcms-filled-fg, var(--font-colour));
+}
+.mdcms-accordion-filled .mdcms-accordion-chevron { color: var(--mdcms-filled-fg, var(--font-colour)); }
+
+/* Filled variant — open: item becomes the outer frame */
+.mdcms-accordion-filled .mdcms-accordion-item[data-open="true"] {
+  border: 1px solid var(--mdcms-bar, var(--accent));
+  border-radius: 4px;
+  overflow: hidden;
+}
+.mdcms-accordion-filled .mdcms-accordion-item[data-open="true"] > .mdcms-accordion-btn {
+  border: none;
+  border-radius: 0;
+}
+.mdcms-accordion-filled .mdcms-accordion-body {
+  background: var(--mdcms-bg, var(--bg-main));
+  padding: 8px 11px 9px;
+  color: var(--font-colour-muted);
+}
+
 @media print {
   .sidebar, .topbar, .scroll-top, .hamburger,
   .mobile-header, .theme-toggle, .search-container { display: none !important; }
@@ -921,6 +1082,22 @@ body {
   'use strict';
 
   // ─── State ────────────────────────────────────────────────
+
+  // Capture the intended pathname before anything mutates the URL.
+  // 404.html (GitHub Pages SPA routing) encodes the original path as ?_route=.
+  const _initialPathname = (() => {
+    const route = new URLSearchParams(window.location.search).get('_route');
+    if (route) {
+      const u = new URL(window.location);
+      u.searchParams.delete('_route');
+      window.history.replaceState(null, '', u);
+      return route;
+    }
+    return window.location.pathname;
+  })();
+
+  let basePath = '/'; // set by initBasePath() once nav data is loaded
+
   let config = {};
   let navData = [];
   let navSections = [];
@@ -931,15 +1108,16 @@ body {
 
   // Category state (phase 3)
   let categoriesUse = false;
-  let categoriesList = [];        // [{code, name, direction, message, notfoundmessage, pagenotfoundmessage, font, ...}]
+  let categoriesList = [];        // [{code, name, direction, message, notfoundmessage, pagenotfoundmessage, visibilityifnocontent, font, ...}]
   let categoriesByCode = {};      // code → category object
   let defaultCategoryCode = null;
   let activeCategory = null;      // current code
   let sectionnamesMode = 'same';  // 'same' | 'per-category'
   let loadedFonts = new Set();    // track which font files have been loaded
+  let defaultLineHeight = null;   // theme/CSS default, captured after theme is applied
 
   // ─── Icons ────────────────────────────────────────────────
-  const STANDARD_ICONS = ['dark_mode','light_mode','menu','search','arrow_right','arrow_drop_down','mobile_arrow_down','language','info','warning','error','success','exclamation','dangerous','report','history','text_compare'];
+  const STANDARD_ICONS = ['dark_mode','light_mode','menu','search','arrow_right','arrow_drop_down','mobile_arrow_down','language','info','warning','error','success','exclamation','dangerous','report','history','text_compare','keyboard_arrow_right','keyboard_arrow_down','keyboard_double_arrow_right','keyboard_double_arrow_down','expand_content','collapse_content','add','minimize'];
   const iconCache = {};
 
   function normaliseIconName(name) {
@@ -1071,9 +1249,16 @@ body {
 
   async function maybeLoadCategoryFont(code) {
     const cat = categoriesByCode[code];
-    if (!cat || !cat.font || loadedFonts.has(cat.font)) return;
-    showFontLoadingBanner();
+    if (!cat || !cat.font) {
+      document.body.style.fontFamily = '';
+      return;
+    }
     const family = 'mdcms-cat-' + code;
+    if (loadedFonts.has(cat.font)) {
+      document.body.style.fontFamily = `"${family}", ${getComputedStyle(document.documentElement).getPropertyValue('--font-body').trim()}`;
+      return;
+    }
+    showFontLoadingBanner();
     const css = `@font-face { font-family: "${family}"; src: url("assets/fonts/${cat.font}"); }`;
     const style = document.createElement('style');
     style.textContent = css;
@@ -1083,8 +1268,7 @@ body {
       await face.load();
       document.fonts.add(face);
       loadedFonts.add(cat.font);
-      // Apply font to body for this session
-      document.body.style.fontFamily = `"${family}", ${getComputedStyle(document.body).fontFamily}`;
+      document.body.style.fontFamily = `"${family}", ${getComputedStyle(document.documentElement).getPropertyValue('--font-body').trim()}`;
     } catch (e) {
       console.warn('Font load failed:', e);
     }
@@ -1107,11 +1291,19 @@ body {
     if (b) b.remove();
   }
 
+  function _isMdResponse(r) {
+    // Reject HTML responses — servers with SPA routing (e.g. Cloudflare Pages with
+    // "/* /index.html 200") return index.html with 200 for missing files, which would
+    // be mistaken for a found markdown file.
+    const ct = r.headers.get('content-type') || '';
+    return !ct.startsWith('text/html');
+  }
+
   async function fetchPageFile(conceptualFile) {
     // conceptualFile like "pages/foo.md". Returns { ok, text, resolvedFile } or { ok: false }.
     if (!categoriesUse) {
       const r = await fetch(conceptualFile);
-      if (r.ok) return { ok: true, text: await r.text(), resolvedFile: conceptualFile };
+      if (r.ok && _isMdResponse(r)) return { ok: true, text: await r.text(), resolvedFile: conceptualFile };
       return { ok: false };
     }
     const base = conceptualFile.replace(/\.md$/, '');
@@ -1141,7 +1333,7 @@ body {
       if (seen.has(url)) continue;
       seen.add(url);
       const r = await fetch(url);
-      if (r.ok) return { ok: true, text: await r.text(), resolvedFile: url };
+      if (r.ok && _isMdResponse(r)) return { ok: true, text: await r.text(), resolvedFile: url };
     }
     return { ok: false };
   }
@@ -1174,13 +1366,15 @@ body {
     //   - Home page: always show (per config.homepage or default 'pages/home.md')
     //   - Variant exists for active category: show
     //   - Active category has notfoundmessage: show (renderer falls back to default language)
+    //   - Active category has visibilityifnocontent: visible: show (renderer shows pagenotfoundmessage)
     //   - Otherwise: hide
     if (!categoriesUse) return true;
     if (page.file === defaultPage()) return true;
+    if (page.uncategorized) return true;
     const variants = page.variants || [];
     if (variants.includes(activeCategory)) return true;
     const cat = categoriesByCode[activeCategory];
-    return !!(cat && cat.notfoundmessage);
+    return !!(cat && (cat.notfoundmessage || cat.visibilityifnocontent === 'visible'));
   }
 
   // ─── Theme ────────────────────────────────────────────────
@@ -1198,6 +1392,7 @@ body {
       btn.appendChild(iconEl(isDark ? 'light_mode' : 'dark_mode'));
       btn.appendChild(el('span', { textContent: isDark ? 'Light mode' : 'Dark mode' }));
     }
+    computeDerivedTokens();
   }
 
   function getInitialTheme() {
@@ -1242,18 +1437,38 @@ body {
       if (m['nav-background']) vars.push(`--bg-nav: ${m['nav-background']}`);
       if (m.text) { vars.push(`--font-colour: ${m.text}`); vars.push(`--code-font: ${m.text}`); }
       if (m['text-muted']) vars.push(`--font-colour-muted: ${m['text-muted']}`);
+      if (m['nav-link'])            vars.push(`--nav-link-colour: ${m['nav-link']}`);
+      if (m['nav-link-active'])     vars.push(`--nav-link-active-colour: ${m['nav-link-active']}`);
+      if (m['nav-section-heading']) vars.push(`--nav-section-heading-colour: ${m['nav-section-heading']}`);
+      if (m['nav-sitename'])        vars.push(`--nav-sitename-colour: ${m['nav-sitename']}`);
+      if (m['nav-description'])     vars.push(`--nav-description-colour: ${m['nav-description']}`);
+      if (m['nav-toggle'])          vars.push(`--nav-toggle-colour: ${m['nav-toggle']}`);
+      if (m['divider'])             vars.push(`--divider: ${m['divider']}`);
       if (vars.length) modeCss += `:root[data-theme="${mode}"] { ${vars.join('; ')}; }\n`;
     });
     if (modeCss) getOrCreateStyle('theme-overrides').textContent = modeCss;
 
-    if (tc['colours-semantic']) {
-      const sem = tc['colours-semantic'];
-      const semVars = [];
-      if (sem.info)    semVars.push(`--colour-info: ${sem.info}`);
-      if (sem.warning) semVars.push(`--colour-warning: ${sem.warning}`);
-      if (sem.success) semVars.push(`--colour-success: ${sem.success}`);
-      if (sem.error)   semVars.push(`--colour-error: ${sem.error}`);
-      if (semVars.length) getOrCreateStyle('theme-semantic').textContent = `:root { ${semVars.join('; ')}; }`;
+    if (tc['colours-semantic'] || tc['colours-semantic-dark']) {
+      let semCss = '';
+      if (tc['colours-semantic']) {
+        const sem = tc['colours-semantic'];
+        const semVars = [];
+        if (sem.info)    semVars.push(`--colour-info: ${sem.info}`);
+        if (sem.warning) semVars.push(`--colour-warning: ${sem.warning}`);
+        if (sem.success) semVars.push(`--colour-success: ${sem.success}`);
+        if (sem.error)   semVars.push(`--colour-error: ${sem.error}`);
+        if (semVars.length) semCss += `:root { ${semVars.join('; ')}; }\n`;
+      }
+      if (tc['colours-semantic-dark']) {
+        const semD = tc['colours-semantic-dark'];
+        const semDVars = [];
+        if (semD.info)    semDVars.push(`--colour-info: ${semD.info}`);
+        if (semD.warning) semDVars.push(`--colour-warning: ${semD.warning}`);
+        if (semD.success) semDVars.push(`--colour-success: ${semD.success}`);
+        if (semD.error)   semDVars.push(`--colour-error: ${semD.error}`);
+        if (semDVars.length) semCss += `:root[data-theme="dark"] { ${semDVars.join('; ')}; }\n`;
+      }
+      if (semCss) getOrCreateStyle('theme-semantic').textContent = semCss;
     }
 
     if (tc['main-width']) root.style.setProperty('--main-width', tc['main-width']);
@@ -1327,8 +1542,8 @@ body {
       if (!spec) return null;
       const parts = spec.split(':');
       if (parts.length >= 3) return { provider: parts[0].trim(), name: parts.slice(1, -1).join(':').trim(), weight: parts[parts.length - 1].trim() };
-      if (parts.length === 2) return { provider: 'google', name: parts[0].trim(), weight: parts[1].trim() };
-      return { provider: 'google', name: parts[0].trim(), weight: '400' };
+      if (parts.length === 2) return { provider: 'bunny', name: parts[0].trim(), weight: parts[1].trim() };
+      return { provider: 'bunny', name: parts[0].trim(), weight: '400' };
     }
 
     const src = tc || {};
@@ -1409,6 +1624,10 @@ body {
         const fenceType = codeLang === 'mdcms' ? '' : codeLang.slice('mdcms '.length).trim();
         const fullText = fenceType ? (fenceType + '\n' + (codeText || '')) : (codeText || '');
         const tag = parseMdcmsTag(fullText);
+        // For tab/accordion blocks, preserve the raw fence body to avoid trim() breaking YAML indentation.
+        if (/^tab(-underline|-filled)?$|^accordion(-underline|-filled)?$/.test(tag.tagName)) {
+          tag.rawBody = codeText || '';
+        }
         const encoded = JSON.stringify(tag).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
         return '<div class="mdcms-tag" data-config="' + encoded + '"></div>';
       }
@@ -1559,7 +1778,7 @@ function fmtDatetime(dtStr) {
 
     // Category filter
     if (categoriesUse && activeCategory) {
-      posts = posts.filter(function(e) { return e.category === activeCategory; });
+      posts = posts.filter(function(e) { return !e.category || e.category === activeCategory; });
     }
 
     // Field filter
@@ -1898,6 +2117,95 @@ function fmtDatetime(dtStr) {
     return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
   }
 
+  function parseColorToHex(val) {
+    if (!val) return null;
+    val = val.trim();
+    if (val.startsWith('#')) {
+      if (val.length === 4) return '#' + val[1]+val[1]+val[2]+val[2]+val[3]+val[3];
+      return val.toLowerCase();
+    }
+    var m = val.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+    if (m) return '#' + [m[1],m[2],m[3]].map(function(n) { return parseInt(n).toString(16).padStart(2,'0'); }).join('');
+    return null;
+  }
+
+  function relativeLuminance(hex) {
+    hex = hex.replace('#','');
+    if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    var r = parseInt(hex.substr(0,2),16)/255;
+    var g = parseInt(hex.substr(2,2),16)/255;
+    var b = parseInt(hex.substr(4,2),16)/255;
+    function lin(c) { return c <= 0.04045 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4); }
+    return 0.2126*lin(r) + 0.7152*lin(g) + 0.0722*lin(b);
+  }
+
+  function hexToHsl(hex) {
+    hex = hex.replace('#','');
+    if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    var r = parseInt(hex.substr(0,2),16)/255;
+    var g = parseInt(hex.substr(2,2),16)/255;
+    var b = parseInt(hex.substr(4,2),16)/255;
+    var max = Math.max(r,g,b), min = Math.min(r,g,b);
+    var h = 0, s = 0, l = (max+min)/2;
+    if (max !== min) {
+      var d = max - min;
+      s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+      switch(max) {
+        case r: h = ((g-b)/d + (g<b?6:0))/6; break;
+        case g: h = ((b-r)/d + 2)/6; break;
+        case b: h = ((r-g)/d + 4)/6; break;
+      }
+    }
+    return [h, s, l];
+  }
+
+  // HSL chroma: S × (1-|2L-1|) — gives perceptually meaningful colorfulness
+  // unlike raw HSL S which is artificially high near white/black.
+  function hslChroma(hex) {
+    var hsl = hexToHsl(hex);
+    return hsl[1] * (1 - Math.abs(2 * hsl[2] - 1));
+  }
+
+  function computeDerivedTokens() {
+    var cs = getComputedStyle(document.documentElement);
+    var bgHex     = parseColorToHex(cs.getPropertyValue('--bg-main').trim());
+    var navHex    = parseColorToHex(cs.getPropertyValue('--bg-nav').trim());
+    var textHex   = parseColorToHex(cs.getPropertyValue('--font-colour').trim());
+    var mutedHex  = parseColorToHex(cs.getPropertyValue('--font-colour-muted').trim());
+    var accentHex = parseColorToHex(cs.getPropertyValue('--accent').trim());
+
+    if (!bgHex || !navHex || !textHex || !mutedHex || !accentHex) return;
+
+    var bgL  = relativeLuminance(bgHex);
+    var navL = relativeLuminance(navHex);
+    var navC = hslChroma(navHex);
+    var bgC  = hslChroma(bgHex);
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+    var navIsAccent   = Math.abs(bgL - navL) > 0.22 || (navC > 0.35 && Math.abs(navC - bgC) > 0.25);
+    var navIsInverted = Math.abs(bgL - navL) > 0.35;
+
+    var navText      = navIsInverted ? (navL < 0.5 ? '#F2EFE8' : '#161412') : textHex;
+    var navTextMuted = navIsInverted ? hexToRgba(navText, 0.6) : mutedHex;
+
+    var filledBg      = navIsAccent ? navHex                : hexToRgba(accentHex, 0.10);
+    var filledBorder  = navIsAccent ? hexToRgba(navText, 0.18) : hexToRgba(accentHex, 0.30);
+    var filledFg      = navIsAccent ? navText               : textHex;
+    var filledFgMuted = navIsAccent ? navTextMuted          : mutedHex;
+    var barColor      = navIsAccent ? navHex                : accentHex;
+    var stripAlpha    = isDark ? 0.14 : 0.10;
+
+    var root = document.documentElement;
+    root.style.setProperty('--mdcms-bg',             bgHex);
+    root.style.setProperty('--mdcms-accent',         accentHex);
+    root.style.setProperty('--mdcms-filled-bg',      filledBg);
+    root.style.setProperty('--mdcms-filled-border',  filledBorder);
+    root.style.setProperty('--mdcms-filled-fg',      filledFg);
+    root.style.setProperty('--mdcms-filled-fg-muted',filledFgMuted);
+    root.style.setProperty('--mdcms-bar',            barColor);
+    root.style.setProperty('--mdcms-strip-border',   hexToRgba(textHex, stripAlpha));
+  }
+
   function renderTocTag(container) {
     const byCode = {};
     navSections.forEach(s => { byCode[s.code] = s; });
@@ -1954,6 +2262,143 @@ function fmtDatetime(dtStr) {
     container.replaceWith(div);
   }
 
+  function renderTabsTag(container, cfg) {
+    var variant = cfg.tagName === 'tab' ? 'tab-underline' : cfg.tagName;
+    var isFilled = variant === 'tab-filled';
+    var varClass = isFilled ? 'filled' : 'underline';
+
+    var items = [];
+    try {
+      // Use rawBody (pre-trim YAML) when available; fall back to reconstructed form.
+      var rawYaml = cfg.rawBody !== undefined ? cfg.rawBody : ('items:\n' + (cfg.body || ''));
+      var parsed = jsyaml.load(rawYaml);
+      items = (parsed && parsed.items) || [];
+    } catch (e) {
+      container.textContent = 'Error parsing tab items.';
+      return;
+    }
+    if (!items.length) { container.textContent = 'No tab items.'; return; }
+
+    var selectedIdx = items.findIndex(function(it) { return it && it.default === 'selected'; });
+    if (selectedIdx < 0) selectedIdx = 0;
+
+    var wrapper = el('div', { className: 'mdcms-tabs mdcms-tabs-' + varClass });
+    var strip   = el('div', { className: 'mdcms-tabs-strip', role: 'tablist' });
+    var panels  = [];
+
+    items.forEach(function(item, i) {
+      if (!item) return;
+      var isSelected = i === selectedIdx;
+
+      var btn = el('button', {
+        className: 'mdcms-tab-btn',
+        role: 'tab',
+        type: 'button',
+        'aria-selected': String(isSelected)
+      });
+      var titleStyle = item['title-style'] || '';
+      var lvlMatch = titleStyle.match(/^(#{1,6})$/);
+      var titleSpan;
+      if (lvlMatch) {
+        titleSpan = el('span', { role: 'heading', 'aria-level': String(lvlMatch[1].length) });
+        titleSpan.textContent = item.title || '';
+      } else {
+        titleSpan = el('span', { textContent: item.title || '' });
+      }
+      btn.appendChild(titleSpan);
+      strip.appendChild(btn);
+
+      var panel = el('div', { className: 'mdcms-tabs-panel', role: 'tabpanel' });
+      panel.innerHTML = renderMarkdown(String(item.content || ''));
+      if (!isSelected) panel.setAttribute('hidden', '');
+      panels.push(panel);
+
+      btn.addEventListener('click', (function(idx) {
+        return function() {
+          strip.querySelectorAll('.mdcms-tab-btn').forEach(function(b, j) {
+            b.setAttribute('aria-selected', String(j === idx));
+            if (j === idx) panels[j].removeAttribute('hidden');
+            else panels[j].setAttribute('hidden', '');
+          });
+        };
+      })(i));
+    });
+
+    wrapper.appendChild(strip);
+    panels.forEach(function(p) { wrapper.appendChild(p); });
+    container.replaceWith(wrapper);
+  }
+
+  function renderAccordionTag(container, cfg) {
+    var variant = cfg.tagName === 'accordion' ? 'accordion-underline' : cfg.tagName;
+    var isFilled = variant === 'accordion-filled';
+    var varClass = isFilled ? 'filled' : 'underline';
+
+    var items = [];
+    try {
+      var rawYaml = cfg.rawBody !== undefined ? cfg.rawBody : ('items:\n' + (cfg.body || ''));
+      var parsed = jsyaml.load(rawYaml);
+      items = (parsed && parsed.items) || [];
+    } catch (e) {
+      container.textContent = 'Error parsing accordion items.';
+      return;
+    }
+    if (!items.length) { container.textContent = 'No accordion items.'; return; }
+
+    var CHEVRON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
+
+    var wrapper = el('div', { className: 'mdcms-accordion mdcms-accordion-' + varClass });
+
+    items.forEach(function(item) {
+      if (!item) return;
+      var isOpen = item.default === 'open';
+
+      var itemEl = el('div', { className: 'mdcms-accordion-item' });
+      itemEl.setAttribute('data-open', String(isOpen));
+
+      var btn = el('button', {
+        className: 'mdcms-accordion-btn',
+        type: 'button',
+        'aria-expanded': String(isOpen)
+      });
+
+      var titleStyle = item['title-style'] || '';
+      var lvlMatch = titleStyle.match(/^(#{1,6})$/);
+      var titleEl = el('span', { className: 'mdcms-accordion-title' });
+      if (lvlMatch) {
+        var heading = el('span', { role: 'heading', 'aria-level': String(lvlMatch[1].length) });
+        heading.textContent = item.title || '';
+        titleEl.appendChild(heading);
+      } else {
+        titleEl.textContent = item.title || '';
+      }
+      btn.appendChild(titleEl);
+
+      var chevron = el('span', { className: 'mdcms-accordion-chevron' });
+      chevron.innerHTML = CHEVRON_SVG;
+      btn.appendChild(chevron);
+
+      var body = el('div', { className: 'mdcms-accordion-body' });
+      body.innerHTML = renderMarkdown(String(item.content || ''));
+      if (!isOpen) body.setAttribute('hidden', '');
+
+      btn.addEventListener('click', function() {
+        var open = itemEl.getAttribute('data-open') === 'true';
+        var next = !open;
+        itemEl.setAttribute('data-open', String(next));
+        btn.setAttribute('aria-expanded', String(next));
+        if (next) body.removeAttribute('hidden');
+        else body.setAttribute('hidden', '');
+      });
+
+      itemEl.appendChild(btn);
+      itemEl.appendChild(body);
+      wrapper.appendChild(itemEl);
+    });
+
+    container.replaceWith(wrapper);
+  }
+
   function hydrateMdcmsTags() {
     document.querySelectorAll('.mdcms-tag').forEach(function(tagEl) {
       try {
@@ -1962,6 +2407,10 @@ function fmtDatetime(dtStr) {
           renderCalloutTag(tagEl, cfg);
         } else if (cfg.tagName === 'toc') {
           renderTocTag(tagEl);
+        } else if (/^tab(-underline|-filled)?$/.test(cfg.tagName)) {
+          renderTabsTag(tagEl, cfg);
+        } else if (/^accordion(-underline|-filled)?$/.test(cfg.tagName)) {
+          renderAccordionTag(tagEl, cfg);
         } else {
           renderPostTag(tagEl, cfg);
         }
@@ -1978,7 +2427,6 @@ function fmtDatetime(dtStr) {
     const layout = el('div', { className: `layout-sidebar nav-${navPos}` });
 
     const mobileHeader = el('div', { className: 'mobile-header' });
-    mobileHeader.style.display = 'none';
     const hamburger = el('button', { className: 'hamburger', 'aria-label': 'Open menu' });
     hamburger.appendChild(iconEl('menu'));
     const mobileName = el('span', { className: 'sidebar-sitename', textContent: config.sitename || 'MD-CMS' });
@@ -1987,10 +2435,6 @@ function fmtDatetime(dtStr) {
       mobileHeader.appendChild(el('img', { className: 'topbar-logo', src: `assets/images/${config.logo}`, alt: '' }));
     }
     mobileHeader.appendChild(mobileName);
-
-    const mobileStyle = document.createElement('style');
-    mobileStyle.textContent = `@media (max-width: 768px) { .layout-sidebar .mobile-header { display: flex !important; } }`;
-    document.head.appendChild(mobileStyle);
 
     const overlay = el('div', { className: 'mobile-overlay' });
     overlay.addEventListener('click', () => closeMobileMenu());
@@ -2200,16 +2644,17 @@ function fmtDatetime(dtStr) {
   function visibleCategoryCodesForCurrentPage() {
     // Which categories should appear in the dropdown:
     //  - the variant exists for this page, OR
-    //  - the category has a notfoundmessage
+    //  - the category has a notfoundmessage (fallback to default content), OR
+    //  - the category has visibilityifnocontent: visible (shows pagenotfoundmessage instead)
     //  - always include the active category so user can see what they're on
     const out = new Set();
     const page = currentPage
       ? navData.find(p => p.file === currentPage)
       : null;
     categoriesList.forEach(cat => {
-      const hasVariant = !page || !page.variants || page.variants.includes(cat.code);
-      const hasMsg = !!cat.notfoundmessage;
-      if (hasVariant || hasMsg || cat.code === activeCategory) out.add(cat.code);
+      const hasVariant = !page || page.uncategorized || !(page.variants && page.variants.length) || page.variants.includes(cat.code);
+      const alwaysVisible = !!cat.notfoundmessage || cat.visibilityifnocontent === 'visible';
+      if (hasVariant || alwaysVisible || cat.code === activeCategory) out.add(cat.code);
     });
     return out;
   }
@@ -2234,7 +2679,7 @@ function fmtDatetime(dtStr) {
         'data-code': cat.code
       });
       option.appendChild(document.createTextNode(primary));
-      const hasVariant = !page || !page.variants || page.variants.includes(cat.code);
+      const hasVariant = !page || page.uncategorized || !(page.variants && page.variants.length) || page.variants.includes(cat.code);
       if (!hasVariant && cat.notfoundmessage) {
         option.appendChild(el('span', { className: 'secondary', textContent: cat.notfoundmessage }));
       } else if (secondary) {
@@ -2258,6 +2703,9 @@ function fmtDatetime(dtStr) {
     document.querySelectorAll('.category-bar').forEach(b => b.setAttribute('dir', direction));
     document.querySelectorAll('.md-content, .title-bar').forEach(el => el.setAttribute('dir', direction));
     document.querySelectorAll('.sidebar').forEach(el => el.setAttribute('dir', direction));
+    // Apply per-category line-height override, or restore theme default
+    const lh = cat && cat['line-height'];
+    document.documentElement.style.setProperty('--line-height-body', lh ? String(lh) : (defaultLineHeight || '1.7'));
   }
 
   function doSearch(query, resultsEl) {
@@ -2387,8 +2835,10 @@ function fmtDatetime(dtStr) {
 
     if (isHidden) {
       const expanded = sectionExpanded(section.code);
+      const expandIcon  = themeConfig['nav-section-expand-icon']  || 'arrow_right';
+      const collapseIcon = themeConfig['nav-section-collapse-icon'] || 'arrow_drop_down';
       heading.innerHTML = '';
-      heading.appendChild(iconEl(expanded ? 'arrow_drop_down' : 'arrow_right', 'toggle-icon'));
+      heading.appendChild(iconEl(expanded ? collapseIcon : expandIcon, 'toggle-icon'));
       heading.appendChild(el('span', { textContent: name }));
       heading.addEventListener('click', () => {
         toggleSection(section.code);
@@ -2588,30 +3038,94 @@ function fmtDatetime(dtStr) {
     });
   }
 
+  // ─── Clean URL routing ────────────────────────────────────
+
+  // Returns the file (e.g. "pages/timesheet.md") if the given slug is a section-id
+  // that has a matching pages/{slug}.md entry in navData.
+  function resolveSlugToFile(slug) {
+    if (!slug || !navSections.some(s => s.code === slug)) return null;
+    const file = `pages/${slug}.md`;
+    return navData.some(p => p.file === file) ? file : null;
+  }
+
+  // Called once after navData/navSections are populated.
+  // Sets basePath (the app root) and returns the initial page file when the URL
+  // already contains a section-id slug (direct access via clean URL or 404 redirect).
+  function initBasePath() {
+    const segments = _initialPathname.split('/').filter(Boolean);
+    if (segments.length > 0) {
+      const lastSeg = segments[segments.length - 1];
+      const file = resolveSlugToFile(lastSeg);
+      if (file) {
+        const slugIdx = _initialPathname.lastIndexOf('/' + lastSeg);
+        basePath = _initialPathname.slice(0, slugIdx + 1) || '/';
+        return file;
+      }
+      // URL ends in an explicit file (e.g. .../index.html). The app root is the
+      // directory containing it — not the file path — otherwise every relative
+      // fetch would be resolved against ".../index.html/" and 404.
+      if (lastSeg.includes('.')) {
+        const idx = _initialPathname.lastIndexOf('/' + lastSeg);
+        basePath = _initialPathname.slice(0, idx + 1) || '/';
+        return null;
+      }
+    }
+    basePath = _initialPathname.endsWith('/') ? _initialPathname : _initialPathname + '/';
+    return null;
+  }
+
   // ─── Page loading ─────────────────────────────────────────
   async function navigateTo(file) {
     currentPage = file;
     const contentEl = document.getElementById('pageContent');
     highlightNav(file);
 
-    // Build a clean URL: keep origin + path, set ?cat only when non-default, set hash to conceptual file
+    // If the active category is "hidden" (no notfoundmessage, not visibilityifnocontent:visible)
+    // and this page has no variant for it, silently switch to the default category instead of
+    // showing an error.
+    if (categoriesUse && activeCategory !== defaultCategoryCode && file !== defaultPage()) {
+      const cat = categoriesByCode[activeCategory];
+      const isHidden = cat && !cat.notfoundmessage && cat.visibilityifnocontent !== 'visible';
+      if (isHidden) {
+        const pageEntry = navData.find(p => p.file === file);
+        const hasVariant = !pageEntry || pageEntry.uncategorized
+          || !(pageEntry.variants && pageEntry.variants.length)
+          || pageEntry.variants.includes(activeCategory);
+        if (!hasVariant) {
+          setActiveCategory(defaultCategoryCode);
+          return;
+        }
+      }
+    }
+
+    // Build a clean URL. Pages whose filename matches a nav section-id get a clean
+    // pathname (e.g. /timesheet); all other pages keep the hash-based URL.
     const u = new URL(window.location);
     if (categoriesUse && activeCategory && activeCategory !== defaultCategoryCode) {
       u.searchParams.set('cat', activeCategory);
     } else {
       u.searchParams.delete('cat');
     }
-    u.hash = '#' + file;
+    const slugMatch = file.match(/^pages\/([^/]+)\.md$/);
+    const slug = slugMatch ? slugMatch[1] : null;
+    if (slug && navSections.some(s => s.code === slug)) {
+      u.pathname = basePath + slug;
+      u.hash = '';
+    } else {
+      u.pathname = basePath;
+      u.hash = '#' + file;
+    }
     window.history.replaceState(null, '', u);
 
     contentEl.innerHTML = '<div class="loading-spinner"></div>';
 
     const result = await fetchPageFile(file);
     if (!result.ok) {
-      contentEl.innerHTML = `<div class="error-message">
-        <h2>Page not available</h2>
-        <p>${pageNotFoundMessage()}</p>
-      </div>`;
+      const offlineMsg = !navigator.onLine && localStorage.getItem('mdcms-offline');
+      const bodyMsg = offlineMsg
+        ? `<p>${offlineMsg}</p>`
+        : `<p>${pageNotFoundMessage()}</p>`;
+      contentEl.innerHTML = `<div class="error-message"><h2>Page not available</h2>${bodyMsg}</div>`;
       document.title = (config.sitename || 'MD-CMS');
       refreshCategoryBar();
       if (categoriesUse) populateCategoryOptions('');
@@ -2663,7 +3177,12 @@ function fmtDatetime(dtStr) {
 
   // ─── Defaults & routing ──────────────────────────────────
   function defaultPage() {
-    return config.homepage || 'pages/home.md';
+    if (config.homepage) return config.homepage;
+    // Prefer a conventional home page; otherwise fall back to the first page in
+    // nav order so a site without pages/home.md still lands somewhere real
+    // instead of showing "Page not available".
+    if (navData.some(p => p.file === 'pages/home.md')) return 'pages/home.md';
+    return (navData[0] && navData[0].file) || 'pages/home.md';
   }
 
   function getPageFromHash() {
@@ -2673,6 +3192,13 @@ function fmtDatetime(dtStr) {
 
   window.addEventListener('hashchange', () => {
     const page = getPageFromHash();
+    if (page && page !== currentPage) navigateTo(page);
+  });
+
+  window.addEventListener('popstate', () => {
+    const slug = window.location.pathname.replace(basePath, '').replace(/^\//, '').replace(/\/$/, '');
+    const pathPage = slug ? resolveSlugToFile(slug) : null;
+    const page = pathPage || getPageFromHash();
     if (page && page !== currentPage) navigateTo(page);
   });
 
@@ -2699,11 +3225,30 @@ function fmtDatetime(dtStr) {
         if (link) link.href = `assets/images/${config.logo}`;
       }
 
-      if (config.theme) {
+      // Optional ?theme= override — lets an external picker preview any theme
+      // without editing config.yml. Restricted to same-origin relative paths
+      // (no scheme, no protocol-relative) so it can only load themes shipped
+      // alongside the site.
+      const themeOverride = (() => {
+        const t = new URLSearchParams(window.location.search).get('theme');
+        if (!t || /^[a-z][a-z0-9+.-]*:/i.test(t) || t.startsWith('//')) return null;
+        return t;
+      })();
+      const activeThemePath = themeOverride || config.theme;
+
+      if (activeThemePath) {
         try {
-          const themeResp = await fetch(config.theme);
+          const themeResp = await fetch(activeThemePath);
           if (themeResp.ok) themeConfig = jsyaml.load(await themeResp.text()) || {};
         } catch (e) { /* fall back to hardcoded CSS defaults */ }
+      }
+
+      const offlineMsgCfg = config['offline-message'];
+      if (offlineMsgCfg) {
+        const offlineText = typeof offlineMsgCfg === 'string'
+          ? offlineMsgCfg
+          : (offlineMsgCfg[defaultCategoryCode] || offlineMsgCfg['en'] || Object.values(offlineMsgCfg)[0] || '');
+        if (offlineText) localStorage.setItem('mdcms-offline', offlineText);
       }
 
       loadFonts(themeConfig);
@@ -2717,8 +3262,9 @@ function fmtDatetime(dtStr) {
       if (navMode === 'topbar') buildTopbar();
       else buildSidebar();
 
-      if (config.theme) applyThemeYml(themeConfig);
+      if (activeThemePath) applyThemeYml(themeConfig);
       else applyConfigTheme();
+      defaultLineHeight = getComputedStyle(document.documentElement).getPropertyValue('--line-height-body').trim() || '1.7';
       applyTheme(getInitialTheme());
 
       // nav.yml — phase 2 expects `sections:` + `pages:` blocks; phase 1 flat
@@ -2735,6 +3281,7 @@ function fmtDatetime(dtStr) {
         }
         renderNav();
       }
+      const routeFromPath = initBasePath();
 
       if (config.search !== false) {
         try {
@@ -2763,7 +3310,7 @@ function fmtDatetime(dtStr) {
       }
 
       const hashPage = getPageFromHash();
-      await navigateTo(hashPage || defaultPage());
+      await navigateTo(routeFromPath || hashPage || defaultPage());
     } catch (err) {
       document.getElementById('app').innerHTML = `<div style="max-width:600px;margin:4rem auto;padding:2rem;text-align:center;font-family:system-ui;">
         <h1 style="color:#EF4444;font-size:1.5rem;">MD-CMS Error</h1>

@@ -53,7 +53,8 @@ docs/
   install.md
   release.md
 .github/workflows/release.yml   ← cross-platform release builds
-samplesite/                     ← reference implementation (not deployed)
+sample-sites/                   ← reference sites + theme-picker index (not deployed)
+themes/                         ← theme library (grouped by family)
 ```
 
 ## CLI commands
@@ -215,7 +216,9 @@ Then: `git tag v0.4.1 && git push origin v0.4.1`
 
 - Most `posts-*` tag variants are broken. Only `posts-datetime-chronological-byyearmonth` and `posts-datetime-reversechronological` reliably work.
 - Section headings in the nav are non-clickable (sections-sitemap is not yet implemented).
-- **`navigation: topbar` is broken.** Always use `navigation: sidebar` in `config.yml` for any test sites or starter templates.
+- `mdcms fetch-deps` is currently broken (`NameError` — `CDN_DEPS`/`_fetch_bunny_fonts`/`_patch_index_html` are referenced but undefined). See `docs/knownbugs.md`.
+
+**`navigation: topbar`** works in the current renderer (verified end-to-end by the `showcase`, `techpulse`, `kitchen-table`, and `neuraldb-docs` sample sites). Earlier releases had a broken topbar; that note no longer applies.
 
 ## v0.4 renderer features (index.html)
 
@@ -282,5 +285,5 @@ All UI icons served as local SVGs from `app/assets/icons/`. No Google Fonts or e
 - `yaml.safe_load()` is used for all YAML reading (config.yml, nav.yml, frontmatter). The nav.yml parser depends on PyYAML, not a hand-rolled parser.
 - Category code validation uses `CATEGORY_CODE_RE = re.compile(r"^[a-zA-Z0-9\-]+$")` — codes must match this.
 - `scan_and_categorize()` takes both `directory` and `site_root` — paths in records are always relative to `site_root`.
-- The `samplesite/` directory is a reference implementation with multi-language categories (English, Norwegian, Arabic including RTL). It is not deployed; it exists for reference and testing.
+- The `sample-sites/` directory holds several reference sites (sidebar and topbar, docs / blog / book / news styles) plus `index.html`, a self-contained gallery that previews any site under any theme from `themes/` via the renderer's `?theme=` override. `sample-sites/themes.json` is the generated theme manifest it reads. Not deployed; it exists for reference and testing. Rebuild any sample site with `mdcms build --path sample-sites/<name>`, and regenerate the theme manifest if you add themes.
 - Template download uses `urllib` (stdlib) with `certifi` for SSL certificate verification — required for PyInstaller binaries on Linux/macOS where the bundled Python cannot find system CA certificates.

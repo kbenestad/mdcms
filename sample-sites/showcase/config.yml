@@ -1,0 +1,16 @@
+# mdcms v0.6.0 | DO NOT REMOVE THIS COMMENT
+# MD-CMS Feature Showcase — a topbar site exercising the v0.6 renderer.
+sitename: MD-CMS Showcase
+sitedescription: A guided tour of the MD-CMS renderer — topbar navigation, callouts, tabs, accordions, TOC and posts.
+navigation: topbar
+theme: theme.yml
+search: true
+default-theme: system
+footer: "Built with **MD-CMS** · content and themes are in the public domain (CC0)."
+
+callouts:
+  preview:
+    type: info
+    en:
+      title: "Live theme preview"
+      text: This page can be re-skinned on the fly. Open it from the sample-site picker and choose any theme to see the same content in a different palette.
