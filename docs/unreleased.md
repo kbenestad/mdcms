@@ -315,3 +315,19 @@ The "navigation: topbar is broken" note in `CLAUDE.md` was stale. Topbar navigat
 `initBasePath()` computed the app root by appending `/` to the initial pathname when it didn't already end in `/`. For a URL ending in a real filename — e.g. `example.com/sample-sites/showcase/index.html` — this produced a base of `.../index.html/`, so every relative fetch (`pages/home.md`, assets) resolved against `.../index.html/pages/home.md` and returned 404, leaving the site stuck on "Page not available".
 
 The renderer now detects a trailing filename segment (one containing a `.`) that isn't a nav-section slug and uses its containing directory as the app root. Directory-style URLs (`.../showcase/`) were already correct and are unaffected. This is what lets the sample-site picker link sites as `<dir>/index.html`.
+
+---
+
+## Security fix: template downloader path traversal (`mdcms.py`)
+
+`mdcms register --from <url>` downloads a site template described by a remote `mdcms.json` manifest (or, as a fallback, the GitHub Contents API). The file list in that response is attacker-controllable, and paths were joined onto the destination with no validation. Because `pathlib` lets an absolute or `../` segment escape the base (`dest / "/etc/x"` resolves to `/etc/x`), a malicious template URL could write files anywhere the user could write.
+
+A new `_safe_dest()` helper now rejects absolute paths, backslashes, and any `..` segment, and confirms the resolved target stays inside the destination directory. It guards both the manifest download (`_apply_manifest`) and the Contents API tree-walk (`_download_tree_api`). Legitimate templates are unaffected.
+
+Released as CLI **v0.6.1**.
+
+---
+
+## GitHub Pages deployment for sample sites (`.github/workflows/pages.yml`)
+
+A new workflow publishes the repository to GitHub Pages on every push to `main`, so the sample-site gallery and theme library are browsable online. The whole repo is deployed as the Pages artifact to keep the picker's relative `../../themes/...` links intact. Entry point: `/<repo>/sample-sites/`.

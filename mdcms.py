@@ -32,8 +32,8 @@ import certifi
 import click
 import yaml
 
-CLI_VERSION = "0.6.0"
-CLI_RELEASE_DATE = "7 June 2026"
+CLI_VERSION = "0.6.1"
+CLI_RELEASE_DATE = "1 July 2026"
 MIN_SUPPORTED_VERSION = "0.3"
 
 MARKER_RE = re.compile(r"mdcms v(\d+\.\d+)", re.IGNORECASE)
@@ -742,23 +742,50 @@ def _fetch_manifest(base_url: str) -> "dict | None":
     return None
 
 
+def _safe_dest(dest_root: Path, rel: str) -> Path:
+    """Resolve `rel` under `dest_root`, refusing any path that escapes it.
+
+    The manifest (mdcms.json) and the GitHub Contents API responses are remote,
+    attacker-controllable input when `register --from <url>` is used. Without
+    this guard an absolute path or `../` traversal in a manifest would let a
+    malicious template write files anywhere on disk (`dest / "/etc/x"` resolves
+    to `/etc/x` in pathlib).
+    """
+    rel_str = str(rel)
+    rel_path = Path(rel_str)
+    if (
+        rel_path.is_absolute()
+        or rel_str.startswith(("/", "\\"))
+        or "\\" in rel_str
+        or ".." in rel_path.parts
+    ):
+        raise click.ClickException(f"Refusing unsafe path in template: {rel_str!r}")
+    root = dest_root.resolve()
+    target = (root / rel_path).resolve()
+    if target != root and root not in target.parents:
+        raise click.ClickException(f"Refusing path outside destination: {rel_str!r}")
+    return target
+
+
 def _apply_manifest(manifest: dict, base_url: str, dest: Path):
     """Download all files in manifest from base_url into dest."""
     base = base_url.rstrip("/")
     for rel in manifest.get("files", []):
-        file_dest = dest / rel
+        file_dest = _safe_dest(dest, rel)
         file_dest.parent.mkdir(parents=True, exist_ok=True)
         click.echo(f"  {rel}")
         file_dest.write_bytes(_http_get(f"{base}/{rel}"))
     for rel in manifest.get("dirs", []):
-        (dest / rel).mkdir(parents=True, exist_ok=True)
+        _safe_dest(dest, rel).mkdir(parents=True, exist_ok=True)
 
 
 def _download_tree_api(api_url: str, dest: Path, depth: int = 0):
     """Recursively download from the GitHub Contents API (fallback when no manifest)."""
     items = json.loads(_http_get_github(api_url).decode("utf-8"))
     for item in items:
-        item_dest = dest / item["name"]
+        # item["name"] is a single path component from the API; refuse anything
+        # that isn't (defence in depth against a spoofed/hostile response).
+        item_dest = _safe_dest(dest, item["name"])
         if item["type"] == "dir":
             item_dest.mkdir(parents=True, exist_ok=True)
             _download_tree_api(item["url"], item_dest, depth + 1)
