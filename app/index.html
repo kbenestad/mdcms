@@ -3061,6 +3061,14 @@ function fmtDatetime(dtStr) {
         basePath = _initialPathname.slice(0, slugIdx + 1) || '/';
         return file;
       }
+      // URL ends in an explicit file (e.g. .../index.html). The app root is the
+      // directory containing it — not the file path — otherwise every relative
+      // fetch would be resolved against ".../index.html/" and 404.
+      if (lastSeg.includes('.')) {
+        const idx = _initialPathname.lastIndexOf('/' + lastSeg);
+        basePath = _initialPathname.slice(0, idx + 1) || '/';
+        return null;
+      }
     }
     basePath = _initialPathname.endsWith('/') ? _initialPathname : _initialPathname + '/';
     return null;
@@ -3169,7 +3177,12 @@ function fmtDatetime(dtStr) {
 
   // ─── Defaults & routing ──────────────────────────────────
   function defaultPage() {
-    return config.homepage || 'pages/home.md';
+    if (config.homepage) return config.homepage;
+    // Prefer a conventional home page; otherwise fall back to the first page in
+    // nav order so a site without pages/home.md still lands somewhere real
+    // instead of showing "Page not available".
+    if (navData.some(p => p.file === 'pages/home.md')) return 'pages/home.md';
+    return (navData[0] && navData[0].file) || 'pages/home.md';
   }
 
   function getPageFromHash() {
@@ -3212,9 +3225,20 @@ function fmtDatetime(dtStr) {
         if (link) link.href = `assets/images/${config.logo}`;
       }
 
-      if (config.theme) {
+      // Optional ?theme= override — lets an external picker preview any theme
+      // without editing config.yml. Restricted to same-origin relative paths
+      // (no scheme, no protocol-relative) so it can only load themes shipped
+      // alongside the site.
+      const themeOverride = (() => {
+        const t = new URLSearchParams(window.location.search).get('theme');
+        if (!t || /^[a-z][a-z0-9+.-]*:/i.test(t) || t.startsWith('//')) return null;
+        return t;
+      })();
+      const activeThemePath = themeOverride || config.theme;
+
+      if (activeThemePath) {
         try {
-          const themeResp = await fetch(config.theme);
+          const themeResp = await fetch(activeThemePath);
           if (themeResp.ok) themeConfig = jsyaml.load(await themeResp.text()) || {};
         } catch (e) { /* fall back to hardcoded CSS defaults */ }
       }
@@ -3238,7 +3262,7 @@ function fmtDatetime(dtStr) {
       if (navMode === 'topbar') buildTopbar();
       else buildSidebar();
 
-      if (config.theme) applyThemeYml(themeConfig);
+      if (activeThemePath) applyThemeYml(themeConfig);
       else applyConfigTheme();
       defaultLineHeight = getComputedStyle(document.documentElement).getPropertyValue('--line-height-body').trim() || '1.7';
       applyTheme(getInitialTheme());

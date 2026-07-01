@@ -1,6 +1,7 @@
-# mdcms v0.3 | DO NOT REMOVE THIS COMMENT
+# mdcms v0.6.0 | DO NOT REMOVE THIS COMMENT
 sitename: NeuralDB
 sitedescription: AI-native database with vector and relational capabilities
 navigation: topbar
+homepage: pages/index.md
 search: true
 footer: "© 2026 NeuralDB, Inc. Documentation licensed under CC BY 4.0."

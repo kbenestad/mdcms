@@ -275,3 +275,43 @@ Only pages files that are both:
 A malformed `config.yml` (e.g. a stray tab character, which YAML forbids as a token starter) previously caused `read_config` to silently return an empty dict. The build would proceed with no config — categories disabled, no default category code — producing a broken `nav.yml` with wrong filenames and missing `variants` fields, so category-variant pages would not appear in the sidebar.
 
 `read_config` now raises `ClickException` on both `OSError` and `yaml.YAMLError`, aborting the build with a descriptive error message instead of continuing silently with an empty config.
+
+---
+
+## Sample-site gallery with theme picker (`sample-sites/`)
+
+The `sample-sites/` folder now has a self-contained launcher at `sample-sites/index.html`. It lists every reference site as a card and lets you preview any site under any theme from the `themes/` library before opening it.
+
+### What's included
+
+- **`sample-sites/index.html`** — a dependency-free picker. It reads `sample-sites/themes.json`, groups the 224 bundled themes by family, and builds launch links. Selecting a theme rewrites each site's "Open" link to include a `?theme=` override; "Default" opens the site with its own `theme.yml`.
+- **`sample-sites/themes.json`** — generated manifest of every theme file under `themes/` (`family`, `file`, repo-relative `path`, friendly `label`).
+- **`sample-sites/showcase/`** — a new topbar reference site that exercises callouts, tabs, accordions, the `toc` tag, and a paginated post listing. Serves as the canonical "does the renderer work" demo.
+
+All six pre-existing sample sites were re-synced to the current renderer (they shipped a v0.3.8 `index.html`) and rebuilt, and their `config.yml` version markers were bumped to match.
+
+---
+
+## Renderer: `?theme=` preview override (`app/index.html`)
+
+`index.html` now honours a `?theme=<path>` query parameter, loading that theme file instead of the one named in `config.yml`. This powers the sample-site picker's live previews without editing any site config. The override is restricted to same-origin relative paths (no scheme, no protocol-relative URLs), so it can only load theme files shipped alongside the site.
+
+---
+
+## Renderer: graceful default-page fallback (`app/index.html`)
+
+`defaultPage()` previously returned `config.homepage || 'pages/home.md'` unconditionally, so any site without a `pages/home.md` and no `homepage:` set opened to a "Page not available" error. It now falls back to the first page in nav order when neither a configured homepage nor a conventional `pages/home.md` is present, so a site always lands on real content.
+
+---
+
+## Docs: topbar navigation verified working
+
+The "navigation: topbar is broken" note in `CLAUDE.md` was stale. Topbar navigation renders correctly in the current renderer (sections become dropdown menus, unsectioned pages sit inline) and is exercised end-to-end by the `showcase`, `techpulse`, `kitchen-table`, and `neuraldb-docs` sample sites. The known-limitation note was removed.
+
+---
+
+## Fix: pages 404 when a site is opened via an explicit `index.html` URL (`app/index.html`)
+
+`initBasePath()` computed the app root by appending `/` to the initial pathname when it didn't already end in `/`. For a URL ending in a real filename — e.g. `example.com/sample-sites/showcase/index.html` — this produced a base of `.../index.html/`, so every relative fetch (`pages/home.md`, assets) resolved against `.../index.html/pages/home.md` and returned 404, leaving the site stuck on "Page not available".
+
+The renderer now detects a trailing filename segment (one containing a `.`) that isn't a nav-section slug and uses its containing directory as the app root. Directory-style URLs (`.../showcase/`) were already correct and are unaffected. This is what lets the sample-site picker link sites as `<dir>/index.html`.

@@ -33,3 +33,15 @@ Bugs that have been identified but not yet fixed. Fixed bugs are moved to the re
 **Root cause:** `read_config` caught `(OSError, yaml.YAMLError)` in a single block and silently returned `{}` on any error.
 
 **Fix:** `read_config` now raises `click.ClickException` on both `OSError` and `yaml.YAMLError`, aborting the build with a descriptive error message instead of continuing with an empty config.
+
+---
+
+## Open bugs
+
+### `mdcms fetch-deps` crashes immediately (`NameError`)
+
+**Symptom:** Running `mdcms fetch-deps [name]` or `mdcms fetch-deps --path <path>` aborts with `NameError: name 'CDN_DEPS' is not defined`. The offline-bundling command is completely non-functional.
+
+**Root cause:** `fetch_deps()` in `mdcms.py` references three names — `CDN_DEPS`, `_fetch_bunny_fonts()`, and `_patch_index_html()` — that are used but never defined anywhere in the module. They appear to have been dropped (or never landed) when the command was added.
+
+**Fix (not yet done):** Reintroduce a `CDN_DEPS` list mapping each CDN URL in `app/index.html` (js-yaml, marked, fuse.js, highlight.js + its two stylesheets) to a local `assets/required/vendors/` path, plus `_fetch_bunny_fonts()` (download Bunny Font CSS + font files referenced by `theme.yml`) and `_patch_index_html()` (rewrite the CDN `<script>`/`<link>` URLs and injected Bunny `@font-face` URLs to the local copies). Until then, offline bundling must be done by hand.

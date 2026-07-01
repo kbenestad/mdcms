@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Redirecting…</title>
+<script>
+  // SPA routing for GitHub Pages: the server returns this 404 page for any path
+  // it can't resolve. We encode the intended path as ?_route= and redirect to the
+  // app root so index.html can pick it up and render the right page.
+  (function () {
+    var path = window.location.pathname;
+    var search = window.location.search;
+    var hash = window.location.hash;
+
+    // On GitHub Pages project sites the app lives at /repo-name/, so we keep
+    // that prefix and only encode the segment after it.
+    var parts = path.split('/');
+    var isGhPages = window.location.hostname.endsWith('.github.io') && parts.length > 2;
+    var base = isGhPages ? '/' + parts[1] + '/' : '/';
+    var route = '/' + parts.slice(isGhPages ? 2 : 1).join('/');
+
+    var qs = '_route=' + encodeURIComponent(route);
+    if (search) qs += '&' + search.slice(1);
+
+    window.location.replace(window.location.origin + base + '?' + qs + hash);
+  })();
+</script>
+</head>
+<body></body>
+</html>
