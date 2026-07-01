@@ -1,0 +1,80 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — os-material-you
+# Android / Material 3 feel. Tonal-palette neutrals built on the M3
+# baseline purple (#6750A4). Pale lavender paper, soft surface chrome.
+#
+# Colours from the Material 3 baseline scheme:
+#   primary light  #6750A4  /  dark  #D0BCFF
+#   surface light  #FEF7FF  /  dark  #141218
+#   surface-container-low  light #F7F2FA / dark #1D1B20
+#   on-surface     light  #1D1B20 / dark #E6E0E9
+#   on-surface-variant   light #49454F / dark #CAC4D0
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#6750A4"
+  background: "#FEF7FF"
+  nav-background: "#F7F2FA"
+  text: "#1D1B20"
+  text-muted: "#49454F"
+
+dark:
+  accent: "#D0BCFF"
+  background: "#141218"
+  nav-background: "#1D1B20"
+  text: "#E6E0E9"
+  text-muted: "#CAC4D0"
+
+# ──────────────────────────────────
+# Semantic colours — M3 baseline error + standard tertiary/green/yellow
+# ──────────────────────────────────
+colours-semantic:
+  info: "#6750A4"
+  warning: "#9A6700"
+  success: "#386A20"
+  error: "#B3261E"
+
+colours-semantic-dark:
+  info: "#D0BCFF"
+  warning: "#EFBE6E"
+  success: "#A6D388"
+  error: "#F2B8B5"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#6750A4"
+    background-colour: "#6750A4"
+  warning:
+    icon: warning
+    primary-colour: "#9A6700"
+    background-colour: "#9A6700"
+  success:
+    icon: success
+    primary-colour: "#386A20"
+    background-colour: "#386A20"
+  error:
+    icon: error
+    primary-colour: "#B3261E"
+    background-colour: "#B3261E"
+
+# ──────────────────────────────────
+# Typography
+# Roboto is the portable default and the Material default.
+# Preferred: Roboto Flex (variable) or Google Sans for headings.
+# ──────────────────────────────────
+font-body: "bunny:Roboto:400"
+font-heading: "bunny:Roboto:500"
+font-size: 1.00
+line-height: 1.55
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 78em
+nav-width: 20em

@@ -1,0 +1,86 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — tokyo metro · bold
+# Marunouchi red and Tozai sky-blue. Tokyo Metro’s line-colour grammar.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#E60012"
+  background: "#FFFFFF"
+  nav-background: "#009BBF"
+  text: "#1A1A1A"
+  text-muted: "#5C5C5C"
+  nav-link: "rgba(255,255,255,0.92)"
+  nav-link-active: "#FFFFFF"
+  nav-section-heading: "rgba(255,255,255,0.65)"
+  nav-sitename: "#FFFFFF"
+  nav-description: "rgba(255,255,255,0.70)"
+  nav-toggle: "rgba(255,255,255,0.70)"
+
+dark:
+  accent: "#F39800"
+  background: "#003F4D"
+  nav-background: "#00263A"
+  text: "#FFFFFF"
+  text-muted: "#9DBCDC"
+  nav-link: "rgba(255,255,255,0.92)"
+  nav-link-active: "#F39800"
+  nav-section-heading: "rgba(255,255,255,0.65)"
+  nav-sitename: "#FFFFFF"
+  nav-description: "rgba(255,255,255,0.70)"
+  nav-toggle: "rgba(255,255,255,0.70)"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#2B5797"
+  warning: "#B26A1F"
+  success: "#2F7A4A"
+  error: "#C13030"
+
+colours-semantic-dark:
+  info: "#80A5DB"
+  warning: "#E7AF74"
+  success: "#89D2A3"
+  error: "#DE7C7C"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#2B5797"
+    background-colour: "#2B5797"
+  warning:
+    icon: warning
+    primary-colour: "#B26A1F"
+    background-colour: "#B26A1F"
+  success:
+    icon: success
+    primary-colour: "#2F7A4A"
+    background-colour: "#2F7A4A"
+  error:
+    icon: error
+    primary-colour: "#C13030"
+    background-colour: "#C13030"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:IBM Plex Sans:300"
+font-heading: "bunny:IBM Plex Sans:600"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.70      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

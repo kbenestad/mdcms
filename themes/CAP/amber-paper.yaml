@@ -1,0 +1,80 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — amber · paper
+# White paper, neutral chrome. Amber as a confident highlight.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#F9AD18"
+  background: "#FFFFFF"
+  nav-background: "#F5F4F0"
+  text: "#1A1814"
+  text-muted: "#5C5A52"
+  nav-link: "#1A1814"
+  nav-link-active: "#1A1A1A"
+  nav-section-heading: "#5C5A52"
+  nav-sitename: "#1A1814"
+  nav-description: "#5C5A52"
+  nav-toggle: "#5C5A52"
+
+dark:
+  accent: "#FFC04A"
+  background: "#0F0D0A"
+  nav-background: "#1A1712"
+  text: "#F2EFE8"
+  text-muted: "#A39E92"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#2B5797"
+  warning: "#F9AD18"
+  success: "#2F7A4A"
+  error: "#C13030"
+
+colours-semantic-dark:
+  info: "#80A5DB"
+  warning: "#F9AD18"
+  success: "#89D2A3"
+  error: "#DE7C7C"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#2B5797"
+    background-colour: "#2B5797"
+  warning:
+    icon: warning
+    primary-colour: "#F9AD18"
+    background-colour: "#F9AD18"
+  success:
+    icon: success
+    primary-colour: "#2F7A4A"
+    background-colour: "#2F7A4A"
+  error:
+    icon: error
+    primary-colour: "#C13030"
+    background-colour: "#C13030"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:IBM Plex Sans:300"
+font-heading: "bunny:IBM Plex Sans:600"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.70      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

@@ -1,0 +1,86 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — finland · bold
+# Lake-blue cross on snow. Deep navy sidebar carries the flag.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#003580"
+  background: "#FFFFFF"
+  nav-background: "#003580"
+  text: "#001F4E"
+  text-muted: "#5C6E94"
+  nav-link: "rgba(255,255,255,0.92)"
+  nav-link-active: "#FFFFFF"
+  nav-section-heading: "rgba(255,255,255,0.65)"
+  nav-sitename: "#FFFFFF"
+  nav-description: "rgba(255,255,255,0.70)"
+  nav-toggle: "rgba(255,255,255,0.70)"
+
+dark:
+  accent: "#7AA0D8"
+  background: "#001F4E"
+  nav-background: "#001233"
+  text: "#FFFFFF"
+  text-muted: "#A0B4D8"
+  nav-link: "#E2E2E2"
+  nav-link-active: "#7AA0D8"
+  nav-section-heading: "#9A9A9A"
+  nav-sitename: "#FFFFFF"
+  nav-description: "#9A9A9A"
+  nav-toggle: "#9A9A9A"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#003580"
+  warning: "#B26A1F"
+  success: "#2F7A4A"
+  error: "#9C3A2A"
+
+colours-semantic-dark:
+  info: "#5C9FFF"
+  warning: "#E7AF74"
+  success: "#89D2A3"
+  error: "#DC8C7E"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#003580"
+    background-colour: "#003580"
+  warning:
+    icon: warning
+    primary-colour: "#B26A1F"
+    background-colour: "#B26A1F"
+  success:
+    icon: success
+    primary-colour: "#2F7A4A"
+    background-colour: "#2F7A4A"
+  error:
+    icon: error
+    primary-colour: "#9C3A2A"
+    background-colour: "#9C3A2A"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:IBM Plex Sans:300"
+font-heading: "bunny:IBM Plex Sans:600"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.70      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

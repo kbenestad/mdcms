@@ -1,0 +1,63 @@
+# mdcms v0.6.0 | DO NOT REMOVE THIS COMMENT
+# MD-CMS v0.6.0 — Site configuration
+#
+# Only `sitename` and `navigation` are required. Uncomment and edit the rest
+# as needed. See https://kbenestad.codeberg.page/md-cms for the full reference.
+#
+# LICENCE
+#   Copyright 2026 Kristian Benestad | kbenestad.codeberg.page
+#
+#   Licensed under the Apache License, Version 2.0 (the "Licence");
+#   you may not use this file except in compliance with the Licence.
+#   You may obtain a copy of the Licence at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the Licence is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the Licence for the specific language governing permissions and
+#   limitations under the Licence.
+
+# ──────────────────────────────────
+# Site identity
+# ──────────────────────────────────
+sitename: MD-CMS Phase 7 Test
+navigation: sidebar          # sidebar | topbar
+theme: theme.yml             # presentational config — edit theme.yml to customise colours, fonts, and layout
+
+pwa: yes
+pwa-name: MD-CMS Phase 7 Test
+pwa-shortname: MDCMS Test
+pwa-colour: "#2563EB"
+offline-message: "This page is not available offline. Connect to the internet and reload."
+
+# homepage: pages/home.md    # override the default landing page
+
+# sitedescription: A short description for meta tags
+# logo: logo.svg             # filename in assets/images/
+# favicon: favicon.png
+# footer: "© 2026 Your Name"
+
+# ──────────────────────────────────
+# Layout (optional)
+# ──────────────────────────────────
+# nav-position: left         # left | right (sidebar mode)
+
+# Typography and colours are configured in theme.yml, not here.
+
+# ──────────────────────────────────
+# Features (optional)
+# ──────────────────────────────────
+# search: true
+# default-theme: system      # light | dark | system
+
+# ──────────────────────────────────
+# Reusable callout messages (optional)
+# ──────────────────────────────────
+callouts:
+  aitranslation:
+    type: warning
+    en:
+      title: "PLEASE NOTE:"
+      text: This page has been translated with artificial intelligence. It has not been reviewed by staff yet.

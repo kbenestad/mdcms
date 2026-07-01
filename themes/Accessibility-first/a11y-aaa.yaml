@@ -1,0 +1,74 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — a11y · aaa contrast
+# WCAG AAA contrast. Black-on-white text, deep blue links, Atkinson Hyperlegible.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#0033A0"
+  background: "#FFFFFF"
+  nav-background: "#F2F2F2"
+  text: "#000000"
+  text-muted: "#4F4F4F"
+
+dark:
+  accent: "#FFD700"
+  background: "#000000"
+  nav-background: "#0A0A0A"
+  text: "#FFFFFF"
+  text-muted: "#BDBDBD"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#0033A0"
+  warning: "#8B5A00"
+  success: "#1F6B3C"
+  error: "#A1001C"
+
+colours-semantic-dark:
+  info: "#5C90FF"
+  warning: "#FFC55C"
+  success: "#80DAA3"
+  error: "#FF5C78"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#0033A0"
+    background-colour: "#0033A0"
+  warning:
+    icon: warning
+    primary-colour: "#8B5A00"
+    background-colour: "#8B5A00"
+  success:
+    icon: success
+    primary-colour: "#1F6B3C"
+    background-colour: "#1F6B3C"
+  error:
+    icon: error
+    primary-colour: "#A1001C"
+    background-colour: "#A1001C"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:Atkinson Hyperlegible:400"
+font-heading: "bunny:Atkinson Hyperlegible:700"
+font-size: 1.05        # unitless multiplier (1.0 = 16px base)
+line-height: 1.75      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

@@ -1,0 +1,86 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — os-breeze
+# KDE Plasma / Breeze feel. Cool neutral chrome, the famous Plasma blue
+# accent. Breeze is intentionally subtle — light, low-saturation, with
+# just a touch of cool grey.
+#
+# Colours from KDE's Breeze stylesheet (qss + colour scheme):
+#   accent (Highlight)        #3DAEE9
+#   view-background-color     #FCFCFC
+#   window-background-color   #EFF0F1
+#   foreground (Text)         #232629
+#   foreground-inactive       #7F8C8D
+# Breeze Dark:
+#   view-background-color     #1B1E20
+#   window-background-color   #232629
+#   foreground                #FCFCFC
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#3DAEE9"
+  background: "#FCFCFC"
+  nav-background: "#EFF0F1"
+  text: "#232629"
+  text-muted: "#7F8C8D"
+
+dark:
+  accent: "#3DAEE9"
+  background: "#1B1E20"
+  nav-background: "#232629"
+  text: "#FCFCFC"
+  text-muted: "#A1A9B1"
+
+# ──────────────────────────────────
+# Semantic colours — Breeze "positive / neutral / negative" tones
+# ──────────────────────────────────
+colours-semantic:
+  info: "#3DAEE9"
+  warning: "#F67400"
+  success: "#27AE60"
+  error: "#DA4453"
+
+colours-semantic-dark:
+  info: "#61C1F0"
+  warning: "#F8A04A"
+  success: "#56C883"
+  error: "#ED7077"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#3DAEE9"
+    background-colour: "#3DAEE9"
+  warning:
+    icon: warning
+    primary-colour: "#F67400"
+    background-colour: "#F67400"
+  success:
+    icon: success
+    primary-colour: "#27AE60"
+    background-colour: "#27AE60"
+  error:
+    icon: error
+    primary-colour: "#DA4453"
+    background-colour: "#DA4453"
+
+# ──────────────────────────────────
+# Typography
+# Noto Sans is the portable default and KDE's current UI font.
+# Preferred (classic Plasma 4 era): "Oxygen Sans" — open SIL-licensed,
+# available on Google Fonts as "Oxygen".
+# ──────────────────────────────────
+font-body: "bunny:Noto Sans:400"
+font-heading: "bunny:Noto Sans:600"
+font-size: 1.00
+line-height: 1.6
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 78em
+nav-width: 20em

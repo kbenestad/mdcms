@@ -1,0 +1,66 @@
+# mdcms theme — default
+# Edit colours, fonts, and layout here. See docs for full reference.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#2563EB"
+  background: "#FFFFFF"
+  nav-background: "#F8FAFC"
+  text: "#1E293B"
+  text-muted: "#64748B"
+
+dark:
+  accent: "#60A5FA"
+  background: "#0F172A"
+  nav-background: "#1E293B"
+  text: "#F1F5F9"
+  text-muted: "#94A3B8"
+
+# ──────────────────────────────────
+# Semantic colours
+# Used by callout tags (info, warning, success, error).
+# Choose values that work on both light and dark backgrounds.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#2563EB"
+  warning: "#D97706"
+  success: "#16A34A"
+  error: "#DC2626"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#2563EB"
+    background-colour: "#2563EB"
+  warning:
+    icon: warning
+    primary-colour: "#D97706"
+    background-colour: "#D97706"
+  success:
+    icon: success
+    primary-colour: "#16A34A"
+    background-colour: "#16A34A"
+  error:
+    icon: error
+    primary-colour: "#DC2626"
+    background-colour: "#DC2626"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:Noto Sans:400"
+font-heading: "bunny:Noto Sans:700"
+font-size: 1.0        # unitless multiplier (1.0 = 16px base)
+line-height: 1.7      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

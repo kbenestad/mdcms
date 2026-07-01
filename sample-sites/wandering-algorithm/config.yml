@@ -1,0 +1,7 @@
+# mdcms v0.3 | DO NOT REMOVE THIS COMMENT
+sitename: The Wandering Algorithm
+sitedescription: A novel by Elena Marchetti
+navigation: sidebar
+nav-position: left
+search: true
+footer: "© 2026 Elena Marchetti. All rights reserved."

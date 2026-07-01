@@ -1,0 +1,46 @@
+# mdcms theme — TechPulse
+light:
+  accent: "#0066CC"
+  background: "#FFFFFF"
+  nav-background: "#F0F4F8"
+  text: "#1A202C"
+  text-muted: "#718096"
+
+dark:
+  accent: "#63B3ED"
+  background: "#0D1117"
+  nav-background: "#161B22"
+  text: "#E2E8F0"
+  text-muted: "#A0AEC0"
+
+colours-semantic:
+  info: "#0066CC"
+  warning: "#D97706"
+  success: "#16A34A"
+  error: "#DC2626"
+
+callouts:
+  info:
+    icon: info
+    primary-colour: "#0066CC"
+    background-colour: "#0066CC"
+  warning:
+    icon: warning
+    primary-colour: "#D97706"
+    background-colour: "#D97706"
+  success:
+    icon: success
+    primary-colour: "#16A34A"
+    background-colour: "#16A34A"
+  error:
+    icon: error
+    primary-colour: "#DC2626"
+    background-colour: "#DC2626"
+
+font-body: "bunny:Inter:400"
+font-heading: "bunny:Inter:700"
+font-size: 1.0
+line-height: 1.7
+
+main-width: 78em
+nav-width: 16em

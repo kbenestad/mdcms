@@ -1,0 +1,74 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — sage
+# Warm, calm, editorial-feeling. Cream paper + forest green.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#2F7A5A"
+  background: "#FAF8F2"
+  nav-background: "#F1EEE3"
+  text: "#1F2A24"
+  text-muted: "#6B7A72"
+
+dark:
+  accent: "#74D1A4"
+  background: "#0F1714"
+  nav-background: "#172220"
+  text: "#E8EDE9"
+  text-muted: "#8AA396"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#2F7A5A"
+  warning: "#B26A1F"
+  success: "#2F7A5A"
+  error: "#B33A3A"
+
+colours-semantic-dark:
+  info: "#89D2B3"
+  warning: "#E7AF74"
+  success: "#89D2B3"
+  error: "#D78484"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#2F7A5A"
+    background-colour: "#2F7A5A"
+  warning:
+    icon: warning
+    primary-colour: "#B26A1F"
+    background-colour: "#B26A1F"
+  success:
+    icon: success
+    primary-colour: "#2F7A5A"
+    background-colour: "#2F7A5A"
+  error:
+    icon: error
+    primary-colour: "#B33A3A"
+    background-colour: "#B33A3A"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:DM Sans:400"
+font-heading: "bunny:DM Sans:700"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.70      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

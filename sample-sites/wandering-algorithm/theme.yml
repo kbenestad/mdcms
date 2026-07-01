@@ -1,0 +1,46 @@
+# mdcms theme — The Wandering Algorithm
+light:
+  accent: "#4A5568"
+  background: "#FAFAF8"
+  nav-background: "#F2F0EB"
+  text: "#2D3748"
+  text-muted: "#718096"
+
+dark:
+  accent: "#9F7AEA"
+  background: "#0D1117"
+  nav-background: "#161B22"
+  text: "#E6EDF3"
+  text-muted: "#8B949E"
+
+colours-semantic:
+  info: "#4299E1"
+  warning: "#ECC94B"
+  success: "#48BB78"
+  error: "#FC8181"
+
+callouts:
+  info:
+    icon: info
+    primary-colour: "#4299E1"
+    background-colour: "#4299E1"
+  warning:
+    icon: warning
+    primary-colour: "#ECC94B"
+    background-colour: "#ECC94B"
+  success:
+    icon: success
+    primary-colour: "#48BB78"
+    background-colour: "#48BB78"
+  error:
+    icon: error
+    primary-colour: "#FC8181"
+    background-colour: "#FC8181"
+
+font-body: "bunny:Lora:400"
+font-heading: "bunny:Playfair Display:700"
+font-size: 1.05
+line-height: 1.8
+
+main-width: 70em
+nav-width: 18em

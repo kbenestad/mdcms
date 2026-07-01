@@ -1,0 +1,76 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — os-adwaita
+# GNOME / Adwaita feel. Warm near-white paper, soft window-bg chrome,
+# the familiar Adwaita blue accent. Cantarell typeface throughout.
+
+# ──────────────────────────────────
+# Colours — based on published libadwaita tokens
+#   light: window_bg_color #fafafa, view_bg #ffffff, accent #1c71d8 (blue 4),
+#          fg ~rgba(0,0,0,0.8), dim ~rgba(0,0,0,0.55)
+#   dark:  window_bg_color #242424, view_bg #1e1e1e, accent #78aeed (blue 1)
+# ──────────────────────────────────
+light:
+  accent: "#1C71D8"
+  background: "#FFFFFF"
+  nav-background: "#FAFAFA"
+  text: "#202020"
+  text-muted: "#5E5C64"
+
+dark:
+  accent: "#78AEED"
+  background: "#1E1E1E"
+  nav-background: "#242424"
+  text: "#FFFFFF"
+  text-muted: "#C0BFBC"
+
+# ──────────────────────────────────
+# Semantic colours — Adwaita "named colors": green-3, yellow-5, red-3
+# ──────────────────────────────────
+colours-semantic:
+  info: "#1C71D8"
+  warning: "#E5A50A"
+  success: "#26A269"
+  error: "#C01C28"
+
+colours-semantic-dark:
+  info: "#78AEED"
+  warning: "#F8E45C"
+  success: "#57E389"
+  error: "#F66151"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#1C71D8"
+    background-colour: "#1C71D8"
+  warning:
+    icon: warning
+    primary-colour: "#E5A50A"
+    background-colour: "#E5A50A"
+  success:
+    icon: success
+    primary-colour: "#26A269"
+    background-colour: "#26A269"
+  error:
+    icon: error
+    primary-colour: "#C01C28"
+    background-colour: "#C01C28"
+
+# ──────────────────────────────────
+# Typography
+# Cantarell is GNOME's UI typeface — humanist sans, slightly tall x-height.
+# Available on Google Fonts.
+# ──────────────────────────────────
+font-body: "google:Cantarell:400"
+font-heading: "google:Cantarell:700"
+font-size: 1.00
+line-height: 1.65
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 78em
+nav-width: 20em

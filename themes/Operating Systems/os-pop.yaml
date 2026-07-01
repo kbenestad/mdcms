@@ -1,0 +1,79 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — os-pop
+# Pop!_OS feel. Warm Cosmic-grey chrome, signature Pop orange accent.
+# System76's GTK-rooted desktop with its own distinctive warmth.
+#
+# Colours from System76's public Pop palette:
+#   Pop Orange    #FAA41A   (primary accent)
+#   Cosmic Light bg  #F2F2F2 / surface #FAFAFA
+#   Cosmic Dark bg   #2D2D2D / surface #232323
+#   Text light    #181818 / dark #F2F2F2
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#FAA41A"
+  background: "#FAFAFA"
+  nav-background: "#F2F2F2"
+  text: "#181818"
+  text-muted: "#5C5C5C"
+
+dark:
+  accent: "#FAA41A"
+  background: "#232323"
+  nav-background: "#2D2D2D"
+  text: "#F2F2F2"
+  text-muted: "#A8A8A8"
+
+# ──────────────────────────────────
+# Semantic colours — Pop palette greens/yellows/reds with the warm cast
+# ──────────────────────────────────
+colours-semantic:
+  info: "#1B6091"
+  warning: "#FAA41A"
+  success: "#73C48F"
+  error: "#F15D22"
+
+colours-semantic-dark:
+  info: "#88B8DC"
+  warning: "#FFC664"
+  success: "#9BD7AF"
+  error: "#FF8A5C"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#1B6091"
+    background-colour: "#1B6091"
+  warning:
+    icon: warning
+    primary-colour: "#FAA41A"
+    background-colour: "#FAA41A"
+  success:
+    icon: success
+    primary-colour: "#73C48F"
+    background-colour: "#73C48F"
+  error:
+    icon: error
+    primary-colour: "#F15D22"
+    background-colour: "#F15D22"
+
+# ──────────────────────────────────
+# Typography
+# Fira Sans is the portable default and Pop!_OS's actual UI font.
+# Available on Google Fonts. Pop also ships Fira Mono for code.
+# ──────────────────────────────────
+font-body: "bunny:Fira Sans:400"
+font-heading: "bunny:Fira Sans:600"
+font-size: 1.00
+line-height: 1.6
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 78em
+nav-width: 20em

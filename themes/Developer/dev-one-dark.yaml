@@ -1,0 +1,86 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — one dark
+# Atom's signature theme — soft greys with cool primary accents.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#4078F2"
+  background: "#FAFAFA"
+  nav-background: "#F0F0F0"
+  text: "#383A42"
+  text-muted: "#A0A1A7"
+  nav-link: "#383A42"
+  nav-link-active: "#4078F2"
+  nav-section-heading: "#5C5C5C"
+  nav-sitename: "#383A42"
+  nav-description: "#5C5C5C"
+  nav-toggle: "#5C5C5C"
+
+dark:
+  accent: "#61AFEF"
+  background: "#282C34"
+  nav-background: "#21252B"
+  text: "#ABB2BF"
+  text-muted: "#5C6370"
+  nav-link: "#E2E2E2"
+  nav-link-active: "#61AFEF"
+  nav-section-heading: "#9A9A9A"
+  nav-sitename: "#FFFFFF"
+  nav-description: "#9A9A9A"
+  nav-toggle: "#9A9A9A"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#61AFEF"
+  warning: "#E5C07B"
+  success: "#98C379"
+  error: "#E06C75"
+
+colours-semantic-dark:
+  info: "#6BB4F0"
+  warning: "#E5C07B"
+  success: "#A7D289"
+  error: "#E37880"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#61AFEF"
+    background-colour: "#61AFEF"
+  warning:
+    icon: warning
+    primary-colour: "#E5C07B"
+    background-colour: "#E5C07B"
+  success:
+    icon: success
+    primary-colour: "#98C379"
+    background-colour: "#98C379"
+  error:
+    icon: error
+    primary-colour: "#E06C75"
+    background-colour: "#E06C75"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:IBM Plex Sans:300"
+font-heading: "bunny:IBM Plex Sans:600"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.70      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

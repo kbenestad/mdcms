@@ -1,0 +1,74 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — coffee · cortado
+# Balanced warm beige. Equal parts milk and espresso — the goldilocks of the three.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#6F3A1F"
+  background: "#FBF6EA"
+  nav-background: "#F2E2C0"
+  text: "#2A1A0F"
+  text-muted: "#6E5A40"
+
+dark:
+  accent: "#D8945C"
+  background: "#1A130A"
+  nav-background: "#251A10"
+  text: "#F0E0CC"
+  text-muted: "#A89580"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#5A7AB8"
+  warning: "#B26A1F"
+  success: "#3F6B3C"
+  error: "#9C3A2A"
+
+colours-semantic-dark:
+  info: "#89A2D2"
+  warning: "#E7AF74"
+  success: "#8DD289"
+  error: "#DC8C7E"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#5A7AB8"
+    background-colour: "#5A7AB8"
+  warning:
+    icon: warning
+    primary-colour: "#B26A1F"
+    background-colour: "#B26A1F"
+  success:
+    icon: success
+    primary-colour: "#3F6B3C"
+    background-colour: "#3F6B3C"
+  error:
+    icon: error
+    primary-colour: "#9C3A2A"
+    background-colour: "#9C3A2A"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:Newsreader:400"
+font-heading: "bunny:Newsreader:600"
+font-size: 1.05        # unitless multiplier (1.0 = 16px base)
+line-height: 1.65      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

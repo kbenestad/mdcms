@@ -1,0 +1,99 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# MD-CMS v0.4 — Theme configuration
+#
+# Edit colours, fonts, and layout here. See docs for full reference.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#2563EB"
+  background: "#FFFFFF"
+  nav-background: "#F8FAFC"
+  text: "#1E293B"
+  text-muted: "#64748B"
+  # nav-link: "#1E293B"          # inactive nav link text (defaults to text)
+  # nav-link-active: "#2563EB"   # active nav link text (defaults to accent)
+  # nav-section-heading: "#64748B" # nav section label text (defaults to text-muted)
+  # nav-sitename: "#1E293B"      # site name in sidebar header (defaults to nav-link)
+  # nav-description: "#64748B"   # site description in sidebar header (defaults to nav-section-heading)
+  # nav-toggle: "#64748B"        # dark/light mode toggle (defaults to nav-section-heading)
+  # divider: "#CBD5E1"           # border/hr colour (defaults to color-mix of background + text)
+
+dark:
+  accent: "#60A5FA"
+  background: "#0F172A"
+  nav-background: "#1E293B"
+  text: "#F1F5F9"
+  text-muted: "#94A3B8"
+  # nav-link: "#E2E8F0"          # inactive nav link text (defaults to text)
+  # nav-link-active: "#60A5FA"   # active nav link text (defaults to accent)
+  # nav-section-heading: "#94A3B8" # nav section label text (defaults to text-muted)
+  # nav-sitename: "#E2E8F0"      # site name in sidebar header (defaults to nav-link)
+  # nav-description: "#94A3B8"   # site description in sidebar header (defaults to nav-section-heading)
+  # nav-toggle: "#94A3B8"        # dark/light mode toggle (defaults to nav-section-heading)
+  # divider: "#334155"           # border/hr colour (defaults to color-mix of background + text)
+
+# ──────────────────────────────────
+# Semantic colours
+# Used by callout tags (info, warning, success, error).
+# colours-semantic applies to both modes; colours-semantic-dark overrides for dark mode.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#2563EB"
+  warning: "#D97706"
+  success: "#16A34A"
+  error: "#DC2626"
+
+colours-semantic-dark:
+  info: "#60A5FA"
+  warning: "#F59E0B"
+  success: "#34D399"
+  error: "#F87171"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#2563EB"
+    background-colour: "#2563EB"
+  warning:
+    icon: warning
+    primary-colour: "#D97706"
+    background-colour: "#D97706"
+  success:
+    icon: success
+    primary-colour: "#16A34A"
+    background-colour: "#16A34A"
+  error:
+    icon: error
+    primary-colour: "#DC2626"
+    background-colour: "#DC2626"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:Noto Sans:400"
+font-heading: "bunny:Noto Sans:700"
+font-size: 1.0        # unitless multiplier (1.0 = 16px base)
+line-height: 1.7      # unitless multiplier
+
+# ──────────────────────────────────
+# Nav section toggle icons
+# Used on sections with pagesvisibility: hidden (collapsible sections).
+# expand-icon shown when section is collapsed; collapse-icon when expanded.
+# Options: arrow_right/arrow_drop_down (default) | keyboard_arrow_right/keyboard_arrow_down
+#          keyboard_double_arrow_right/keyboard_double_arrow_down
+#          expand_content/collapse_content | add/minimize
+# ──────────────────────────────────
+# nav-section-expand-icon: arrow_right
+# nav-section-collapse-icon: arrow_drop_down
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

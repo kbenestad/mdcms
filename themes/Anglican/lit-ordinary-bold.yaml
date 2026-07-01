@@ -1,0 +1,86 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — ordinary · bold
+# Gold on verdant green. The long banner of Ordinary Time, woven through.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#C9A23E"
+  background: "#FFFFFF"
+  nav-background: "#14532D"
+  text: "#0A2A18"
+  text-muted: "#4A6E58"
+  nav-link: "rgba(255,255,255,0.92)"
+  nav-link-active: "#C9A23E"
+  nav-section-heading: "rgba(255,255,255,0.65)"
+  nav-sitename: "#FFFFFF"
+  nav-description: "rgba(255,255,255,0.70)"
+  nav-toggle: "rgba(255,255,255,0.70)"
+
+dark:
+  accent: "#E5C04A"
+  background: "#08140C"
+  nav-background: "#0F2A1A"
+  text: "#FFFFFF"
+  text-muted: "#9DC8A8"
+  nav-link: "#E2E2E2"
+  nav-link-active: "#E5C04A"
+  nav-section-heading: "#9A9A9A"
+  nav-sitename: "#FFFFFF"
+  nav-description: "#9A9A9A"
+  nav-toggle: "#9A9A9A"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#1B3666"
+  warning: "#B58A1A"
+  success: "#14532D"
+  error: "#B91C1C"
+
+colours-semantic-dark:
+  info: "#7EA0DD"
+  warning: "#EBC970"
+  success: "#7BDFA3"
+  error: "#EA7171"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#1B3666"
+    background-colour: "#1B3666"
+  warning:
+    icon: warning
+    primary-colour: "#B58A1A"
+    background-colour: "#B58A1A"
+  success:
+    icon: success
+    primary-colour: "#14532D"
+    background-colour: "#14532D"
+  error:
+    icon: error
+    primary-colour: "#B91C1C"
+    background-colour: "#B91C1C"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:Cormorant Garamond:500"
+font-heading: "bunny:Cormorant Garamond:700"
+font-size: 1.05        # unitless multiplier (1.0 = 16px base)
+line-height: 1.60      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

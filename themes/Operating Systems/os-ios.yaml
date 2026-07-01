@@ -1,0 +1,80 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — os-ios
+# iPhone feel. Crisp white paper, grouped-table grey sidebar,
+# iOS system blue. Dark mode goes true-black like the OLED dark mode.
+#
+# Colours from Apple's iOS system colour palette:
+#   systemBlue light #007AFF / dark #0A84FF
+#   systemBackground light #FFFFFF / dark #000000
+#   secondarySystemBackground light #F2F2F7 / dark #1C1C1E
+#   label                     light #000000 / dark #FFFFFF
+#   secondaryLabel            light #3C3C43 60% / dark #EBEBF5 60%
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#007AFF"
+  background: "#FFFFFF"
+  nav-background: "#F2F2F7"
+  text: "#000000"
+  text-muted: "#8E8E93"
+
+dark:
+  accent: "#0A84FF"
+  background: "#000000"
+  nav-background: "#1C1C1E"
+  text: "#FFFFFF"
+  text-muted: "#8E8E93"
+
+# ──────────────────────────────────
+# Semantic colours — iOS system colours
+# ──────────────────────────────────
+colours-semantic:
+  info: "#007AFF"
+  warning: "#FF9500"
+  success: "#34C759"
+  error: "#FF3B30"
+
+colours-semantic-dark:
+  info: "#0A84FF"
+  warning: "#FF9F0A"
+  success: "#30D158"
+  error: "#FF453A"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#007AFF"
+    background-colour: "#007AFF"
+  warning:
+    icon: warning
+    primary-colour: "#FF9500"
+    background-colour: "#FF9500"
+  success:
+    icon: success
+    primary-colour: "#34C759"
+    background-colour: "#34C759"
+  error:
+    icon: error
+    primary-colour: "#FF3B30"
+    background-colour: "#FF3B30"
+
+# ──────────────────────────────────
+# Typography
+# Inter portable default. Preferred on iOS: SF Pro Text (body),
+# SF Pro Display (headings ≥20pt), SF Pro Rounded for friendly UI.
+# ──────────────────────────────────
+font-body: "bunny:Inter:400"
+font-heading: "bunny:Inter:600"
+font-size: 1.00
+line-height: 1.5
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 78em
+nav-width: 20em

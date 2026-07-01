@@ -1,0 +1,80 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — terminal · pdp
+# 1960s green CRT phosphor. PDP-8, ASR-33, glowing on a basement floor.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#00691F"
+  background: "#F0FBE8"
+  nav-background: "#DDF1CC"
+  text: "#0F2A10"
+  text-muted: "#5A7058"
+
+dark:
+  accent: "#33FF66"
+  background: "#001405"
+  nav-background: "#002A0E"
+  text: "#33FF66"
+  text-muted: "#1FAA40"
+  nav-link: "#E2E2E2"
+  nav-link-active: "#33FF66"
+  nav-section-heading: "#9A9A9A"
+  nav-sitename: "#FFFFFF"
+  nav-description: "#9A9A9A"
+  nav-toggle: "#9A9A9A"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#33FF66"
+  warning: "#FFAA00"
+  success: "#33FF66"
+  error: "#FF4040"
+
+colours-semantic-dark:
+  info: "#33FF66"
+  warning: "#FFAA00"
+  success: "#33FF66"
+  error: "#FF5C5C"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#33FF66"
+    background-colour: "#33FF66"
+  warning:
+    icon: warning
+    primary-colour: "#FFAA00"
+    background-colour: "#FFAA00"
+  success:
+    icon: success
+    primary-colour: "#33FF66"
+    background-colour: "#33FF66"
+  error:
+    icon: error
+    primary-colour: "#FF4040"
+    background-colour: "#FF4040"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "google:VT323:400"
+font-heading: "google:VT323:400"
+font-size: 1.25        # unitless multiplier (1.0 = 16px base)
+line-height: 1.60      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

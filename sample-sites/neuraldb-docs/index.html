@@ -1,0 +1,2784 @@
+<!-- Minimum supported version: mdcms v0.3.8 | DO NOT REMOVE THIS COMMENT -->
+<!--
+  MD-CMS v0.3.8 — Renderer
+
+  Copyright 2026 Kristian Benestad | kbenestad.codeberg.page
+
+  Licensed under the Apache License, Version 2.0 (the "Licence");
+  you may not use this file except in compliance with the Licence.
+  You may obtain a copy of the Licence at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the Licence is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the Licence for the specific language governing permissions and
+  limitations under the Licence.
+-->
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MD-CMS</title>
+<meta name="description" content="">
+<link rel="icon" href="assets/images/favicon.png">
+
+<!-- Libraries (CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css" id="hljs-light">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" id="hljs-dark" disabled>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+
+<style>
+/* ═══════════════════════════════════════════
+   CSS RESET & BASE
+   ═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ═══════════════════════════════════════════
+   THEME: CSS CUSTOM PROPERTIES
+   ═══════════════════════════════════════════ */
+:root[data-theme="light"] {
+  --accent: #2563EB;
+  --accent-rgb: 37, 99, 235;
+  --bg-main: #FFFFFF;
+  --bg-nav: #F8FAFC;
+  --nav-font-colour: var(--font-colour);
+  --nav-active-bg: rgba(var(--accent-rgb), 0.10);
+  --nav-hover-bg: rgba(var(--accent-rgb), 0.05);
+  --font-colour: #1E293B;
+  --font-colour-muted: #64748B;
+  --code-bg: #F1F5F9;
+  --code-font: #1E293B;
+  --divider: #CBD5E1;
+  --table-header-bg: rgba(var(--accent-rgb), 0.08);
+  --table-border: #E2E8F0;
+  --link-colour: #2563EB;
+  --link-hover-colour: #1D4ED8;
+  --link-visited-colour: #7C3AED;
+  --link-decoration: underline;
+  --link-hover-decoration: underline;
+  --link-hover-weight: 700;
+  --link-visited-decoration: underline;
+  --search-bg: #FFFFFF;
+  --search-border: #E2E8F0;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --scrollbar-thumb: #CBD5E1;
+  --scrollbar-track: transparent;
+  --overlay-bg: rgba(0,0,0,0.3);
+}
+
+:root[data-theme="dark"] {
+  --accent: #60A5FA;
+  --accent-rgb: 96, 165, 250;
+  --bg-main: #0F172A;
+  --bg-nav: #1E293B;
+  --nav-font-colour: #E2E8F0;
+  --nav-active-bg: rgba(96, 165, 250, 0.15);
+  --nav-hover-bg: rgba(96, 165, 250, 0.08);
+  --font-colour: #F1F5F9;
+  --font-colour-muted: #94A3B8;
+  --code-bg: #1E293B;
+  --code-font: #E2E8F0;
+  --divider: #334155;
+  --table-header-bg: rgba(96, 165, 250, 0.10);
+  --table-border: #334155;
+  --link-colour: #60A5FA;
+  --link-hover-colour: #93C5FD;
+  --link-visited-colour: #A78BFA;
+  --link-decoration: underline;
+  --link-hover-decoration: underline;
+  --link-hover-weight: 700;
+  --link-visited-decoration: underline;
+  --search-bg: #1E293B;
+  --search-border: #334155;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+  --scrollbar-thumb: #475569;
+  --scrollbar-track: transparent;
+  --overlay-bg: rgba(0,0,0,0.6);
+}
+
+/* ═══════════════════════════════════════════
+   TYPOGRAPHY
+   ═══════════════════════════════════════════ */
+:root {
+  --font-title: system-ui, -apple-system, sans-serif;
+  --font-body: system-ui, -apple-system, sans-serif;
+  --font-code: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  --font-title-weight: 700;
+  --font-body-weight: 400;
+  --main-width: 80em;
+  --nav-width: 20em;
+  --line-height-body: 1.7;
+  --colour-info: #2563EB;
+  --colour-warning: #D97706;
+  --colour-success: #16A34A;
+  --colour-error: #DC2626;
+}
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  font-weight: var(--font-body-weight);
+  color: var(--font-colour);
+  background: var(--bg-main);
+  line-height: var(--line-height-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT: SIDEBAR MODE
+   ═══════════════════════════════════════════ */
+.layout-sidebar { display: flex; min-height: 100vh; }
+
+.layout-sidebar .sidebar {
+  position: fixed;
+  top: 0;
+  width: var(--nav-width);
+  height: 100vh;
+  background: var(--bg-nav);
+  border-right: 1px solid var(--divider);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 100;
+  transition: background-color 0.2s ease, transform 0.3s ease;
+}
+
+.layout-sidebar.nav-left .sidebar { left: 0; }
+.layout-sidebar.nav-right .sidebar { right: 0; border-right: none; border-left: 1px solid var(--divider); }
+
+.layout-sidebar .main-area { flex: 1; min-width: 0; }
+.layout-sidebar.nav-left .main-area { margin-left: var(--nav-width); }
+.layout-sidebar.nav-right .main-area { margin-right: var(--nav-width); }
+
+.main-content { max-width: var(--main-width); margin: 0 auto; padding: 2rem 3rem 4rem; }
+
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 2px; }
+.sidebar::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+
+/* ═══════════════════════════════════════════
+   SIDEBAR CONTENT
+   ═══════════════════════════════════════════ */
+.sidebar-header {
+  padding: 1.5rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--divider);
+  flex-shrink: 0;
+}
+
+.sidebar-logo { max-width: 48px; max-height: 48px; margin-bottom: 0.5rem; display: block; }
+
+.sidebar-sitename {
+  font-family: var(--font-title);
+  font-weight: var(--font-title-weight);
+  font-size: 1.15rem;
+  color: var(--font-colour);
+  line-height: 1.3;
+  text-decoration: none;
+  display: block;
+}
+.sidebar-sitename:hover { color: var(--accent); }
+
+.sidebar-description { font-size: 0.8rem; color: var(--font-colour-muted); margin-top: 0.25rem; line-height: 1.4; }
+
+/* Search */
+.search-container { padding: 0.75rem 1.25rem; flex-shrink: 0; }
+
+.search-box {
+  width: 100%;
+  padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  border: 1px solid var(--search-border);
+  border-radius: 6px;
+  background: var(--search-bg);
+  color: var(--font-colour);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.search-box:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15);
+}
+.search-box::placeholder { color: var(--font-colour-muted); }
+
+.search-wrapper { position: relative; }
+.search-icon {
+  position: absolute;
+  left: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+  color: var(--font-colour-muted);
+  pointer-events: none;
+}
+
+.search-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg-nav);
+  border: 1px solid var(--search-border);
+  border-radius: 6px;
+  box-shadow: var(--shadow-md);
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 200;
+  display: none;
+}
+.search-results.active { display: block; }
+
+.search-result-item {
+  padding: 0.6rem 0.85rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--divider);
+  transition: background 0.1s;
+}
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover { background: var(--nav-hover-bg); }
+.search-result-title { font-size: 0.85rem; font-weight: 600; color: var(--font-colour); }
+.search-result-snippet {
+  font-size: 0.75rem;
+  color: var(--font-colour-muted);
+  margin-top: 0.15rem;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Navigation links */
+.nav-links { flex: 1; padding: 0.5rem 0; overflow-y: auto; }
+
+.nav-section-heading {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--font-colour-muted);
+  padding: 1rem 1.25rem 0.35rem;
+  user-select: none;
+  border-left: 3px solid transparent;
+}
+.nav-section-heading.toggleable {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.nav-section-heading.toggleable:hover { color: var(--font-colour); }
+.nav-section-heading .toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+.mdcms-icon { display: inline-flex; align-items: center; line-height: 1; }
+.mdcms-icon svg { width: 1em; height: 1em; fill: currentColor; display: block; }
+.nav-item.depth-1 { padding-left: 2.5rem; }
+.nav-item.depth-2 { padding-left: 3.5rem; }
+.nav-item.depth-3 { padding-left: 4.5rem; }
+.nav-section-heading.depth-1 { padding-left: 2rem; }
+.nav-section-heading.depth-2 { padding-left: 3rem; }
+.nav-section-heading.depth-3 { padding-left: 4rem; }
+
+.nav-item {
+  display: block;
+  padding: 0.45rem 1.25rem;
+  font-size: 0.875rem;
+  color: var(--nav-font-colour, var(--font-colour));
+  text-decoration: none;
+  transition: background 0.1s, color 0.1s;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+}
+.nav-item:hover { background: var(--nav-hover-bg); }
+.nav-item.active {
+  background: var(--nav-active-bg);
+  border-left-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Sidebar footer */
+.sidebar-footer {
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid var(--divider);
+  flex-shrink: 0;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+  color: var(--font-colour-muted);
+  background: none;
+  border: 1px solid var(--divider);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: color 0.15s, border-color 0.15s;
+  width: 100%;
+  justify-content: center;
+}
+.theme-toggle:hover { color: var(--font-colour); border-color: var(--font-colour-muted); }
+.theme-toggle svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* ═══════════════════════════════════════════
+   LAYOUT: TOPBAR MODE
+   ═══════════════════════════════════════════ */
+.layout-topbar .topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 56px;
+  background: var(--bg-nav);
+  border-bottom: 1px solid var(--divider);
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  z-index: 100;
+  transition: background-color 0.2s ease;
+  gap: 1rem;
+}
+
+.topbar-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; flex-shrink: 0; }
+.topbar-logo { max-height: 28px; max-width: 28px; }
+.topbar-sitename {
+  font-family: var(--font-title);
+  font-weight: var(--font-title-weight);
+  font-size: 1rem;
+  color: var(--font-colour);
+}
+
+.topbar-nav { display: flex; align-items: center; gap: 0.25rem; flex: 1; overflow-x: auto; }
+.topbar-nav .nav-item {
+  padding: 0.35rem 0.75rem;
+  border-radius: 5px;
+  border-left: none;
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+.topbar-nav .nav-item.active { border-left: none; background: var(--nav-active-bg); }
+
+/* ─── Topbar grouped navigation (dropdowns) ─── */
+.topbar-nav .nav-group { position: relative; }
+.topbar-nav .nav-trigger {
+  display: flex; align-items: center; gap: 0.25rem;
+  padding: 0.35rem 0.75rem; border-radius: 5px;
+  background: none; border: none; cursor: pointer;
+  color: var(--font-colour); font-size: 0.85rem;
+  font-family: inherit; white-space: nowrap; text-decoration: none; line-height: inherit;
+}
+.topbar-nav .nav-trigger:hover,
+.topbar-nav .nav-group.open > .nav-trigger { background: var(--nav-hover-bg); }
+.topbar-nav .nav-group.has-active > .nav-trigger { background: var(--nav-active-bg); }
+.topbar-nav .nav-caret { font-size: 0.6rem; color: var(--font-colour-muted); opacity: 0.55; line-height: 1; }
+.topbar-nav .nav-dropdown {
+  display: none; position: absolute; top: calc(100% + 4px); left: 0;
+  background: var(--bg-nav); border: 1px solid var(--divider);
+  border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  min-width: 160px; z-index: 200; padding: 0.25rem 0;
+}
+.topbar-nav .nav-group.open > .nav-dropdown { display: block; }
+.topbar-nav .nav-dropdown .nav-item {
+  display: block; padding: 0.45rem 1rem;
+  border-left: none; border-radius: 0; white-space: nowrap;
+}
+.topbar-nav .nav-dropdown .nav-item:hover { background: var(--nav-hover-bg); }
+.topbar-nav .nav-dropdown .nav-item.active { background: var(--nav-active-bg); font-weight: 600; }
+
+.topbar-actions { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+
+.topbar-search { position: relative; }
+.topbar-search .search-box { width: 200px; padding: 0.4rem 0.6rem 0.4rem 2rem; font-size: 0.8rem; }
+.topbar-search .search-icon { left: 0.55rem; width: 14px; height: 14px; }
+.topbar-search .search-results { width: 320px; right: 0; left: auto; }
+
+.topbar .theme-toggle { width: auto; padding: 0.35rem 0.5rem; font-size: 0; border: none; }
+.topbar .theme-toggle svg { width: 18px; height: 18px; }
+
+.layout-topbar .main-area { margin-top: 56px; }
+.layout-topbar .mobile-nav-panel { display: none; }
+.layout-topbar .hamburger { display: none; }
+
+/* ═══════════════════════════════════════════
+   HAMBURGER MENU
+   ═══════════════════════════════════════════ */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem;
+  color: var(--font-colour);
+  z-index: 150;
+}
+.hamburger svg { width: 22px; height: 22px; }
+
+.mobile-overlay { display: none; position: fixed; inset: 0; background: var(--overlay-bg); z-index: 90; }
+.mobile-overlay.active { display: block; }
+
+/* ═══════════════════════════════════════════
+   MARKDOWN CONTENT
+   ═══════════════════════════════════════════ */
+.md-content h1, .md-content h2, .md-content h3,
+.md-content h4, .md-content h5, .md-content h6 {
+  font-family: var(--font-title);
+  font-weight: var(--font-title-weight);
+  color: var(--accent);
+  line-height: 1.3;
+  margin-top: 1.8em;
+  margin-bottom: 0.6em;
+  position: relative;
+}
+.md-content h1 { font-size: 2rem; margin-top: 0; }
+.md-content h2 { font-size: 1.5rem; }
+.md-content h3 { font-size: 1.25rem; }
+.md-content h4 { font-size: 1.1rem; }
+.md-content h5 { font-size: 1rem; }
+.md-content h6 { font-size: 0.9rem; }
+.md-content h1:first-child, .md-content h2:first-child, .md-content h3:first-child { margin-top: 0; }
+
+.md-content p { margin-bottom: 1.1em; }
+
+.md-content a {
+  color: var(--link-colour);
+  text-decoration: var(--link-decoration);
+  transition: color 0.15s;
+}
+.md-content a:hover {
+  color: var(--link-hover-colour);
+  text-decoration: var(--link-hover-decoration);
+  font-weight: var(--link-hover-weight);
+}
+.md-content a:visited {
+  color: var(--link-visited-colour);
+  text-decoration: var(--link-visited-decoration);
+}
+
+.md-content strong { font-weight: 700; }
+.md-content em { font-style: italic; }
+.md-content ul, .md-content ol { margin-bottom: 1.1em; padding-left: 1.75em; }
+.md-content li { margin-bottom: 0.3em; }
+.md-content li > ul, .md-content li > ol { margin-bottom: 0.3em; margin-top: 0.3em; }
+
+.md-content blockquote {
+  border-left: 4px solid var(--accent);
+  padding: 0.75em 1.25em;
+  margin: 0 0 1.1em 0;
+  color: var(--font-colour-muted);
+  background: rgba(var(--accent-rgb), 0.03);
+  border-radius: 0 6px 6px 0;
+}
+.md-content blockquote p:last-child { margin-bottom: 0; }
+
+.md-content code {
+  font-family: var(--font-code);
+  font-size: 0.875em;
+  background: var(--code-bg);
+  color: var(--code-font);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}
+
+.md-content pre {
+  margin-bottom: 1.1em;
+  border-radius: 8px;
+  overflow-x: auto;
+  background: var(--code-bg);
+  border: 1px solid var(--divider);
+}
+.md-content pre code {
+  display: block;
+  padding: 1em 1.25em;
+  background: none;
+  border-radius: 0;
+  line-height: 1.5;
+  font-size: 0.85em;
+}
+
+.md-content hr { border: none; height: 1px; background: var(--divider); margin: 2em 0; }
+.md-content img { max-width: 100%; height: auto; border-radius: 6px; margin: 0.5em 0; }
+
+.md-content table { width: 100%; border-collapse: collapse; margin-bottom: 1.1em; font-size: 0.9em; }
+.md-content th {
+  background: var(--table-header-bg);
+  font-weight: 700;
+  text-align: left;
+  border-bottom: 2px solid var(--accent);
+}
+.md-content th, .md-content td { padding: 0.6em 0.85em; border: 1px solid var(--table-border); }
+.md-content tr:hover { background: rgba(var(--accent-rgb), 0.02); }
+
+::selection { background: rgba(var(--accent-rgb), 0.2); }
+
+/* ═══════════════════════════════════════════
+   CATEGORY BAR (phase 3)
+   ═══════════════════════════════════════════ */
+.category-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.25rem 0 1rem;
+  font-size: 0.9rem;
+  color: var(--font-colour-muted);
+  flex-wrap: wrap;
+}
+.category-bar[dir="rtl"] { justify-content: flex-start; }
+
+.category-icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.1rem;
+  color: var(--font-colour-muted);
+}
+
+.category-dropdown { position: relative; }
+
+.category-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--search-bg);
+  border: 1px solid var(--search-border);
+  border-radius: 6px;
+  padding: 0.35rem 0.65rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--font-colour);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.category-trigger:hover { border-color: var(--font-colour-muted); }
+.category-trigger:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15); }
+.category-trigger .caret { font-size: 0.7rem; opacity: 0.7; }
+
+.category-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 220px;
+  background: var(--bg-nav);
+  border: 1px solid var(--search-border);
+  border-radius: 6px;
+  box-shadow: var(--shadow-md);
+  z-index: 150;
+  display: none;
+  overflow: hidden;
+}
+.category-bar[dir="rtl"] .category-panel { left: 0; right: auto; }
+.category-dropdown.open .category-panel { display: block; }
+
+.category-search {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  border: none;
+  border-bottom: 1px solid var(--divider);
+  background: var(--bg-main);
+  color: var(--font-colour);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.category-options { max-height: 280px; overflow-y: auto; }
+
+.category-option {
+  padding: 0.55rem 0.85rem;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--font-colour);
+  border-bottom: 1px solid var(--divider);
+  transition: background 0.1s;
+}
+.category-option:last-child { border-bottom: none; }
+.category-option:hover { background: var(--nav-hover-bg); }
+.category-option.active { background: var(--nav-active-bg); color: var(--accent); font-weight: 600; }
+.category-option .secondary {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--font-colour-muted);
+  margin-top: 0.15rem;
+}
+
+/* Font-loading banner */
+.font-loading-banner {
+  background: rgba(var(--accent-rgb), 0.08);
+  color: var(--font-colour);
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  text-align: center;
+  /* Always show in default font, never the category's pending font */
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* RTL page content */
+.md-content[dir="rtl"], .title-bar[dir="rtl"] { text-align: right; }
+.sidebar[dir="rtl"] .nav-item,
+.sidebar[dir="rtl"] .nav-section-heading { text-align: right; }
+
+/* Page meta */
+.page-meta {
+  font-size: 0.85rem;
+  color: var(--font-colour-muted);
+  margin-bottom: 1.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--divider);
+  line-height: 1.5;
+}
+
+/* Title bar */
+.title-bar {
+  font-size: 0.8rem;
+  color: var(--font-colour-muted);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.title-bar-sep { opacity: 0.5; }
+
+/* Scroll to top */
+.scroll-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s, visibility 0.25s, transform 0.15s;
+  z-index: 50;
+}
+.scroll-top.visible { opacity: 1; visibility: visible; }
+.scroll-top:hover { transform: scale(1.1); }
+.scroll-top svg { width: 18px; height: 18px; }
+
+/* Footer */
+.site-footer {
+  padding: 2rem 3rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--font-colour-muted);
+  border-top: 1px solid var(--divider);
+  margin-top: 2rem;
+}
+.site-footer a { color: var(--link-colour); }
+
+/* Loading */
+.loading-spinner { display: flex; justify-content: center; padding: 4rem 0; }
+.loading-spinner::after {
+  content: '';
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--divider);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-message { text-align: center; padding: 3rem 1rem; color: var(--font-colour-muted); }
+.error-message h2 { color: var(--accent); margin-bottom: 0.5rem; }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .hamburger { display: flex; }
+
+  .layout-sidebar .sidebar {
+    transform: translateX(-100%);
+    width: 80vw;
+    max-width: 320px;
+    box-shadow: var(--shadow-md);
+  }
+  .layout-sidebar.nav-right .sidebar { transform: translateX(100%); }
+  .layout-sidebar .sidebar.open { transform: translateX(0); }
+  .layout-sidebar .main-area { margin-left: 0 !important; margin-right: 0 !important; }
+  .main-content { padding: 1rem 1.25rem 3rem; }
+
+  .layout-sidebar .mobile-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-nav);
+    border-bottom: 1px solid var(--divider);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .mobile-header .sidebar-sitename { font-size: 1rem; }
+
+  .topbar-nav { display: none; }
+  .topbar-search { display: none; }
+  .layout-topbar .hamburger { display: inline-flex; }
+
+  .layout-topbar .mobile-nav-panel {
+    display: block;
+    position: fixed;
+    top: 56px; left: 0; right: 0; bottom: 0;
+    background: var(--bg-nav);
+    z-index: 90;
+    overflow-y: auto;
+    transform: translateY(-100%);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    padding: 0.5rem 0;
+  }
+  .layout-topbar .mobile-nav-panel.open { transform: translateY(0); opacity: 1; }
+  .layout-topbar .mobile-nav-panel .search-container { padding: 0.75rem 1rem; }
+  .layout-topbar .mobile-nav-panel .nav-item {
+    padding: 0.6rem 1.25rem;
+    font-size: 1rem;
+    border-left: none;
+  }
+  .layout-topbar .mobile-nav-panel .nav-item.active { border-left: none; font-weight: 600; }
+  .layout-topbar .mobile-nav-panel .nav-group-row { display: flex; align-items: stretch; }
+  .layout-topbar .mobile-nav-panel .nav-group-row .nav-item { flex: 1; }
+  .layout-topbar .mobile-nav-panel .nav-section-label {
+    flex: 1; display: flex; align-items: center;
+    padding: 0.6rem 1.25rem; font-size: 1rem; color: var(--font-colour); font-weight: 500;
+  }
+  .layout-topbar .mobile-nav-panel .nav-expand-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--font-colour-muted); padding: 0 1.25rem; font-size: 1.2rem; line-height: 1; flex-shrink: 0;
+  }
+  .layout-topbar .mobile-nav-panel .nav-group-children { display: none; }
+  .layout-topbar .mobile-nav-panel .nav-group-children.open { display: block; }
+  .layout-topbar .mobile-nav-panel .nav-group-children .nav-item { padding-left: 2.5rem; }
+}
+
+@media (max-width: 480px) {
+  .layout-sidebar .sidebar { width: 100vw; max-width: none; }
+  .layout-topbar .mobile-nav-panel { bottom: 0; }
+  .main-content { padding: 1rem 1rem 3rem; }
+}
+
+/* ═══════════════════════════════════════════
+   TAG SYSTEM: CALLOUTS
+   ═══════════════════════════════════════════ */
+.mdcms-callout {
+  border-left: 4px solid var(--callout-primary, var(--accent));
+  background: var(--callout-bg, transparent);
+  border-radius: 0 6px 6px 0;
+  padding: 0.85rem 1rem 0.85rem 1rem;
+  margin: 1.25rem 0;
+}
+.mdcms-callout-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.45rem;
+}
+.mdcms-callout-title .mdcms-icon { font-size: 1.1em; }
+.mdcms-callout-body { font-size: 0.95rem; }
+.mdcms-callout-body > *:first-child { margin-top: 0; }
+.mdcms-callout-body > *:last-child { margin-bottom: 0; }
+
+/* ═══════════════════════════════════════════
+   TAG SYSTEM: TABLE OF CONTENTS
+   ═══════════════════════════════════════════ */
+.mdcms-toc { margin: 1rem 0; }
+.mdcms-toc-section { font-size: 1rem; font-weight: 600; margin: 1.5rem 0 0.4rem; color: var(--font-colour-muted); border-bottom: 1px solid var(--divider); padding-bottom: 0.25rem; }
+.mdcms-toc-list { list-style: none; padding: 0; margin: 0 0 0.5rem; }
+.mdcms-toc-list li { padding: 0.2rem 0; border-bottom: 1px solid var(--divider); }
+.mdcms-toc-list li:last-child { border-bottom: none; }
+.mdcms-toc-list a { color: var(--accent); text-decoration: none; font-size: 0.95rem; }
+.mdcms-toc-list a:hover { text-decoration: underline; }
+
+/* ═══════════════════════════════════════════
+   TAG SYSTEM: POST LISTINGS
+   ═══════════════════════════════════════════ */
+.mdcms-posts { margin: 1rem 0; }
+.post-list { list-style: none; padding: 0; margin: 0 0 0.75rem; }
+.post-list li { padding: 0.35rem 0; border-bottom: 1px solid var(--divider); display: flex; gap: 0.5rem; }
+.post-list li:last-child { border-bottom: none; }
+.post-list a { color: var(--accent); text-decoration: none; font-size: 0.92rem; display: flex; gap: 0.5rem; width: 100%; }
+.post-list a:hover { color: var(--accent-hover, var(--accent)); text-decoration: underline; }
+.post-date { color: var(--font-colour-muted); white-space: nowrap; flex-shrink: 0;
+  display: inline-block; min-width: var(--post-date-width, 10rem); }
+.post-sep { color: var(--font-colour-muted); flex-shrink: 0; }
+.post-title { flex: 1; }
+.posts-empty { color: var(--font-colour-muted); font-style: italic; }
+
+.post-year-select {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--divider);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--font-colour);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+.post-month-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 1rem 0 0.35rem;
+  color: var(--font-colour);
+}
+
+.post-pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+}
+.page-info { color: var(--font-colour-muted); }
+.page-btn {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--divider);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.page-btn:disabled { opacity: 0.4; cursor: default; }
+.page-btn:hover:not(:disabled) { background: var(--nav-hover-bg); }
+.page-jump-label { color: var(--font-colour-muted); margin-left: 0.5rem; }
+.page-jump {
+  width: 3.5rem;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--divider);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--font-colour);
+  font-size: 0.85rem;
+  text-align: centre;
+}
+
+.post-load-more {
+  display: block;
+  margin: 0.75rem auto 0;
+  padding: 0.4rem 1.5rem;
+  border: 1px solid var(--divider);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.post-load-more:hover { background: var(--nav-hover-bg); }
+
+@media print {
+  .sidebar, .topbar, .scroll-top, .hamburger,
+  .mobile-header, .theme-toggle, .search-container { display: none !important; }
+  .main-area { margin: 0 !important; }
+  .main-content { max-width: 100%; padding: 0; }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<button class="scroll-top" id="scrollTop" aria-label="Scroll to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   MD-CMS v0.2 — Core Application (phase 1: no sections/categories/tags)
+   ═══════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  // ─── State ────────────────────────────────────────────────
+  let config = {};
+  let navData = [];
+  let navSections = [];
+  let searchIndex = [];
+  let fuseInstance = null;
+  let currentPage = null;
+  let themeConfig = {};
+
+  // Category state (phase 3)
+  let categoriesUse = false;
+  let categoriesList = [];        // [{code, name, direction, message, notfoundmessage, pagenotfoundmessage, font, ...}]
+  let categoriesByCode = {};      // code → category object
+  let defaultCategoryCode = null;
+  let activeCategory = null;      // current code
+  let sectionnamesMode = 'same';  // 'same' | 'per-category'
+  let loadedFonts = new Set();    // track which font files have been loaded
+
+  // ─── Icons ────────────────────────────────────────────────
+  const STANDARD_ICONS = ['dark_mode','light_mode','menu','search','arrow_right','arrow_drop_down','mobile_arrow_down','language','info','warning','error','success','exclamation','dangerous','report','history','text_compare'];
+  const iconCache = {};
+
+  function normaliseIconName(name) {
+    return String(name).trim().replace(/\.svg$/i, '').toLowerCase().replace(/[\s-]+/g, '_') + '.svg';
+  }
+
+  async function loadIcon(name) {
+    const filename = normaliseIconName(name);
+    if (filename in iconCache) return iconCache[filename];
+    try {
+      const resp = await fetch('assets/icons/' + filename);
+      iconCache[filename] = resp.ok ? await resp.text() : null;
+    } catch (e) { iconCache[filename] = null; }
+    return iconCache[filename];
+  }
+
+  function getIcon(name) {
+    return iconCache[normaliseIconName(name)] || null;
+  }
+
+  function iconEl(name, className) {
+    const svg = getIcon(name);
+    const span = document.createElement('span');
+    span.className = 'mdcms-icon' + (className ? ' ' + className : '');
+    const filename = normaliseIconName(name);
+    span.innerHTML = svg || '<img src="assets/icons/' + filename + '" alt="[missing: ' + filename + ']" style="width:1em;height:1em;display:inline-block;">';
+    return span;
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────
+  function el(tag, attrs, children) {
+    const e = document.createElement(tag);
+    if (attrs) Object.entries(attrs).forEach(([k, v]) => {
+      if (k === 'className') e.className = v;
+      else if (k === 'innerHTML') e.innerHTML = v;
+      else if (k === 'textContent') e.textContent = v;
+      else if (k.startsWith('on')) e.addEventListener(k.slice(2).toLowerCase(), v);
+      else e.setAttribute(k, v);
+    });
+    if (children) {
+      if (typeof children === 'string') e.innerHTML = children;
+      else if (Array.isArray(children)) children.forEach(c => { if (c) e.appendChild(c); });
+      else e.appendChild(children);
+    }
+    return e;
+  }
+
+  function slugify(text) {
+    return text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+  }
+
+  function parseFrontmatter(md) {
+    const match = md.match(/^---\s*\n([\s\S]*?)\n---\s*\n/);
+    if (!match) return { meta: {}, body: md };
+    try {
+      const meta = jsyaml.load(match[1]) || {};
+      return { meta, body: md.slice(match[0].length) };
+    } catch (e) {
+      return { meta: {}, body: md };
+    }
+  }
+
+  function formatDate(dateStr) {
+    // Uses config-driven formatting for page meta display.
+    if (!dateStr) return '';
+    var hasTime = String(dateStr).includes(':');
+    return hasTime ? fmtDatetime(dateStr) : fmtDate(dateStr);
+  }
+
+  function hexToRgb(hex) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    const n = parseInt(hex, 16);
+    return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
+  }
+
+  function parseLinkStyle(val) {
+    if (!val) return {};
+    const parts = val.split(':');
+    const colour = parts[0];
+    const styles = (parts[1] || '').split(',').map(s => s.trim());
+    return {
+      colour,
+      underline: styles.includes('underline'),
+      noUnderline: styles.includes('no-underline'),
+      bold: styles.includes('bold'),
+      italics: styles.includes('italics')
+    };
+  }
+
+  // ─── Category helpers (phase 3) ───────────────────────────
+
+  function initCategories() {
+    categoriesUse = config['categories-use'] === true || config['categories-use'] === 'yes';
+    sectionnamesMode = config['categories-sectionnames'] || 'same';
+    if (!categoriesUse) return;
+
+    const dflt = config['default-category'];
+    if (dflt && dflt.code) {
+      defaultCategoryCode = dflt.code;
+      categoriesList.push(Object.assign({}, dflt, { _isDefault: true }));
+      categoriesByCode[dflt.code] = categoriesList[categoriesList.length - 1];
+    }
+    (config.categories || []).forEach(c => {
+      if (!c || !c.code) return;
+      const entry = Object.assign({}, c);
+      categoriesList.push(entry);
+      categoriesByCode[c.code] = entry;
+    });
+
+    // Resolve active category from URL
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get('cat');
+    activeCategory = (fromUrl && categoriesByCode[fromUrl]) ? fromUrl : defaultCategoryCode;
+  }
+
+  function setActiveCategory(code) {
+    if (!categoriesByCode[code]) return;
+    activeCategory = code;
+    const url = new URL(window.location);
+    if (code === defaultCategoryCode) url.searchParams.delete('cat');
+    else url.searchParams.set('cat', code);
+    window.history.replaceState(null, '', url);
+    maybeLoadCategoryFont(code).then(() => {
+      renderNav();
+      if (currentPage) navigateTo(currentPage);
+    });
+  }
+
+  async function maybeLoadCategoryFont(code) {
+    const cat = categoriesByCode[code];
+    if (!cat || !cat.font || loadedFonts.has(cat.font)) return;
+    showFontLoadingBanner();
+    const family = 'mdcms-cat-' + code;
+    const css = `@font-face { font-family: "${family}"; src: url("assets/fonts/${cat.font}"); }`;
+    const style = document.createElement('style');
+    style.textContent = css;
+    document.head.appendChild(style);
+    try {
+      const face = new FontFace(family, `url(assets/fonts/${cat.font})`);
+      await face.load();
+      document.fonts.add(face);
+      loadedFonts.add(cat.font);
+      // Apply font to body for this session
+      document.body.style.fontFamily = `"${family}", ${getComputedStyle(document.body).fontFamily}`;
+    } catch (e) {
+      console.warn('Font load failed:', e);
+    }
+    hideFontLoadingBanner();
+  }
+
+  function showFontLoadingBanner() {
+    let banner = document.getElementById('fontLoadingBanner');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'fontLoadingBanner';
+      banner.className = 'font-loading-banner';
+      banner.textContent = 'Updating font, please wait…';
+      const content = document.getElementById('pageContent');
+      if (content && content.parentNode) content.parentNode.insertBefore(banner, content);
+    }
+  }
+  function hideFontLoadingBanner() {
+    const b = document.getElementById('fontLoadingBanner');
+    if (b) b.remove();
+  }
+
+  async function fetchPageFile(conceptualFile) {
+    // conceptualFile like "pages/foo.md". Returns { ok, text, resolvedFile } or { ok: false }.
+    if (!categoriesUse) {
+      const r = await fetch(conceptualFile);
+      if (r.ok) return { ok: true, text: await r.text(), resolvedFile: conceptualFile };
+      return { ok: false };
+    }
+    const base = conceptualFile.replace(/\.md$/, '');
+    const isHome = conceptualFile === defaultPage();
+    const cat = categoriesByCode[activeCategory];
+    const tries = [];
+
+    if (!activeCategory || activeCategory === defaultCategoryCode) {
+      // On the default category: serve base; also try an explicitly-coded default variant.
+      tries.push(conceptualFile);
+      if (defaultCategoryCode) tries.push(`${base}.${defaultCategoryCode}.md`);
+    } else {
+      // Non-default category: always try its variant first.
+      tries.push(`${base}.${activeCategory}.md`);
+      // Fall back to default language ONLY when allowed — i.e. the active
+      // category has `notfoundmessage` set, or this is the home page
+      // (home is always served even when a category variant is missing).
+      const allowFallback = isHome || !!(cat && cat.notfoundmessage);
+      if (allowFallback) {
+        tries.push(conceptualFile);
+        if (defaultCategoryCode) tries.push(`${base}.${defaultCategoryCode}.md`);
+      }
+    }
+
+    const seen = new Set();
+    for (const url of tries) {
+      if (seen.has(url)) continue;
+      seen.add(url);
+      const r = await fetch(url);
+      if (r.ok) return { ok: true, text: await r.text(), resolvedFile: url };
+    }
+    return { ok: false };
+  }
+
+  function pageNotFoundMessage() {
+    const cat = activeCategory && categoriesByCode[activeCategory];
+    if (cat && cat.pagenotfoundmessage) return cat.pagenotfoundmessage;
+    if (config.pagenotfoundmessage) return config.pagenotfoundmessage;
+    return 'Please select a page above to continue.';
+  }
+
+  function sectionDisplayName(section) {
+    if (!categoriesUse || sectionnamesMode !== 'per-category' || !activeCategory) {
+      return section.defaultname;
+    }
+    const cn = section.categorynames || {};
+    return cn[activeCategory] || section.defaultname;
+  }
+
+  function pageDisplayTitle(page) {
+    if (categoriesUse && page.titles && activeCategory && page.titles[activeCategory]) {
+      return page.titles[activeCategory];
+    }
+    return page.title;
+  }
+
+  function pageShouldDisplay(page) {
+    // Nav filter. Returns true if the page should appear in nav for the active category.
+    //   - Non-category sites: always show
+    //   - Home page: always show (per config.homepage or default 'pages/home.md')
+    //   - Variant exists for active category: show
+    //   - Active category has notfoundmessage: show (renderer falls back to default language)
+    //   - Otherwise: hide
+    if (!categoriesUse) return true;
+    if (page.file === defaultPage()) return true;
+    const variants = page.variants || [];
+    if (variants.includes(activeCategory)) return true;
+    const cat = categoriesByCode[activeCategory];
+    return !!(cat && cat.notfoundmessage);
+  }
+
+  // ─── Theme ────────────────────────────────────────────────
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('md-cms-theme', theme);
+    const lightSheet = document.getElementById('hljs-light');
+    const darkSheet = document.getElementById('hljs-dark');
+    if (lightSheet) lightSheet.disabled = (theme === 'dark');
+    if (darkSheet) darkSheet.disabled = (theme === 'light');
+    const btn = document.querySelector('.theme-toggle');
+    if (btn) {
+      const isDark = theme === 'dark';
+      btn.innerHTML = '';
+      btn.appendChild(iconEl(isDark ? 'light_mode' : 'dark_mode'));
+      btn.appendChild(el('span', { textContent: isDark ? 'Light mode' : 'Dark mode' }));
+    }
+  }
+
+  function getInitialTheme() {
+    const saved = localStorage.getItem('md-cms-theme');
+    if (saved) return saved;
+    const def = config['default-theme'] || 'system';
+    if (def === 'system') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return def;
+  }
+
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  }
+
+  function applyThemeYml(tc) {
+    if (!tc) return;
+    const root = document.documentElement;
+    const getOrCreateStyle = id => {
+      let s = document.getElementById(id);
+      if (!s) { s = document.createElement('style'); s.id = id; document.head.appendChild(s); }
+      return s;
+    };
+
+    let modeCss = '';
+    ['light', 'dark'].forEach(mode => {
+      const m = tc[mode];
+      if (!m) return;
+      const vars = [];
+      if (m.accent) {
+        const rgb = hexToRgb(m.accent);
+        vars.push(`--accent: ${m.accent}`);
+        vars.push(`--accent-rgb: ${rgb}`);
+        vars.push(`--nav-active-bg: rgba(${rgb}, 0.10)`);
+        vars.push(`--nav-hover-bg: rgba(${rgb}, 0.05)`);
+        vars.push(`--table-header-bg: rgba(${rgb}, 0.08)`);
+        vars.push(`--link-colour: ${m.accent}`);
+      }
+      if (m.background) { vars.push(`--bg-main: ${m.background}`); vars.push(`--search-bg: ${m.background}`); }
+      if (m['nav-background']) vars.push(`--bg-nav: ${m['nav-background']}`);
+      if (m.text) { vars.push(`--font-colour: ${m.text}`); vars.push(`--code-font: ${m.text}`); }
+      if (m['text-muted']) vars.push(`--font-colour-muted: ${m['text-muted']}`);
+      if (vars.length) modeCss += `:root[data-theme="${mode}"] { ${vars.join('; ')}; }\n`;
+    });
+    if (modeCss) getOrCreateStyle('theme-overrides').textContent = modeCss;
+
+    if (tc['colours-semantic']) {
+      const sem = tc['colours-semantic'];
+      const semVars = [];
+      if (sem.info)    semVars.push(`--colour-info: ${sem.info}`);
+      if (sem.warning) semVars.push(`--colour-warning: ${sem.warning}`);
+      if (sem.success) semVars.push(`--colour-success: ${sem.success}`);
+      if (sem.error)   semVars.push(`--colour-error: ${sem.error}`);
+      if (semVars.length) getOrCreateStyle('theme-semantic').textContent = `:root { ${semVars.join('; ')}; }`;
+    }
+
+    if (tc['main-width']) root.style.setProperty('--main-width', tc['main-width']);
+    if (tc['nav-width'])  root.style.setProperty('--nav-width',  tc['nav-width']);
+    if (tc['line-height']) root.style.setProperty('--line-height-body', String(tc['line-height']));
+    if (tc['font-size'])   document.documentElement.style.fontSize = `${tc['font-size'] * 16}px`;
+  }
+
+  function applyConfigTheme() {
+    const root = document.documentElement;
+    ['light', 'dark'].forEach(mode => {
+      const themeConf = config[mode];
+      if (!themeConf) return;
+      const prefix = `[data-theme="${mode}"]`;
+      const style = document.getElementById('theme-overrides') || (() => {
+        const s = document.createElement('style');
+        s.id = 'theme-overrides';
+        document.head.appendChild(s);
+        return s;
+      })();
+      let css = '';
+      const modeCSS = [];
+      if (themeConf['main-accentcolour']) {
+        const rgb = hexToRgb(themeConf['main-accentcolour']);
+        modeCSS.push(`--accent: ${themeConf['main-accentcolour']}`);
+        modeCSS.push(`--accent-rgb: ${rgb}`);
+      }
+      const map = {
+        'main-bgcolour': '--bg-main',
+        'navigation-bgcolour': '--bg-nav',
+        'navigation-fontcolour': '--nav-font-colour',
+        'font-colour': '--font-colour',
+        'font-colour-muted': '--font-colour-muted',
+        'code-bgcolour': '--code-bg',
+        'code-fontcolour': '--code-font',
+        'divider-colour': '--divider',
+        'table-header-bgcolour': '--table-header-bg',
+        'table-border-colour': '--table-border'
+      };
+      Object.entries(map).forEach(([key, prop]) => {
+        if (themeConf[key]) modeCSS.push(`${prop}: ${themeConf[key]}`);
+      });
+      if (themeConf['navigation-active-bgcolour'])
+        modeCSS.push(`--nav-active-bg: ${themeConf['navigation-active-bgcolour']}`);
+      if (themeConf['navigation-hover-bgcolour'])
+        modeCSS.push(`--nav-hover-bg: ${themeConf['navigation-hover-bgcolour']}`);
+      const linkConf = parseLinkStyle(themeConf['link-style']);
+      if (linkConf.colour) modeCSS.push(`--link-colour: ${linkConf.colour}`);
+      if (linkConf.underline) modeCSS.push('--link-decoration: underline');
+      else if (linkConf.noUnderline) modeCSS.push('--link-decoration: none');
+      const linkHover = parseLinkStyle(themeConf['link-style-hover']);
+      if (linkHover.colour) modeCSS.push(`--link-hover-colour: ${linkHover.colour}`);
+      if (linkHover.bold) modeCSS.push('--link-hover-weight: 700');
+      if (linkHover.underline) modeCSS.push('--link-hover-decoration: underline');
+      else if (linkHover.noUnderline) modeCSS.push('--link-hover-decoration: none');
+      const linkVisited = parseLinkStyle(themeConf['link-style-visited']);
+      if (linkVisited.colour) modeCSS.push(`--link-visited-colour: ${linkVisited.colour}`);
+      if (linkVisited.underline) modeCSS.push('--link-visited-decoration: underline');
+      else if (linkVisited.noUnderline) modeCSS.push('--link-visited-decoration: none');
+      if (modeCSS.length) css += `:root${prefix} { ${modeCSS.join('; ')}; }\n`;
+      style.textContent += css;
+    });
+    if (config['main-width']) root.style.setProperty('--main-width', config['main-width']);
+    if (config['nav-width']) root.style.setProperty('--nav-width', config['nav-width']);
+  }
+
+  // ─── Fonts ────────────────────────────────────────────────
+  function loadFonts(tc) {
+    if (document.querySelector('link[data-mdcms-fonts]')) return;
+    function parseFont(spec) {
+      if (!spec) return null;
+      const parts = spec.split(':');
+      if (parts.length >= 3) return { provider: parts[0].trim(), name: parts.slice(1, -1).join(':').trim(), weight: parts[parts.length - 1].trim() };
+      if (parts.length === 2) return { provider: 'google', name: parts[0].trim(), weight: parts[1].trim() };
+      return { provider: 'google', name: parts[0].trim(), weight: '400' };
+    }
+
+    const src = tc || {};
+    const bodyFont    = parseFont(src['font-body']    || config['font-body']);
+    const headingFont = parseFont(src['font-heading']  || src['font-title'] || config['font-title']);
+    const codeFont    = parseFont(src['font-code']    || config['font-code']);
+    const allFonts    = [bodyFont, headingFont, codeFont].filter(Boolean);
+
+    const bunnyFonts  = allFonts.filter(f => f.provider === 'bunny');
+    const googleFonts = allFonts.filter(f => f.provider === 'google');
+
+    if (bunnyFonts.length) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `https://fonts.bunny.net/css?family=${bunnyFonts.map(f => `${f.name.replace(/ /g, '+')}:${f.weight}`).join('&family=')}`;
+      document.head.appendChild(link);
+    }
+    if (googleFonts.length) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `https://fonts.googleapis.com/css2?${googleFonts.map(f => `family=${f.name.replace(/ /g, '+')}:wght@${f.weight}`).join('&')}&display=swap`;
+      document.head.appendChild(link);
+    }
+
+    const root = document.documentElement;
+    if (headingFont) {
+      root.style.setProperty('--font-title', `"${headingFont.name}", system-ui, sans-serif`);
+      root.style.setProperty('--font-title-weight', headingFont.weight);
+    }
+    if (bodyFont) {
+      root.style.setProperty('--font-body', `"${bodyFont.name}", system-ui, sans-serif`);
+      root.style.setProperty('--font-body-weight', bodyFont.weight);
+    }
+    if (codeFont) {
+      root.style.setProperty('--font-code', `"${codeFont.name}", monospace`);
+    }
+  }
+
+  // ─── Markdown ─────────────────────────────────────────────
+  function renderMarkdown(mdBody) {
+    marked.setOptions({ gfm: true, breaks: false, headerIds: true, mangle: false });
+    const renderer = new marked.Renderer();
+
+    renderer.heading = function(text, level) {
+      let headingText = typeof text === 'object' ? text.text : text;
+      let rawLevel = typeof text === 'object' ? text.depth : level;
+      const id = slugify(headingText.replace(/<[^>]*>/g, ''));
+      return `<h${rawLevel} id="${id}">${headingText}</h${rawLevel}>`;
+    };
+
+    renderer.link = function(href, title, text) {
+      let linkHref, linkTitle, linkText;
+      if (typeof href === 'object') {
+        linkHref = href.href; linkTitle = href.title; linkText = href.text;
+      } else {
+        linkHref = href; linkTitle = title; linkText = text;
+      }
+      const isExternal = linkHref && (linkHref.startsWith('http://') || linkHref.startsWith('https://'));
+      const isMd = linkHref && linkHref.endsWith('.md');
+      if (isExternal) {
+        return `<a href="${linkHref}" target="_blank" rel="noopener noreferrer"${linkTitle ? ` title="${linkTitle}"` : ''}>${linkText}</a>`;
+      }
+      if (isMd) {
+        return `<a href="#${linkHref}" data-internal="true"${linkTitle ? ` title="${linkTitle}"` : ''}>${linkText}</a>`;
+      }
+      return `<a href="${linkHref}"${linkTitle ? ` title="${linkTitle}"` : ''}>${linkText}</a>`;
+    };
+
+    renderer.code = function(code, lang, escaped) {
+      let codeText, codeLang;
+      if (typeof code === 'object') {
+        codeText = code.text; codeLang = code.lang;
+      } else {
+        codeText = code; codeLang = lang;
+      }
+      // Match both ```mdcms (type in content) and ```mdcms callout-info (type in fence)
+      if (codeLang && (codeLang === 'mdcms' || codeLang.startsWith('mdcms '))) {
+        const fenceType = codeLang === 'mdcms' ? '' : codeLang.slice('mdcms '.length).trim();
+        const fullText = fenceType ? (fenceType + '\n' + (codeText || '')) : (codeText || '');
+        const tag = parseMdcmsTag(fullText);
+        const encoded = JSON.stringify(tag).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        return '<div class="mdcms-tag" data-config="' + encoded + '"></div>';
+      }
+      const esc = (codeText || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cls = codeLang ? ' class="language-' + codeLang + '"' : '';
+      return '<pre><code' + cls + '>' + esc + '</code></pre>';
+    };
+
+    marked.use({ renderer });
+    return marked.parse(mdBody);
+  }
+
+  // ─── Tag system ─────────────────────────────────────────
+
+  // Date/time formatting engine. Reads config keys:
+  //   date: system | pattern     (default: "D Mmmm YYYY")
+  //   time: system | 12hrs | 24hrs (default: "24hrs")
+  //   monthnames: "January, February, ..."
+  //   monthnamesabbreviated: "Jan, Feb, ..."
+
+  const MONTHS_EN = ['January','February','March','April','May','June',
+    'July','August','September','October','November','December'];
+  const MONTHS_EN_ABBR = ['Jan','Feb','Mar','Apr','May','Jun',
+    'Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function getMonthNames() {
+    if (config.monthnames) {
+      return config.monthnames.split(',').map(function(s) { return s.trim(); });
+    }
+    // Try Intl if a language hint is available
+    try {
+      var lang = config.language || document.documentElement.lang || 'en';
+      if (lang !== 'en') {
+        var names = [];
+        for (var i = 0; i < 12; i++) {
+          names.push(new Intl.DateTimeFormat(lang, { month: 'long' }).format(new Date(2024, i, 1)));
+        }
+        return names;
+      }
+    } catch (e) { /* fall through */ }
+    return MONTHS_EN;
+  }
+
+  function getMonthNamesAbbr() {
+    if (config.monthnamesabbreviated) {
+      return config.monthnamesabbreviated.split(',').map(function(s) { return s.trim(); });
+    }
+    try {
+      var lang = config.language || document.documentElement.lang || 'en';
+      if (lang !== 'en') {
+        var names = [];
+        for (var i = 0; i < 12; i++) {
+          names.push(new Intl.DateTimeFormat(lang, { month: 'short' }).format(new Date(2024, i, 1)));
+        }
+        return names;
+      }
+    } catch (e) { /* fall through */ }
+    return MONTHS_EN_ABBR;
+  }
+
+  function getDatePattern() {
+    var p = config.date || 'system';
+    if (p === 'system') return 'D Mmmm YYYY';
+    return p;
+  }
+
+  function getTimeMode() {
+    var t = config.time || 'system';
+    if (t === 'system') return '24hrs';
+    return t;   // '12hrs' | '24hrs'
+  }
+
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function applyDatePattern(pattern, year, month, day) {
+    // month is 1-based
+    var full = getMonthNames();
+    var abbr = getMonthNamesAbbr();
+    return pattern
+      .replace('YYYY', '' + year)
+      .replace('YY', ('' + year).slice(-2))
+      .replace('Mmmm', full[month - 1] || '')
+      .replace('Mmm', abbr[month - 1] || '')
+      .replace('MM', pad2(month))
+      .replace('DD', pad2(day))
+      .replace(/\bD\b/, '' + day);
+  }
+
+  function formatTime(timePart) {
+    // timePart like "14:30"
+    var mode = getTimeMode();
+    if (mode === '24hrs') return timePart;
+    var bits = timePart.split(':');
+    var h = parseInt(bits[0], 10);
+    var m = bits[1] || '00';
+    var suffix = h >= 12 ? ' PM' : ' AM';
+    if (h === 0) h = 12;
+    else if (h > 12) h -= 12;
+    return h + ':' + m + suffix;
+  }
+
+function fmtDate(dateStr) {
+    var s = dateStr instanceof Date ? dateStr.toISOString().slice(0, 10) : String(dateStr);
+    var parts = s.split('-');
+    var y = parseInt(parts[0], 10), m = parseInt(parts[1], 10), d = parseInt(parts[2], 10);
+    return applyDatePattern(getDatePattern(), y, m, d);
+  }
+function fmtDatetime(dtStr) {
+    var s = dtStr instanceof Date ? dtStr.toISOString().slice(0, 16).replace('T', ' ') : String(dtStr);
+    var sp = s.split(' ');
+    var datePart = sp[0], timePart = sp[1] || '00:00';
+    return fmtDate(datePart) + ' at ' + formatTime(timePart);
+  }
+
+  function parseMdcmsTag(text) {
+    var lines = text.trim().split('\n');
+    var tagName = lines[0].trim();
+    var options = {};
+    var bodyStart = lines.length;
+    for (var i = 1; i < lines.length; i++) {
+      var m = lines[i].match(/^\s*([a-z\-]+)\s*:\s*(.*)$/i);
+      if (m) {
+        options[m[1].toLowerCase()] = m[2].trim();
+      } else {
+        bodyStart = i;
+        break;
+      }
+    }
+    var body = lines.slice(bodyStart).join('\n').trim();
+    return { tagName: tagName, options: options, body: body };
+  }
+
+  function parsePostTagName(name) {
+    var m = name.match(
+      /^posts-created-(chronological|reversechronological)(?:-(byyear|byyearmonth|lastyear|lastmonth))?$/
+    );
+    if (!m) return null;
+    return { order: m[1], modifier: m[2] || null };
+  }
+
+  function getPostEntries(parsed, options) {
+    const { order, modifier } = parsed;
+
+    // Start with posts from search index
+    let posts = (searchIndex || []).filter(function(e) {
+      return e.file && e.file.startsWith('posts/');
+    });
+
+    // Category filter
+    if (categoriesUse && activeCategory) {
+      posts = posts.filter(function(e) { return e.category === activeCategory; });
+    }
+
+    // Field filter
+    posts = posts.filter(function(e) { return !!e.created; });
+
+    // Time-window filter
+    if (modifier === 'lastyear' || modifier === 'lastmonth') {
+      var now = new Date();
+      var cutoff = new Date(now);
+      if (modifier === 'lastyear') cutoff.setDate(cutoff.getDate() - 365);
+      else cutoff.setDate(cutoff.getDate() - 30);
+      posts = posts.filter(function(e) {
+        return new Date(e.created.replace(' ', 'T')) >= cutoff;
+      });
+    }
+
+    // Sort
+    posts.sort(function(a, b) {
+      var da = a.created || '', db = b.created || '';
+      return order === 'chronological' ? da.localeCompare(db) : db.localeCompare(da);
+    });
+
+    return posts;
+  }
+
+  function makePostList(entries) {
+    var ul = document.createElement('ul');
+    ul.className = 'post-list';
+    entries.forEach(function(e) {
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = '#' + e.file;
+      var dateSpan = document.createElement('span');
+      dateSpan.className = 'post-date';
+      dateSpan.textContent = e.display;
+      var sepSpan = document.createElement('span');
+      sepSpan.className = 'post-sep';
+      sepSpan.textContent = '—';
+      var titleSpan = document.createElement('span');
+      titleSpan.className = 'post-title';
+      titleSpan.textContent = e.title;
+      a.appendChild(dateSpan);
+      a.appendChild(sepSpan);
+      a.appendChild(titleSpan);
+      a.addEventListener('click', function(ev) {
+        ev.preventDefault();
+        navigateTo(e.file);
+      });
+      li.appendChild(a);
+      ul.appendChild(li);
+    });
+    return ul;
+  }
+
+  function renderPaginatedList(container, entries, mode, batchSize) {
+    if (mode === 'none' || entries.length <= batchSize) {
+      container.appendChild(makePostList(entries));
+      return;
+    }
+
+    if (mode === 'yes') {
+      // Full pagination
+      var currentPg = 1;
+      var totalPages = Math.ceil(entries.length / batchSize);
+      var listWrap = document.createElement('div');
+      var pagBar = document.createElement('div');
+      pagBar.className = 'post-pagination';
+      container.appendChild(listWrap);
+      container.appendChild(pagBar);
+
+      function showPage() {
+        listWrap.innerHTML = '';
+        var start = (currentPg - 1) * batchSize;
+        listWrap.appendChild(makePostList(entries.slice(start, start + batchSize)));
+
+        pagBar.innerHTML = '';
+        var info = el('span', { className: 'page-info', textContent: 'Page ' + currentPg + '/' + totalPages });
+        pagBar.appendChild(info);
+
+        var prev = el('button', { className: 'page-btn', textContent: '\u2039 Previous' });
+        prev.disabled = currentPg <= 1;
+        prev.addEventListener('click', function() { currentPg--; showPage(); });
+        pagBar.appendChild(prev);
+
+        var next = el('button', { className: 'page-btn', textContent: 'Next \u203A' });
+        next.disabled = currentPg >= totalPages;
+        next.addEventListener('click', function() { currentPg++; showPage(); });
+        pagBar.appendChild(next);
+
+        var jumpLabel = el('span', { className: 'page-jump-label', textContent: 'Jump to page' });
+        pagBar.appendChild(jumpLabel);
+        var jumpInput = document.createElement('input');
+        jumpInput.type = 'number'; jumpInput.className = 'page-jump';
+        jumpInput.min = 1; jumpInput.max = totalPages; jumpInput.value = currentPg;
+        jumpInput.addEventListener('change', function() {
+          var v = parseInt(jumpInput.value, 10);
+          if (v >= 1 && v <= totalPages) { currentPg = v; showPage(); }
+        });
+        pagBar.appendChild(jumpInput);
+      }
+      showPage();
+    } else {
+      // Load more (mode === 'no' or default)
+      var shown = batchSize;
+      var listWrap2 = document.createElement('div');
+      container.appendChild(listWrap2);
+
+      function showBatch() {
+        listWrap2.innerHTML = '';
+        listWrap2.appendChild(makePostList(entries.slice(0, shown)));
+        var oldBtn = container.querySelector('.post-load-more');
+        if (oldBtn) oldBtn.remove();
+        if (shown < entries.length) {
+          var btn = el('button', { className: 'post-load-more', textContent: 'Load more' });
+          btn.addEventListener('click', function() { shown += batchSize; showBatch(); });
+          container.appendChild(btn);
+        }
+      }
+      showBatch();
+    }
+  }
+
+  function renderPostTag(container, tag) {
+    var parsed = parsePostTagName(tag.tagName);
+    if (!parsed) {
+      container.textContent = 'Unknown tag: ' + tag.tagName;
+      return;
+    }
+
+    var opts = tag.options;
+    var posts = getPostEntries(parsed, opts);
+    var modifier = parsed.modifier;
+    var paginate = opts.paginate || 'no';
+    var limitVal = opts.limit || 'all';
+    var batchSize = (limitVal === 'all') ? 20 : parseInt(limitVal, 10) || 20;
+
+    // Format each entry
+    var formatted = posts.map(function(p) {
+      return {
+        display: fmtDatetime(p.created),
+        title: p.title,
+        file: p.file
+      };
+    });
+
+    if (formatted.length === 0) {
+      container.innerHTML = '<p class="posts-empty">No posts found.</p>';
+      return;
+    }
+
+    container.className = 'mdcms-posts';
+    container.innerHTML = '';
+
+    // Set date column width to the longest formatted date string
+    var maxDateLen = 0;
+    formatted.forEach(function(e) { if (e.display.length > maxDateLen) maxDateLen = e.display.length; });
+    container.style.setProperty('--post-date-width', (maxDateLen + 0.5) + 'ch');
+
+    var groupBy = (modifier === 'byyear' || modifier === 'byyearmonth') ? modifier : null;
+
+    if (!groupBy) {
+      // Flat list — optionally cap total if paginate:none
+      var list = formatted;
+      if (paginate === 'none' && limitVal !== 'all') {
+        list = formatted.slice(0, batchSize);
+      }
+      renderPaginatedList(container, list, paginate, batchSize);
+      return;
+    }
+
+    // Grouped by year (or year+month)
+    function getYear(p) {
+      return p.created ? p.created.substring(0, 4) : 'Unknown';
+    }
+    function getYearMonth(p) {
+      return p.created ? p.created.substring(0, 7) : 'Unknown';
+    }
+    function monthLabel(ym) {
+      var m = parseInt(ym.substring(5, 7), 10);
+      return getMonthNames()[m - 1] || ym;
+    }
+
+    // Build year groups from unformatted posts (need raw date access)
+    var yearMap = new Map();
+    posts.forEach(function(p, i) {
+      var y = getYear(p);
+      if (!yearMap.has(y)) yearMap.set(y, []);
+      yearMap.get(y).push(formatted[i]);
+    });
+    var years = Array.from(yearMap.keys());
+
+    // Determine active year
+    var selectYr = (opts.selectyear || 'yes') === 'yes';
+    var defYear = opts.defaultyear || 'current';
+    var curYear;
+    if (defYear === 'current') {
+      curYear = String(new Date().getFullYear());
+      if (!years.includes(curYear)) curYear = years[0];
+    } else {
+      curYear = years.includes(defYear) ? defYear : years[0];
+    }
+
+    // Year selector
+    if (selectYr && years.length > 1) {
+      var sel = document.createElement('select');
+      sel.className = 'post-year-select';
+      years.forEach(function(y) {
+        var opt = document.createElement('option');
+        opt.value = y; opt.textContent = y;
+        if (y === curYear) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      container.appendChild(sel);
+      sel.addEventListener('change', function() { curYear = sel.value; renderYear(); });
+    }
+
+    var contentArea = document.createElement('div');
+    contentArea.className = 'post-content-area';
+    container.appendChild(contentArea);
+
+    // Build month sub-groups if needed
+    var yearMonthMap = null;
+    if (groupBy === 'byyearmonth') {
+      yearMonthMap = new Map();
+      posts.forEach(function(p, i) {
+        var y = getYear(p);
+        if (!yearMonthMap.has(y)) yearMonthMap.set(y, new Map());
+        var ym = getYearMonth(p);
+        var mMap = yearMonthMap.get(y);
+        if (!mMap.has(ym)) mMap.set(ym, []);
+        mMap.get(ym).push(formatted[i]);
+      });
+    }
+
+    function renderYear() {
+      contentArea.innerHTML = '';
+      var items = yearMap.get(curYear) || [];
+
+      if (groupBy === 'byyearmonth' && yearMonthMap) {
+        var mMap = yearMonthMap.get(curYear) || new Map();
+        mMap.forEach(function(monthItems, ym) {
+          var heading = document.createElement('h4');
+          heading.className = 'post-month-heading';
+          heading.textContent = monthLabel(ym);
+          contentArea.appendChild(heading);
+          // Within each month, apply pagination individually would be too complex;
+          // show all month items, pagination applies to full year below if needed.
+          contentArea.appendChild(makePostList(monthItems));
+        });
+      } else {
+        renderPaginatedList(contentArea, items, paginate, batchSize);
+      }
+    }
+    renderYear();
+  }
+
+  // Callout type defaults (fallback when theme.yml has no callouts block)
+  const CALLOUT_DEFAULTS = {
+    info:    { icon: 'info',    colour: '#2563EB' },
+    warning: { icon: 'warning', colour: '#D97706' },
+    success: { icon: 'success', colour: '#16A34A' },
+    error:   { icon: 'error',   colour: '#DC2626' },
+  };
+
+  function renderCalloutTag(container, tag) {
+    var typeMatch = tag.tagName.match(/^callout-(info|warning|success|error)$/);
+    var calloutType = typeMatch ? typeMatch[1] : 'info';
+
+    var opts = tag.options;
+    var msgKey = opts.message || null;
+    var title = opts.title || null;
+    var iconName = opts.icon || null;
+    var bodyMd = tag.body || '';
+
+    // Resolve message: key — config.yml callouts block
+    if (msgKey) {
+      var msgDefs = config.callouts || {};
+      var msgDef = msgDefs[msgKey];
+      if (msgDef) {
+        // Override callout type from message definition
+        if (msgDef.type) calloutType = msgDef.type;
+        // Language resolution: activeCategory → defaultCategoryCode → first key
+        var lang = activeCategory || defaultCategoryCode;
+        var langEntry = (lang && msgDef[lang]) || msgDef[defaultCategoryCode];
+        if (!langEntry) {
+          var keys = Object.keys(msgDef).filter(function(k) { return k !== 'type'; });
+          langEntry = msgDef[keys[0]];
+        }
+        if (langEntry) {
+          title = langEntry.title || null;
+          bodyMd = langEntry.text || '';
+        }
+        if (opts.title || tag.body) {
+          console.warn('[mdcms] callout: message: key takes precedence; inline title/body ignored.');
+        }
+      }
+    }
+
+    // Get callout colours/icon from theme.yml callouts block, then fallback
+    var themeCallouts = (themeConfig.callouts || {})[calloutType] || {};
+    var fallback = CALLOUT_DEFAULTS[calloutType] || CALLOUT_DEFAULTS.info;
+    var primaryColour = themeCallouts['primary-colour'] || fallback.colour;
+    var bgColour = themeCallouts['background-colour'] || fallback.colour;
+    if (!iconName) iconName = themeCallouts.icon || fallback.icon;
+
+    // Build element
+    container.className = 'mdcms-callout mdcms-callout-' + calloutType;
+    container.style.setProperty('--callout-primary', primaryColour);
+    container.style.setProperty('--callout-bg', hexToRgba(bgColour, 0.08));
+
+    if (title) {
+      var titleRow = document.createElement('div');
+      titleRow.className = 'mdcms-callout-title';
+      titleRow.style.color = primaryColour;
+      titleRow.appendChild(iconEl(iconName));
+      var titleText = document.createElement('span');
+      titleText.textContent = title;
+      titleRow.appendChild(titleText);
+      container.appendChild(titleRow);
+    }
+
+    if (bodyMd) {
+      var bodyEl = document.createElement('div');
+      bodyEl.className = 'mdcms-callout-body';
+      bodyEl.innerHTML = marked.parse(bodyMd);
+      container.appendChild(bodyEl);
+    }
+  }
+
+  function hexToRgba(hex, alpha) {
+    var h = hex.replace('#', '');
+    if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    var r = parseInt(h.substring(0,2), 16);
+    var g = parseInt(h.substring(2,4), 16);
+    var b = parseInt(h.substring(4,6), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+  }
+
+  function renderTocTag(container) {
+    const byCode = {};
+    navSections.forEach(s => { byCode[s.code] = s; });
+
+    const sortedSections = navSections
+      .filter(s => !isDraftSection(s.code, byCode))
+      .sort((a, b) => ((a.sort ?? 999) - (b.sort ?? 999)) || (a.code || '').localeCompare(b.code || ''));
+
+    const visiblePages = navData.filter(p => {
+      if (p.file === currentPage) return false;
+      if (!pageShouldDisplay(p)) return false;
+      const sid = p['section-id'];
+      if (sid && isDraftSection(sid, byCode)) return false;
+      return true;
+    });
+
+    const bySection = {};
+    const unsectioned = [];
+    visiblePages.forEach(p => {
+      const sid = p['section-id'] || null;
+      if (sid) { (bySection[sid] = bySection[sid] || []).push(p); }
+      else unsectioned.push(p);
+    });
+
+    function sortPages(pages) {
+      return [...pages].sort((a, b) =>
+        ((a.sort ?? 999) - (b.sort ?? 999)) || a.file.localeCompare(b.file));
+    }
+
+    function makeList(pages) {
+      const ul = document.createElement('ul');
+      ul.className = 'mdcms-toc-list';
+      pages.forEach(p => {
+        const a = el('a', { href: '#' + p.file, textContent: pageDisplayTitle(p) });
+        a.addEventListener('click', e => { e.preventDefault(); navigateTo(p.file); });
+        ul.appendChild(el('li', {}, a));
+      });
+      return ul;
+    }
+
+    const div = el('div', { className: 'mdcms-toc' });
+
+    if (unsectioned.length) div.appendChild(makeList(sortPages(unsectioned)));
+
+    sortedSections.forEach(section => {
+      const pages = bySection[section.code];
+      if (!pages || !pages.length) return;
+      div.appendChild(el('h3', { className: 'mdcms-toc-section', textContent: sectionDisplayName(section) }));
+      div.appendChild(makeList(sortPages(pages)));
+    });
+
+    if (!div.children.length) div.textContent = 'No pages found.';
+
+    container.replaceWith(div);
+  }
+
+  function hydrateMdcmsTags() {
+    document.querySelectorAll('.mdcms-tag').forEach(function(tagEl) {
+      try {
+        var cfg = JSON.parse(tagEl.getAttribute('data-config'));
+        if (/^callout-(info|warning|success|error)$/.test(cfg.tagName)) {
+          renderCalloutTag(tagEl, cfg);
+        } else if (cfg.tagName === 'toc') {
+          renderTocTag(tagEl);
+        } else {
+          renderPostTag(tagEl, cfg);
+        }
+      } catch (e) {
+        tagEl.textContent = 'Error rendering tag.';
+      }
+    });
+  }
+
+  // ─── Shell ────────────────────────────────────────────────
+  function buildSidebar() {
+    const app = document.getElementById('app');
+    const navPos = config['nav-position'] || 'left';
+    const layout = el('div', { className: `layout-sidebar nav-${navPos}` });
+
+    const mobileHeader = el('div', { className: 'mobile-header' });
+    mobileHeader.style.display = 'none';
+    const hamburger = el('button', { className: 'hamburger', 'aria-label': 'Open menu' });
+    hamburger.appendChild(iconEl('menu'));
+    const mobileName = el('span', { className: 'sidebar-sitename', textContent: config.sitename || 'MD-CMS' });
+    mobileHeader.appendChild(hamburger);
+    if (config.logo) {
+      mobileHeader.appendChild(el('img', { className: 'topbar-logo', src: `assets/images/${config.logo}`, alt: '' }));
+    }
+    mobileHeader.appendChild(mobileName);
+
+    const mobileStyle = document.createElement('style');
+    mobileStyle.textContent = `@media (max-width: 768px) { .layout-sidebar .mobile-header { display: flex !important; } }`;
+    document.head.appendChild(mobileStyle);
+
+    const overlay = el('div', { className: 'mobile-overlay' });
+    overlay.addEventListener('click', () => closeMobileMenu());
+
+    const sidebar = el('div', { className: 'sidebar' });
+
+    const header = el('div', { className: 'sidebar-header' });
+    if (config.logo) {
+      header.appendChild(el('img', { className: 'sidebar-logo', src: `assets/images/${config.logo}`, alt: '' }));
+    }
+    const nameLink = el('a', { className: 'sidebar-sitename', href: '#', textContent: config.sitename || 'MD-CMS' });
+    nameLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateTo(defaultPage());
+    });
+    header.appendChild(nameLink);
+    if (config.sitedescription) {
+      header.appendChild(el('div', { className: 'sidebar-description', textContent: config.sitedescription }));
+    }
+    sidebar.appendChild(header);
+
+    if (config.search !== false) sidebar.appendChild(buildSearchWidget());
+
+    const navLinksEl = el('div', { className: 'nav-links', id: 'navLinks' });
+    sidebar.appendChild(navLinksEl);
+
+    const sidebarFooter = el('div', { className: 'sidebar-footer' });
+    const toggleBtn = el('button', { className: 'theme-toggle', 'aria-label': 'Toggle theme' });
+    toggleBtn.addEventListener('click', toggleTheme);
+    sidebarFooter.appendChild(toggleBtn);
+    sidebar.appendChild(sidebarFooter);
+
+    const mainArea = el('div', { className: 'main-area' });
+    mainArea.appendChild(mobileHeader);
+    const mainContent = el('div', { className: 'main-content' });
+    const catBar = buildCategoryBar();
+    if (catBar) mainContent.appendChild(catBar);
+    mainContent.appendChild(el('div', { id: 'pageContent' }));
+    mainArea.appendChild(mainContent);
+
+    if (config.footer) {
+      const footer = el('div', { className: 'site-footer' });
+      footer.innerHTML = marked.parseInline(config.footer);
+      mainArea.appendChild(footer);
+    }
+
+    layout.appendChild(sidebar);
+    layout.appendChild(overlay);
+    layout.appendChild(mainArea);
+    app.appendChild(layout);
+
+    hamburger.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+      hamburger.innerHTML = ''; hamburger.appendChild(iconEl('menu'));
+    });
+    function closeMobileMenu() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+      hamburger.innerHTML = ''; hamburger.appendChild(iconEl('menu'));
+    }
+    window._closeMobileMenu = closeMobileMenu;
+  }
+
+  function buildTopbar() {
+    const app = document.getElementById('app');
+    const layout = el('div', { className: 'layout-topbar' });
+    const topbar = el('div', { className: 'topbar' });
+
+    const brand = el('a', { className: 'topbar-brand', href: '#' });
+    brand.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateTo(defaultPage());
+    });
+    if (config.logo) {
+      brand.appendChild(el('img', { className: 'topbar-logo', src: `assets/images/${config.logo}`, alt: '' }));
+    }
+    brand.appendChild(el('span', { className: 'topbar-sitename', textContent: config.sitename || 'MD-CMS' }));
+    topbar.appendChild(brand);
+
+    const hamburger = el('button', { className: 'hamburger', 'aria-label': 'Open menu' });
+    hamburger.appendChild(iconEl('menu'));
+    const navLinksEl = el('div', { className: 'topbar-nav', id: 'navLinks' });
+    topbar.appendChild(navLinksEl);
+
+    const actions = el('div', { className: 'topbar-actions' });
+    if (config.search !== false) {
+      const searchW = buildSearchWidget();
+      searchW.className = 'topbar-search';
+      actions.appendChild(searchW);
+    }
+    const toggleBtn = el('button', { className: 'theme-toggle', 'aria-label': 'Toggle theme' });
+    toggleBtn.addEventListener('click', toggleTheme);
+    actions.appendChild(toggleBtn);
+    actions.appendChild(hamburger);
+    topbar.appendChild(actions);
+
+    const mobilePanel = el('div', { className: 'mobile-nav-panel', id: 'mobileNavPanel' });
+    if (config.search !== false) mobilePanel.appendChild(buildSearchWidget());
+    const mobileNavLinks = el('div', { className: 'nav-links', id: 'mobileNavLinks' });
+    mobilePanel.appendChild(mobileNavLinks);
+
+    layout.appendChild(topbar);
+    layout.appendChild(mobilePanel);
+
+    const mainArea = el('div', { className: 'main-area' });
+    const mainContent = el('div', { className: 'main-content' });
+    const catBar = buildCategoryBar();
+    if (catBar) mainContent.appendChild(catBar);
+    mainContent.appendChild(el('div', { id: 'pageContent' }));
+    mainArea.appendChild(mainContent);
+    if (config.footer) {
+      const footer = el('div', { className: 'site-footer' });
+      footer.innerHTML = marked.parseInline(config.footer);
+      mainArea.appendChild(footer);
+    }
+    layout.appendChild(mainArea);
+    app.appendChild(layout);
+
+    hamburger.addEventListener('click', () => {
+      const panel = document.getElementById('mobileNavPanel');
+      panel.classList.toggle('open');
+      hamburger.innerHTML = ''; hamburger.appendChild(iconEl('menu'));
+    });
+    window._closeMobileMenu = function() {
+      const panel = document.getElementById('mobileNavPanel');
+      if (panel) panel.classList.remove('open');
+      hamburger.innerHTML = ''; hamburger.appendChild(iconEl('menu'));
+    };
+
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.topbar-nav .nav-group.open').forEach(g => g.classList.remove('open'));
+    });
+  }
+
+  function buildSearchWidget() {
+    const container = el('div', { className: 'search-container' });
+    const wrapper = el('div', { className: 'search-wrapper' });
+    const icon = iconEl('search', 'search-icon');
+    const input = el('input', { className: 'search-box', type: 'text', placeholder: 'Search...' });
+    const results = el('div', { className: 'search-results' });
+    wrapper.appendChild(icon);
+    wrapper.appendChild(input);
+    wrapper.appendChild(results);
+    container.appendChild(wrapper);
+
+    let debounceTimer;
+    input.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => doSearch(input.value, results), 200);
+    });
+    input.addEventListener('focus', () => {
+      if (input.value.trim() && results.children.length) results.classList.add('active');
+    });
+    document.addEventListener('click', (e) => {
+      if (!container.contains(e.target)) results.classList.remove('active');
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { results.classList.remove('active'); input.blur(); }
+    });
+    return container;
+  }
+
+  function buildCategoryBar() {
+    if (!categoriesUse || !categoriesList.length) return null;
+
+    const bar = el('div', { className: 'category-bar' });
+
+    if (config['categories-selecticon']) {
+      bar.appendChild(iconEl(config['categories-selecticon'], 'category-icon'));
+    }
+    if (config['categories-selecttext']) {
+      bar.appendChild(el('span', { className: 'category-label', textContent: config['categories-selecttext'] }));
+    }
+
+    const dropdown = el('div', { className: 'category-dropdown', id: 'categoryDropdown' });
+    const trigger = el('button', { className: 'category-trigger', type: 'button' });
+    const triggerLabel = el('span', { id: 'categoryTriggerLabel' });
+    trigger.appendChild(triggerLabel);
+    trigger.appendChild(iconEl('arrow_drop_down', 'caret'));
+    dropdown.appendChild(trigger);
+
+    const panel = el('div', { className: 'category-panel' });
+    const searchInput = el('input', { className: 'category-search', type: 'text', placeholder: 'Search...' });
+    const options = el('div', { className: 'category-options', id: 'categoryOptions' });
+    panel.appendChild(searchInput);
+    panel.appendChild(options);
+    dropdown.appendChild(panel);
+    bar.appendChild(dropdown);
+
+    trigger.addEventListener('click', () => {
+      dropdown.classList.toggle('open');
+      if (dropdown.classList.contains('open')) {
+        searchInput.value = '';
+        populateCategoryOptions('');
+        searchInput.focus();
+      }
+    });
+    searchInput.addEventListener('input', () => populateCategoryOptions(searchInput.value));
+    document.addEventListener('click', (e) => {
+      if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
+    });
+
+    return bar;
+  }
+
+  function visibleCategoryCodesForCurrentPage() {
+    // Which categories should appear in the dropdown:
+    //  - the variant exists for this page, OR
+    //  - the category has a notfoundmessage
+    //  - always include the active category so user can see what they're on
+    const out = new Set();
+    const page = currentPage
+      ? navData.find(p => p.file === currentPage)
+      : null;
+    categoriesList.forEach(cat => {
+      const hasVariant = !page || !page.variants || page.variants.includes(cat.code);
+      const hasMsg = !!cat.notfoundmessage;
+      if (hasVariant || hasMsg || cat.code === activeCategory) out.add(cat.code);
+    });
+    return out;
+  }
+
+  function populateCategoryOptions(filter) {
+    const container = document.getElementById('categoryOptions');
+    if (!container) return;
+    container.innerHTML = '';
+    const visible = visibleCategoryCodesForCurrentPage();
+    const q = filter.trim().toLowerCase();
+    const page = currentPage ? navData.find(p => p.file === currentPage) : null;
+
+    categoriesList.forEach(cat => {
+      if (!visible.has(cat.code)) return;
+      const primary = cat.message || cat.name;
+      const secondary = cat['name-latin'] && cat['name-latin'] !== cat.name ? cat['name-latin'] : '';
+      const hay = (primary + ' ' + secondary + ' ' + cat.code).toLowerCase();
+      if (q && !hay.includes(q)) return;
+
+      const option = el('div', {
+        className: 'category-option' + (cat.code === activeCategory ? ' active' : ''),
+        'data-code': cat.code
+      });
+      option.appendChild(document.createTextNode(primary));
+      const hasVariant = !page || !page.variants || page.variants.includes(cat.code);
+      if (!hasVariant && cat.notfoundmessage) {
+        option.appendChild(el('span', { className: 'secondary', textContent: cat.notfoundmessage }));
+      } else if (secondary) {
+        option.appendChild(el('span', { className: 'secondary', textContent: secondary }));
+      }
+      option.addEventListener('click', () => {
+        document.getElementById('categoryDropdown').classList.remove('open');
+        setActiveCategory(cat.code);
+      });
+      container.appendChild(option);
+    });
+  }
+
+  function refreshCategoryBar() {
+    if (!categoriesUse) return;
+    const label = document.getElementById('categoryTriggerLabel');
+    const cat = categoriesByCode[activeCategory];
+    if (label && cat) label.textContent = cat.message || cat.name || activeCategory;
+    // Apply RTL to page content + category bar based on active direction
+    const direction = (cat && cat.direction === 'rtl') ? 'rtl' : 'ltr';
+    document.querySelectorAll('.category-bar').forEach(b => b.setAttribute('dir', direction));
+    document.querySelectorAll('.md-content, .title-bar').forEach(el => el.setAttribute('dir', direction));
+    document.querySelectorAll('.sidebar').forEach(el => el.setAttribute('dir', direction));
+  }
+
+  function doSearch(query, resultsEl) {
+    resultsEl.innerHTML = '';
+    if (!query.trim() || !fuseInstance) {
+      resultsEl.classList.remove('active');
+      return;
+    }
+    let results = fuseInstance.search(query, { limit: 16 });
+    if (categoriesUse && activeCategory) {
+      results = results.filter(r => !r.item.category || r.item.category === activeCategory);
+    }
+    results = results.slice(0, 8);
+    if (!results.length) {
+      resultsEl.innerHTML = '<div class="search-result-item"><span class="search-result-title">No results found</span></div>';
+      resultsEl.classList.add('active');
+      return;
+    }
+    results.forEach(r => {
+      const item = el('div', { className: 'search-result-item' });
+      item.appendChild(el('div', null, el('span', { className: 'search-result-title', textContent: r.item.title })));
+      if (r.item.description) {
+        item.appendChild(el('div', { className: 'search-result-snippet', textContent: r.item.description }));
+      }
+      item.addEventListener('click', () => {
+        navigateTo(r.item.file);
+        resultsEl.classList.remove('active');
+        document.querySelectorAll('.search-box').forEach(i => i.value = '');
+        if (window._closeMobileMenu) window._closeMobileMenu();
+      });
+      resultsEl.appendChild(item);
+    });
+    resultsEl.classList.add('active');
+  }
+
+  // ─── Nav rendering ────────────────────────────────────────
+  //
+  // Layout:
+  //   - Sidebar mode: tree with section headings + nesting
+  //   - Topbar mode (inline): flat list of pages only
+  //   - Topbar mode (mobile panel): tree (same as sidebar)
+  //
+  // Section visibility:
+  //   - `visible`: always shown
+  //   - `hidden`: heading with +/- toggle; state persisted in localStorage
+  //   - `draft`:  section and its pages/descendants fully hidden
+
+  function isDraftSection(code, byCode) {
+    let s = byCode[code];
+    while (s) {
+      if (s.pagesvisibility === 'draft') return true;
+      if (!s.parent) return false;
+      s = byCode[s.parent];
+    }
+    return false;
+  }
+
+  function buildSectionTree(liveSections) {
+    const byParent = {};
+    liveSections.forEach(s => {
+      const key = s.parent || '';
+      (byParent[key] = byParent[key] || []).push(s);
+    });
+    Object.values(byParent).forEach(arr => arr.sort((a, b) => {
+      const ka = a.parent ? (a['parent-sort'] ?? 999) : (a.sort ?? 999);
+      const kb = b.parent ? (b['parent-sort'] ?? 999) : (b.sort ?? 999);
+      return ka - kb || a.code.localeCompare(b.code);
+    }));
+    function attach(node) {
+      node.children = byParent[node.code] || [];
+      node.children.forEach(attach);
+    }
+    const top = byParent[''] || [];
+    top.forEach(attach);
+    return top;
+  }
+
+  function groupPagesBySection(liveCodes) {
+    const groups = { '': [] };
+    liveCodes.forEach(c => { groups[c] = []; });
+    navData.forEach(p => {
+      const sid = p['section-id'] || '';
+      if (sid === '' || liveCodes.has(sid)) {
+        (groups[sid] = groups[sid] || []).push(p);
+      }
+    });
+    Object.values(groups).forEach(arr => arr.sort((a, b) => {
+      return ((a.sort ?? 999) - (b.sort ?? 999)) || a.file.localeCompare(b.file);
+    }));
+    return groups;
+  }
+
+  function sectionExpanded(code) {
+    return localStorage.getItem('md-cms-section:' + code) === 'expanded';
+  }
+  function toggleSection(code) {
+    const key = 'md-cms-section:' + code;
+    localStorage.setItem(key, localStorage.getItem(key) === 'expanded' ? 'collapsed' : 'expanded');
+  }
+
+  function makeNavItem(page, depth) {
+    if (!pageShouldDisplay(page)) return null;
+
+    const title = pageDisplayTitle(page);
+    const cls = 'nav-item' + (depth > 0 ? ' depth-' + depth : '');
+    const link = el('a', {
+      className: cls,
+      textContent: title,
+      href: '#' + page.file,
+      'data-file': page.file
+    });
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateTo(page.file);
+      if (window._closeMobileMenu) window._closeMobileMenu();
+    });
+    return link;
+  }
+
+  function renderTreeSection(container, section, depth, groups) {
+    const isHidden = section.pagesvisibility === 'hidden';
+    const depthClass = depth > 0 ? ' depth-' + depth : '';
+    const heading = el('div', {
+      className: 'nav-section-heading' + (isHidden ? ' toggleable' : '') + depthClass
+    });
+    const name = sectionDisplayName(section);
+
+    if (isHidden) {
+      const expanded = sectionExpanded(section.code);
+      heading.innerHTML = '';
+      heading.appendChild(iconEl(expanded ? 'arrow_drop_down' : 'arrow_right', 'toggle-icon'));
+      heading.appendChild(el('span', { textContent: name }));
+      heading.addEventListener('click', () => {
+        toggleSection(section.code);
+        renderNav();
+        highlightNav(currentPage);
+      });
+      container.appendChild(heading);
+      if (!expanded) return;
+    } else {
+      heading.textContent = name;
+      container.appendChild(heading);
+    }
+
+    (groups[section.code] || []).forEach(p => {
+      const item = makeNavItem(p, depth + 1);
+      if (item) container.appendChild(item);
+    });
+    section.children.forEach(c => renderTreeSection(container, c, depth + 1, groups));
+  }
+
+  function renderTree(container) {
+    const byCode = {};
+    navSections.forEach(s => { if (s.code) byCode[s.code] = s; });
+    const liveSections = navSections.filter(s => s.code && !isDraftSection(s.code, byCode));
+    const liveCodes = new Set(liveSections.map(s => s.code));
+
+    const groups = groupPagesBySection(liveCodes);
+    (groups[''] || []).forEach(p => {
+      const item = makeNavItem(p, 0);
+      if (item) container.appendChild(item);
+    });
+
+    const tree = buildSectionTree(liveSections);
+    tree.forEach(root => renderTreeSection(container, root, 0, groups));
+  }
+
+  function buildTopbarNavItems() {
+    const byCode = {};
+    navSections.forEach(s => { if (s.code) byCode[s.code] = s; });
+    const items = [];
+
+    // Sections (non-draft), each becomes a dropdown trigger
+    navSections.forEach(s => {
+      if (!s.code || isDraftSection(s.code, byCode)) return;
+      const pages = navData.filter(p => p['section-id'] === s.code && pageShouldDisplay(p));
+      pages.sort((a, b) => ((a.sort ?? 999) - (b.sort ?? 999)) || a.file.localeCompare(b.file));
+      if (!pages.length) return;
+      items.push({ type: 'section', sort: s.sort ?? 999, section: s, pages });
+    });
+
+    // Unsectioned pages (or pages whose section isn't in nav), grouped by sort century
+    const unsectioned = navData.filter(p => {
+      if (!pageShouldDisplay(p)) return false;
+      const sid = p['section-id'];
+      return !sid || !byCode[sid];
+    });
+    unsectioned.sort((a, b) => ((a.sort ?? 999) - (b.sort ?? 999)) || a.file.localeCompare(b.file));
+    const centuryMap = new Map();
+    unsectioned.forEach(p => {
+      const c = Math.floor((p.sort ?? 999) / 100);
+      if (!centuryMap.has(c)) centuryMap.set(c, []);
+      centuryMap.get(c).push(p);
+    });
+    for (const [, pgs] of centuryMap) {
+      items.push({ type: 'group', sort: pgs[0].sort ?? 999, primary: pgs[0], children: pgs.slice(1) });
+    }
+
+    items.sort((a, b) => a.sort - b.sort);
+    return items;
+  }
+
+  function makeTopbarPageGroup({ primary, children }, isMobile) {
+    const group = el('div', { className: 'nav-group' });
+    const hasChildren = children.length > 0;
+
+    if (isMobile) {
+      const row = el('div', { className: 'nav-group-row' });
+      const link = makeNavItem(primary, 0);
+      if (link) row.appendChild(link);
+      if (hasChildren) {
+        const childrenEl = el('div', { className: 'nav-group-children' });
+        children.forEach(p => { const it = makeNavItem(p, 1); if (it) childrenEl.appendChild(it); });
+        const btn = el('button', { className: 'nav-expand-btn', 'aria-label': 'Expand', textContent: '+' });
+        btn.addEventListener('click', () => {
+          const open = childrenEl.classList.toggle('open');
+          btn.textContent = open ? '−' : '+';
+        });
+        row.appendChild(btn);
+        group.appendChild(row);
+        group.appendChild(childrenEl);
+      } else {
+        group.appendChild(row);
+      }
+    } else {
+      const title = pageDisplayTitle(primary);
+      const trigger = el('a', { className: 'nav-trigger', href: '#' + primary.file, 'data-file': primary.file });
+      trigger.appendChild(el('span', { textContent: title }));
+      if (hasChildren) trigger.appendChild(iconEl('arrow_drop_down', 'nav-caret'));
+      group.appendChild(trigger);
+
+      if (hasChildren) {
+        const dropdown = el('div', { className: 'nav-dropdown' });
+        children.forEach(p => { const it = makeNavItem(p, 0); if (it) dropdown.appendChild(it); });
+        group.appendChild(dropdown);
+        group.addEventListener('mouseenter', () => group.classList.add('open'));
+        group.addEventListener('mouseleave', () => group.classList.remove('open'));
+        trigger.addEventListener('click', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          group.classList.toggle('open');
+          navigateTo(primary.file);
+          if (window._closeMobileMenu) window._closeMobileMenu();
+        });
+      } else {
+        trigger.addEventListener('click', e => {
+          e.preventDefault();
+          navigateTo(primary.file);
+          if (window._closeMobileMenu) window._closeMobileMenu();
+        });
+      }
+    }
+
+    return group;
+  }
+
+  function makeTopbarSection({ section, pages }, isMobile) {
+    const group = el('div', { className: 'nav-group' });
+    const isHidden = section.pagesvisibility === 'hidden';
+    const name = sectionDisplayName(section);
+
+    if (isMobile) {
+      const row = el('div', { className: 'nav-group-row' });
+      row.appendChild(el('span', { className: 'nav-section-label', textContent: name }));
+      const childrenEl = el('div', { className: 'nav-group-children' + (isHidden ? '' : ' open') });
+      pages.forEach(p => { const it = makeNavItem(p, 1); if (it) childrenEl.appendChild(it); });
+      const btn = el('button', { className: 'nav-expand-btn', 'aria-label': 'Expand', textContent: isHidden ? '+' : '−' });
+      btn.addEventListener('click', () => {
+        const open = childrenEl.classList.toggle('open');
+        btn.textContent = open ? '−' : '+';
+      });
+      row.appendChild(btn);
+      group.appendChild(row);
+      group.appendChild(childrenEl);
+    } else {
+      const trigger = el('button', { className: 'nav-trigger', type: 'button' });
+      trigger.appendChild(el('span', { textContent: name }));
+      trigger.appendChild(iconEl('arrow_drop_down', 'nav-caret'));
+      trigger.addEventListener('click', e => { e.stopPropagation(); group.classList.toggle('open'); });
+      group.appendChild(trigger);
+
+      const dropdown = el('div', { className: 'nav-dropdown' });
+      pages.forEach(p => { const it = makeNavItem(p, 0); if (it) dropdown.appendChild(it); });
+      group.appendChild(dropdown);
+
+      if (!isHidden) {
+        group.addEventListener('mouseenter', () => group.classList.add('open'));
+        group.addEventListener('mouseleave', () => group.classList.remove('open'));
+      }
+    }
+
+    return group;
+  }
+
+  function renderTopbarGrouped(container, isMobile) {
+    const items = buildTopbarNavItems();
+    items.forEach(item => {
+      container.appendChild(
+        item.type === 'group'
+          ? makeTopbarPageGroup(item, isMobile)
+          : makeTopbarSection(item, isMobile)
+      );
+    });
+  }
+
+  function renderNav() {
+    const topbar = config.navigation === 'topbar';
+    const main = document.getElementById('navLinks');
+    const mobile = document.getElementById('mobileNavLinks');
+    if (main) {
+      main.innerHTML = '';
+      if (topbar) renderTopbarGrouped(main, false);
+      else renderTree(main);
+    }
+    if (mobile) {
+      mobile.innerHTML = '';
+      if (topbar) renderTopbarGrouped(mobile, true);
+      else renderTree(mobile);
+    }
+  }
+
+  function highlightNav(file) {
+    document.querySelectorAll('.nav-item, .nav-trigger[data-file]').forEach(item => {
+      item.classList.toggle('active', item.getAttribute('data-file') === file);
+    });
+    document.querySelectorAll('.topbar-nav .nav-group').forEach(group => {
+      group.classList.toggle('has-active', !!group.querySelector('[data-file].active'));
+    });
+  }
+
+  // ─── Page loading ─────────────────────────────────────────
+  async function navigateTo(file) {
+    currentPage = file;
+    const contentEl = document.getElementById('pageContent');
+    highlightNav(file);
+
+    // Build a clean URL: keep origin + path, set ?cat only when non-default, set hash to conceptual file
+    const u = new URL(window.location);
+    if (categoriesUse && activeCategory && activeCategory !== defaultCategoryCode) {
+      u.searchParams.set('cat', activeCategory);
+    } else {
+      u.searchParams.delete('cat');
+    }
+    u.hash = '#' + file;
+    window.history.replaceState(null, '', u);
+
+    contentEl.innerHTML = '<div class="loading-spinner"></div>';
+
+    const result = await fetchPageFile(file);
+    if (!result.ok) {
+      contentEl.innerHTML = `<div class="error-message">
+        <h2>Page not available</h2>
+        <p>${pageNotFoundMessage()}</p>
+      </div>`;
+      document.title = (config.sitename || 'MD-CMS');
+      refreshCategoryBar();
+      if (categoriesUse) populateCategoryOptions('');
+      return;
+    }
+
+    const { meta, body } = parseFrontmatter(result.text);
+
+    let html = `<div class="title-bar">
+      <span>${config.sitename || 'MD-CMS'}</span>
+      <span class="title-bar-sep">›</span>
+      <span>${meta.title || file}</span>
+    </div>`;
+    html += '<div class="md-content">' + renderMarkdown(body) + '</div>';
+    contentEl.innerHTML = html;
+
+    // Hydrate any mdcms tag blocks (post listings)
+    hydrateMdcmsTags();
+
+    const firstH = contentEl.querySelector('.md-content h1, .md-content h2');
+    if (firstH && (meta.author || meta.created)) {
+      const metaEl = document.createElement('div');
+      metaEl.className = 'page-meta';
+      let metaText = '';
+      if (meta.author) metaText += meta.author;
+      const displayDate = meta.created;
+      if (displayDate) {
+        if (metaText) metaText += ' | ';
+        metaText += 'Published ' + formatDate(displayDate);
+        if (meta.modified) metaText += ' (last updated ' + formatDate(meta.modified) + ')';
+      }
+      metaEl.textContent = metaText;
+      firstH.after(metaEl);
+    }
+
+    document.title = (meta.title ? meta.title + ' — ' : '') + (config.sitename || 'MD-CMS');
+    const descMeta = document.querySelector('meta[name="description"]');
+    if (descMeta) descMeta.setAttribute('content', meta.description || config.sitedescription || '');
+    if (meta.language) document.documentElement.setAttribute('lang', meta.language);
+
+    if (typeof hljs !== 'undefined') {
+      contentEl.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
+    }
+    window.scrollTo(0, 0);
+
+    refreshCategoryBar();
+    if (categoriesUse) populateCategoryOptions('');
+  }
+
+  // ─── Defaults & routing ──────────────────────────────────
+  function defaultPage() {
+    return config.homepage || 'pages/home.md';
+  }
+
+  function getPageFromHash() {
+    const hash = window.location.hash.slice(1);
+    return hash || null;
+  }
+
+  window.addEventListener('hashchange', () => {
+    const page = getPageFromHash();
+    if (page && page !== currentPage) navigateTo(page);
+  });
+
+  // ─── Scroll to top ───────────────────────────────────────
+  const scrollBtn = document.getElementById('scrollTop');
+  window.addEventListener('scroll', () => {
+    scrollBtn.classList.toggle('visible', window.scrollY > 300);
+  });
+  scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  // ─── Boot ────────────────────────────────────────────────
+  async function boot() {
+    try {
+      const configResp = await fetch('config.yml');
+      if (!configResp.ok) throw new Error('config.yml not found');
+      config = jsyaml.load(await configResp.text()) || {};
+
+      document.title = config.sitename || 'MD-CMS';
+      if (config.favicon) {
+        const link = document.querySelector('link[rel="icon"]');
+        if (link) link.href = `assets/images/${config.favicon}`;
+      } else if (config.logo) {
+        const link = document.querySelector('link[rel="icon"]');
+        if (link) link.href = `assets/images/${config.logo}`;
+      }
+
+      if (config.theme) {
+        try {
+          const themeResp = await fetch(config.theme);
+          if (themeResp.ok) themeConfig = jsyaml.load(await themeResp.text()) || {};
+        } catch (e) { /* fall back to hardcoded CSS defaults */ }
+      }
+
+      loadFonts(themeConfig);
+      initCategories();
+
+      const iconsToPreload = [...STANDARD_ICONS];
+      if (config['categories-selecticon']) iconsToPreload.push(config['categories-selecticon']);
+      await Promise.all(iconsToPreload.map(name => loadIcon(name)));
+
+      const navMode = config.navigation || 'sidebar';
+      if (navMode === 'topbar') buildTopbar();
+      else buildSidebar();
+
+      if (config.theme) applyThemeYml(themeConfig);
+      else applyConfigTheme();
+      applyTheme(getInitialTheme());
+
+      // nav.yml — phase 2 expects `sections:` + `pages:` blocks; phase 1 flat
+      // list is accepted for backwards compatibility.
+      const navResp = await fetch('nav.yml');
+      if (navResp.ok) {
+        const parsed = jsyaml.load(await navResp.text()) || {};
+        if (Array.isArray(parsed)) {
+          navData = parsed;
+          navSections = [];
+        } else {
+          navData = parsed.pages || [];
+          navSections = parsed.sections || [];
+        }
+        renderNav();
+      }
+
+      if (config.search !== false) {
+        try {
+          const searchResp = await fetch('search.json');
+          if (searchResp.ok) {
+            searchIndex = await searchResp.json();
+            fuseInstance = new Fuse(searchIndex, {
+              keys: [
+                { name: 'title', weight: 3 },
+                { name: 'keywords', weight: 2 },
+                { name: 'description', weight: 1.5 },
+                { name: 'body', weight: 1 }
+              ],
+              threshold: 0.35,
+              ignoreLocation: true,
+              includeMatches: true
+            });
+          }
+        } catch (e) { /* search index optional */ }
+      }
+
+      // Initial category application: load font if needed, render dropdown
+      if (categoriesUse) {
+        refreshCategoryBar();
+        await maybeLoadCategoryFont(activeCategory);
+      }
+
+      const hashPage = getPageFromHash();
+      await navigateTo(hashPage || defaultPage());
+    } catch (err) {
+      document.getElementById('app').innerHTML = `<div style="max-width:600px;margin:4rem auto;padding:2rem;text-align:center;font-family:system-ui;">
+        <h1 style="color:#EF4444;font-size:1.5rem;">MD-CMS Error</h1>
+        <p style="margin-top:1rem;color:#64748B;">${err.message}</p>
+        <p style="margin-top:0.5rem;color:#94A3B8;font-size:0.9rem;">Make sure config.yml exists. If running locally, use a local HTTP server (option 8 in mdcms.py).</p>
+      </div>`;
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
+</script>
+</body>
+</html>

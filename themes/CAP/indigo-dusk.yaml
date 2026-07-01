@@ -1,0 +1,74 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — indigo dusk
+# Deep indigo on cool gray. Geometric, contemporary, technical.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#4F46E5"
+  background: "#FBFBFE"
+  nav-background: "#EFF0F8"
+  text: "#15172B"
+  text-muted: "#6A6D8F"
+
+dark:
+  accent: "#A39BFF"
+  background: "#0B0C1C"
+  nav-background: "#14162B"
+  text: "#EAEBF5"
+  text-muted: "#9698B8"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#4F46E5"
+  warning: "#C77A12"
+  success: "#0E8A5F"
+  error: "#D63F4A"
+
+colours-semantic-dark:
+  info: "#7770EB"
+  warning: "#F1B869"
+  success: "#6BF0C2"
+  error: "#E27980"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#4F46E5"
+    background-colour: "#4F46E5"
+  warning:
+    icon: warning
+    primary-colour: "#C77A12"
+    background-colour: "#C77A12"
+  success:
+    icon: success
+    primary-colour: "#0E8A5F"
+    background-colour: "#0E8A5F"
+  error:
+    icon: error
+    primary-colour: "#D63F4A"
+    background-colour: "#D63F4A"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:Space Grotesk:400"
+font-heading: "bunny:Space Grotesk:600"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.65      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

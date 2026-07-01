@@ -1,0 +1,85 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — os-cupertino
+# Mac desktop feel. Bright white paper, light-platinum sidebar,
+# vivid system blue accent. Dark mode goes near-black with brighter blue.
+#
+# Colours from Apple's publicly-documented system colour palette
+# (developer.apple.com → Human Interface Guidelines → Color):
+#   systemBlue light  #007AFF   dark  #0A84FF
+#   secondarySystemBackground (light)  #F2F2F7
+#   systemBackground (dark)            #000000
+#   secondarySystemBackground (dark)   #1C1C1E
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#007AFF"
+  background: "#FFFFFF"
+  nav-background: "#F2F2F7"
+  text: "#1D1D1F"
+  text-muted: "#6E6E73"
+
+dark:
+  accent: "#0A84FF"
+  background: "#1E1E1E"
+  nav-background: "#2C2C2E"
+  text: "#F5F5F7"
+  text-muted: "#98989D"
+
+# ──────────────────────────────────
+# Semantic colours — Apple system colours (light / dark)
+#   green  #34C759 / #30D158
+#   orange #FF9500 / #FF9F0A
+#   red    #FF3B30 / #FF453A
+# ──────────────────────────────────
+colours-semantic:
+  info: "#007AFF"
+  warning: "#FF9500"
+  success: "#34C759"
+  error: "#FF3B30"
+
+colours-semantic-dark:
+  info: "#0A84FF"
+  warning: "#FF9F0A"
+  success: "#30D158"
+  error: "#FF453A"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#007AFF"
+    background-colour: "#007AFF"
+  warning:
+    icon: warning
+    primary-colour: "#FF9500"
+    background-colour: "#FF9500"
+  success:
+    icon: success
+    primary-colour: "#34C759"
+    background-colour: "#34C759"
+  error:
+    icon: error
+    primary-colour: "#FF3B30"
+    background-colour: "#FF3B30"
+
+# ──────────────────────────────────
+# Typography
+# Inter is the portable default — close metrics to SF.
+# Preferred on Apple platforms: SF Pro Text (body), SF Pro Display (headings).
+# Drop your own TTFs in /fonts and change font-body / font-heading to
+# "local:SF Pro Text:400" etc.
+# ──────────────────────────────────
+font-body: "bunny:Inter:400"
+font-heading: "bunny:Inter:600"
+font-size: 1.00
+line-height: 1.55
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 78em
+nav-width: 20em

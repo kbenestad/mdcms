@@ -1,0 +1,84 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — os-system-7
+# Classic Macintosh System 7 / early Mac OS. Black on white with the
+# Platinum-grey window chrome that arrived around System 7.5. Very flat,
+# very calm, very monochrome.
+#
+# Colours:
+#   #FFFFFF  paper (white)
+#   #DDDDDD  Platinum window chrome
+#   #000000  ink (1-bit Mac heritage)
+#   #B0B0B0  shadow grey
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#000000"
+  background: "#FFFFFF"
+  nav-background: "#DDDDDD"
+  text: "#000000"
+  text-muted: "#555555"
+
+dark:
+  accent: "#FFFFFF"
+  background: "#1A1A1A"
+  nav-background: "#262626"
+  text: "#FFFFFF"
+  text-muted: "#A0A0A0"
+
+# ──────────────────────────────────
+# Semantic colours — restrained, since System 7 was a 1-bit interface
+# until colour Macs. Kept muted and "drawn-in-MacPaint".
+# ──────────────────────────────────
+colours-semantic:
+  info: "#000000"
+  warning: "#7A5A00"
+  success: "#1F5A1F"
+  error: "#8B0000"
+
+colours-semantic-dark:
+  info: "#FFFFFF"
+  warning: "#E5C36B"
+  success: "#7FB87F"
+  error: "#E08585"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#000000"
+    background-colour: "#000000"
+  warning:
+    icon: warning
+    primary-colour: "#7A5A00"
+    background-colour: "#7A5A00"
+  success:
+    icon: success
+    primary-colour: "#1F5A1F"
+    background-colour: "#1F5A1F"
+  error:
+    icon: error
+    primary-colour: "#8B0000"
+    background-colour: "#8B0000"
+
+# ──────────────────────────────────
+# Typography
+# Inter portable default. Preferred for true System 7 fidelity:
+#   "ChicagoFLF" (free Chicago revival, body) for headings
+#   "Geneva" (system) for body — or any free Geneva-alike like
+#   "Charcoal CY" or "ArkPixel".
+# For an authentic 1-bit look, try a pixel font like "VT323".
+# ──────────────────────────────────
+font-body: "bunny:Inter:400"
+font-heading: "bunny:Inter:700"
+font-size: 1.00
+line-height: 1.6
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 76em
+nav-width: 20em

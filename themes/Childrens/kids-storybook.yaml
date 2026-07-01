@@ -1,0 +1,74 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — kids · storybook
+# Soft pastel coral with serif headlines. Reads like a children\'s book.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#C25A3F"
+  background: "#FFF8F0"
+  nav-background: "#FFE8D8"
+  text: "#2A1F1A"
+  text-muted: "#8A6F5E"
+
+dark:
+  accent: "#FFA078"
+  background: "#1A140E"
+  nav-background: "#251812"
+  text: "#F4E8D8"
+  text-muted: "#B89580"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#5A7AB8"
+  warning: "#C25A3F"
+  success: "#3F8A5A"
+  error: "#A0381F"
+
+colours-semantic-dark:
+  info: "#89A2D2"
+  warning: "#D89583"
+  success: "#89D2A3"
+  error: "#E58C76"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#5A7AB8"
+    background-colour: "#5A7AB8"
+  warning:
+    icon: warning
+    primary-colour: "#C25A3F"
+    background-colour: "#C25A3F"
+  success:
+    icon: success
+    primary-colour: "#3F8A5A"
+    background-colour: "#3F8A5A"
+  error:
+    icon: error
+    primary-colour: "#A0381F"
+    background-colour: "#A0381F"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:Nunito Sans:400"
+font-heading: "bunny:Newsreader:600"
+font-size: 1.05        # unitless multiplier (1.0 = 16px base)
+line-height: 1.75      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

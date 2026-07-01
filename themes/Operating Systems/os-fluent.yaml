@@ -1,0 +1,81 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — os-fluent
+# Windows 11 / Fluent feel. Cool near-white "Mica" paper, light gray sidebar,
+# Windows accent blue. Dark mode uses the dark mica neutrals.
+#
+# Colours from Microsoft's public Fluent 2 design tokens:
+#   accent (light): #005FB8   accent (dark): #60CDFF
+#   neutralBackground1 light  #F9F9F9 / sidebar #F3F3F3
+#   neutralBackground1 dark   #202020 / sidebar #2C2C2C
+#   neutralForeground1 light  #1A1A1A / dark #FFFFFF
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#005FB8"
+  background: "#F9F9F9"
+  nav-background: "#F3F3F3"
+  text: "#1A1A1A"
+  text-muted: "#5C5C5C"
+
+dark:
+  accent: "#60CDFF"
+  background: "#202020"
+  nav-background: "#2C2C2C"
+  text: "#FFFFFF"
+  text-muted: "#C7C7C7"
+
+# ──────────────────────────────────
+# Semantic colours — Fluent persona / shared colours
+# ──────────────────────────────────
+colours-semantic:
+  info: "#005FB8"
+  warning: "#9D5D00"
+  success: "#107C10"
+  error: "#C42B1C"
+
+colours-semantic-dark:
+  info: "#60CDFF"
+  warning: "#FCE100"
+  success: "#6CCB5F"
+  error: "#FF99A4"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#005FB8"
+    background-colour: "#005FB8"
+  warning:
+    icon: warning
+    primary-colour: "#9D5D00"
+    background-colour: "#9D5D00"
+  success:
+    icon: success
+    primary-colour: "#107C10"
+    background-colour: "#107C10"
+  error:
+    icon: error
+    primary-colour: "#C42B1C"
+    background-colour: "#C42B1C"
+
+# ──────────────────────────────────
+# Typography
+# Inter portable default. Preferred on Windows: Segoe UI Variable Text
+# (body) / Segoe UI Variable Display (headings). Open alternatives:
+# "Selawik" or "Selawik Semilight" (Microsoft's Segoe-metric-compatible
+# release). Drop TTFs in /fonts and swap to "local:Segoe UI Variable:400".
+# ──────────────────────────────────
+font-body: "bunny:Inter:400"
+font-heading: "bunny:Inter:600"
+font-size: 1.00
+line-height: 1.55
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 78em
+nav-width: 20em

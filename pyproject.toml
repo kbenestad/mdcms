@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mdcms"
+version = "0.6.0"
+description = "MD-CMS — Markdown-based CMS companion CLI"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Kristian Benestad" }]
+requires-python = ">=3.9"
+dependencies = [
+    "click>=8.0",
+    "PyYAML>=6.0",
+    "certifi>=2024.0",
+]
+
+[project.scripts]
+mdcms = "mdcms:main"
+
+[project.urls]
+Homepage = "https://github.com/kbenestad/mdcms"
+Documentation = "https://docs.benestad.net"
+
+[tool.setuptools]
+py-modules = ["mdcms"]

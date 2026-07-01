@@ -1,0 +1,81 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — os-elementary
+# elementary OS feel. Calm paper, "Slate" silver chrome,
+# Blueberry-blue accent. Inter is their actual UI typeface (Inter Variable).
+#
+# Colours from elementary's published Stylesheet (Granite/Pantheon):
+#   Blueberry 500  #3689E6  (accent)
+#   Slate 100      #F4F4F4  /  Slate 700  #333333
+#   Strawberry/Lime/Banana/Cherry are the named semantic palette.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#3689E6"
+  background: "#FAFAFA"
+  nav-background: "#F4F4F4"
+  text: "#333333"
+  text-muted: "#7E8087"
+
+dark:
+  accent: "#64BAFF"
+  background: "#1A1A1A"
+  nav-background: "#262626"
+  text: "#FFFFFF"
+  text-muted: "#A6A6A6"
+
+# ──────────────────────────────────
+# Semantic colours — elementary named palette
+#   Lime 500     #68B723  success
+#   Banana 500   #F9C440  warning
+#   Strawberry 500 #C6262E  error
+#   Blueberry 500 #3689E6  info
+# ──────────────────────────────────
+colours-semantic:
+  info: "#3689E6"
+  warning: "#F9C440"
+  success: "#68B723"
+  error: "#C6262E"
+
+colours-semantic-dark:
+  info: "#64BAFF"
+  warning: "#FFD66B"
+  success: "#9BDB4D"
+  error: "#E14852"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#3689E6"
+    background-colour: "#3689E6"
+  warning:
+    icon: warning
+    primary-colour: "#F9C440"
+    background-colour: "#F9C440"
+  success:
+    icon: success
+    primary-colour: "#68B723"
+    background-colour: "#68B723"
+  error:
+    icon: error
+    primary-colour: "#C6262E"
+    background-colour: "#C6262E"
+
+# ──────────────────────────────────
+# Typography
+# Inter is elementary's actual UI typeface — used as-is.
+# ──────────────────────────────────
+font-body: "bunny:Inter:400"
+font-heading: "bunny:Inter:600"
+font-size: 1.00
+line-height: 1.55
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 78em
+nav-width: 20em

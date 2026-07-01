@@ -1,0 +1,74 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — medical · clinic
+# Restrained clinical teal on white. Calm, sterile, professional.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#0E7C7B"
+  background: "#FFFFFF"
+  nav-background: "#EAF4F4"
+  text: "#1A1A1A"
+  text-muted: "#5C7878"
+
+dark:
+  accent: "#4ABABA"
+  background: "#0A1414"
+  nav-background: "#122020"
+  text: "#E8F0F0"
+  text-muted: "#8AA8A8"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#0E7C7B"
+  warning: "#B26A1F"
+  success: "#2F8A4A"
+  error: "#C13030"
+
+colours-semantic-dark:
+  info: "#6CEEED"
+  warning: "#E7AF74"
+  success: "#85D69D"
+  error: "#DE7C7C"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#0E7C7B"
+    background-colour: "#0E7C7B"
+  warning:
+    icon: warning
+    primary-colour: "#B26A1F"
+    background-colour: "#B26A1F"
+  success:
+    icon: success
+    primary-colour: "#2F8A4A"
+    background-colour: "#2F8A4A"
+  error:
+    icon: error
+    primary-colour: "#C13030"
+    background-colour: "#C13030"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:IBM Plex Sans:400"
+font-heading: "bunny:IBM Plex Sans:600"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.65      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

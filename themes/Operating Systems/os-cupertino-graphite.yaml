@@ -1,0 +1,72 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — os-cupertino-graphite
+# Mac desktop, Graphite accent variant — for people who switch the system
+# tint to "Graphite" because they're serious. Pure neutral chrome.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#6E6E73"
+  background: "#FFFFFF"
+  nav-background: "#F2F2F7"
+  text: "#1D1D1F"
+  text-muted: "#6E6E73"
+
+dark:
+  accent: "#98989D"
+  background: "#1E1E1E"
+  nav-background: "#2C2C2E"
+  text: "#F5F5F7"
+  text-muted: "#98989D"
+
+# ──────────────────────────────────
+# Semantic colours
+# ──────────────────────────────────
+colours-semantic:
+  info: "#6E6E73"
+  warning: "#FF9500"
+  success: "#34C759"
+  error: "#FF3B30"
+
+colours-semantic-dark:
+  info: "#98989D"
+  warning: "#FF9F0A"
+  success: "#30D158"
+  error: "#FF453A"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#6E6E73"
+    background-colour: "#6E6E73"
+  warning:
+    icon: warning
+    primary-colour: "#FF9500"
+    background-colour: "#FF9500"
+  success:
+    icon: success
+    primary-colour: "#34C759"
+    background-colour: "#34C759"
+  error:
+    icon: error
+    primary-colour: "#FF3B30"
+    background-colour: "#FF3B30"
+
+# ──────────────────────────────────
+# Typography
+# Inter portable default. Preferred: SF Pro Text / SF Pro Display.
+# ──────────────────────────────────
+font-body: "bunny:Inter:400"
+font-heading: "bunny:Inter:600"
+font-size: 1.00
+line-height: 1.55
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 78em
+nav-width: 20em

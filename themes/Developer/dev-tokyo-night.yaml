@@ -1,0 +1,74 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — tokyo night
+# Neon storefront on midnight asphalt. enkia's vivid Tokyo palette.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#34548A"
+  background: "#E1E2E7"
+  nav-background: "#D5D6DB"
+  text: "#343B58"
+  text-muted: "#565A6E"
+
+dark:
+  accent: "#7AA2F7"
+  background: "#1A1B26"
+  nav-background: "#16161E"
+  text: "#C0CAF5"
+  text-muted: "#A9B1D6"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#7AA2F7"
+  warning: "#E0AF68"
+  success: "#9ECE6A"
+  error: "#F7768E"
+
+colours-semantic-dark:
+  info: "#6593F6"
+  warning: "#E3B778"
+  success: "#9ECE6A"
+  error: "#F66580"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#7AA2F7"
+    background-colour: "#7AA2F7"
+  warning:
+    icon: warning
+    primary-colour: "#E0AF68"
+    background-colour: "#E0AF68"
+  success:
+    icon: success
+    primary-colour: "#9ECE6A"
+    background-colour: "#9ECE6A"
+  error:
+    icon: error
+    primary-colour: "#F7768E"
+    background-colour: "#F7768E"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:IBM Plex Sans:300"
+font-heading: "bunny:IBM Plex Sans:600"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.70      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

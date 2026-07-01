@@ -1,0 +1,84 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — os-nextstep
+# NeXTSTEP / OPENSTEP revival. Cool 50% greys everywhere, jet-black
+# title chrome, and the famous NeXT magenta as the accent. Heavy,
+# considered, very 1989 Cube energy.
+#
+# Colours approximated from NeXTSTEP's 2-bit greyscale + colour passes:
+#   #555555  dark window chrome (title bars, scrollbar wells)
+#   #AAAAAA  panel face (50% grey)
+#   #DDDDDD  highlight
+#   #000000  ink
+#   #C72A86  NeXT magenta (used in logo + accents)
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#C72A86"
+  background: "#DDDDDD"
+  nav-background: "#555555"
+  text: "#000000"
+  text-muted: "#5A5A5A"
+
+dark:
+  accent: "#E579B5"
+  background: "#1A1A1A"
+  nav-background: "#000000"
+  text: "#DDDDDD"
+  text-muted: "#A0A0A0"
+
+# ──────────────────────────────────
+# Semantic colours — kept restrained, in keeping with the grey-on-grey
+# NeXTSTEP discipline.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#3A6FA5"
+  warning: "#A06A00"
+  success: "#3E7A3E"
+  error: "#A02828"
+
+colours-semantic-dark:
+  info: "#88AED9"
+  warning: "#D9B36B"
+  success: "#86C58B"
+  error: "#E07A7A"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#3A6FA5"
+    background-colour: "#3A6FA5"
+  warning:
+    icon: warning
+    primary-colour: "#A06A00"
+    background-colour: "#A06A00"
+  success:
+    icon: success
+    primary-colour: "#3E7A3E"
+    background-colour: "#3E7A3E"
+  error:
+    icon: error
+    primary-colour: "#A02828"
+    background-colour: "#A02828"
+
+# ──────────────────────────────────
+# Typography
+# Inter portable default. NeXTSTEP used Helvetica system-wide.
+# Preferred: "Helvetica Neue" (Apple system) — falls back to Inter.
+# For the more brutalist OPENSTEP feel try "bunny:Helvetica:400"
+# if you have it installed locally.
+# ──────────────────────────────────
+font-body: "bunny:Inter:400"
+font-heading: "bunny:Inter:700"
+font-size: 1.00
+line-height: 1.55
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 76em
+nav-width: 20em

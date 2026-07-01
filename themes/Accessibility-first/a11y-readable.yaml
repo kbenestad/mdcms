@@ -1,0 +1,74 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — a11y · readable
+# Cream background, soft contrast, generous line-height. Dyslexia and low-vision friendly.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#2A5C8F"
+  background: "#FAF4E6"
+  nav-background: "#F0E8D0"
+  text: "#2A2620"
+  text-muted: "#6E665A"
+
+dark:
+  accent: "#79A5D8"
+  background: "#1A1814"
+  nav-background: "#252118"
+  text: "#F0E8D8"
+  text-muted: "#A89E8A"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#2A5C8F"
+  warning: "#8B5A00"
+  success: "#1F6B3C"
+  error: "#A0381F"
+
+colours-semantic-dark:
+  info: "#81ADDA"
+  warning: "#FFC55C"
+  success: "#80DAA3"
+  error: "#E58C76"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#2A5C8F"
+    background-colour: "#2A5C8F"
+  warning:
+    icon: warning
+    primary-colour: "#8B5A00"
+    background-colour: "#8B5A00"
+  success:
+    icon: success
+    primary-colour: "#1F6B3C"
+    background-colour: "#1F6B3C"
+  error:
+    icon: error
+    primary-colour: "#A0381F"
+    background-colour: "#A0381F"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:Atkinson Hyperlegible:400"
+font-heading: "bunny:Atkinson Hyperlegible:700"
+font-size: 1.05        # unitless multiplier (1.0 = 16px base)
+line-height: 1.85      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

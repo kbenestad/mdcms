@@ -1,0 +1,46 @@
+# mdcms theme — Foundations of Modern Philosophy
+light:
+  accent: "#744210"
+  background: "#FFFFF8"
+  nav-background: "#F7F3E9"
+  text: "#1A202C"
+  text-muted: "#718096"
+
+dark:
+  accent: "#F6AD55"
+  background: "#1A1611"
+  nav-background: "#211D18"
+  text: "#EDF2F7"
+  text-muted: "#A0AEC0"
+
+colours-semantic:
+  info: "#2B6CB0"
+  warning: "#C05621"
+  success: "#276749"
+  error: "#C53030"
+
+callouts:
+  info:
+    icon: info
+    primary-colour: "#2B6CB0"
+    background-colour: "#2B6CB0"
+  warning:
+    icon: warning
+    primary-colour: "#C05621"
+    background-colour: "#C05621"
+  success:
+    icon: success
+    primary-colour: "#276749"
+    background-colour: "#276749"
+  error:
+    icon: error
+    primary-colour: "#C53030"
+    background-colour: "#C53030"
+
+font-body: "bunny:Source Serif 4:400"
+font-heading: "bunny:Source Serif 4:700"
+font-size: 1.0
+line-height: 1.85
+
+main-width: 72em
+nav-width: 20em

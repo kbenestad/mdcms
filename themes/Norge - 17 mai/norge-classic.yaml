@@ -1,0 +1,86 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — norge · classic
+# Norwegian red on white, with a navy nav sidebar. The 17 May default.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#BA0C2F"
+  background: "#FFFFFF"
+  nav-background: "#00205B"
+  text: "#00205B"
+  text-muted: "#6E7794"
+  nav-link: "rgba(255,255,255,0.92)"
+  nav-link-active: "#FFFFFF"
+  nav-section-heading: "rgba(255,255,255,0.65)"
+  nav-sitename: "#FFFFFF"
+  nav-description: "rgba(255,255,255,0.70)"
+  nav-toggle: "rgba(255,255,255,0.70)"
+
+dark:
+  accent: "#BA0C2F"
+  background: "#00205B"
+  nav-background: "#001540"
+  text: "#FFFFFF"
+  text-muted: "#9DB1E0"
+  nav-link: "rgba(255,255,255,0.92)"
+  nav-link-active: "#FFFFFF"
+  nav-section-heading: "rgba(255,255,255,0.65)"
+  nav-sitename: "#FFFFFF"
+  nav-description: "rgba(255,255,255,0.70)"
+  nav-toggle: "rgba(255,255,255,0.70)"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#00205B"
+  warning: "#B26A1F"
+  success: "#2F7A4A"
+  error: "#BA0C2F"
+
+colours-semantic-dark:
+  info: "#5C95FF"
+  warning: "#E7AF74"
+  success: "#89D2A3"
+  error: "#F56683"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#00205B"
+    background-colour: "#00205B"
+  warning:
+    icon: warning
+    primary-colour: "#B26A1F"
+    background-colour: "#B26A1F"
+  success:
+    icon: success
+    primary-colour: "#2F7A4A"
+    background-colour: "#2F7A4A"
+  error:
+    icon: error
+    primary-colour: "#BA0C2F"
+    background-colour: "#BA0C2F"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:IBM Plex Sans:300"
+font-heading: "bunny:IBM Plex Sans:600"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.70      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

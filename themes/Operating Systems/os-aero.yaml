@@ -1,0 +1,82 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — os-aero
+# Windows Vista / 7 "Aero Glass" feel. Pale glass-tinted blue chrome,
+# translucent sidebar vibes, bright sky-blue accent. The desktop your
+# laptop sweated to render in 2009.
+#
+# Colours approximated from the default Aero theme palette:
+#   accent (taskbar / button glow)  #1A78D4
+#   glass tint                       #B8D6F0 (frosted blue)
+#   window face                      #F0F4F9
+#   text                             #1B1B1B
+# Aero Dark / "Aero Black" variant uses the same accent over near-black.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#1A78D4"
+  background: "#F4F9FE"
+  nav-background: "#B8D6F0"
+  text: "#1B1B1B"
+  text-muted: "#525E6E"
+
+dark:
+  accent: "#4FC3F7"
+  background: "#0F1A2A"
+  nav-background: "#1A2A40"
+  text: "#EAF2FC"
+  text-muted: "#8FA8C4"
+
+# ──────────────────────────────────
+# Semantic colours — Vista/7 standard hues
+# ──────────────────────────────────
+colours-semantic:
+  info: "#1A78D4"
+  warning: "#E59400"
+  success: "#1E8C3F"
+  error: "#C42B1C"
+
+colours-semantic-dark:
+  info: "#4FC3F7"
+  warning: "#FFC74A"
+  success: "#7AD18F"
+  error: "#FF7A7A"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#1A78D4"
+    background-colour: "#1A78D4"
+  warning:
+    icon: warning
+    primary-colour: "#E59400"
+    background-colour: "#E59400"
+  success:
+    icon: success
+    primary-colour: "#1E8C3F"
+    background-colour: "#1E8C3F"
+  error:
+    icon: error
+    primary-colour: "#C42B1C"
+    background-colour: "#C42B1C"
+
+# ──────────────────────────────────
+# Typography
+# Inter portable default. Preferred: Segoe UI (Vista/7 default — first
+# Microsoft OS to ship it). Open Segoe-metric-compatible alternative:
+# "Selawik". Drop your TTFs in /fonts and swap font-body / font-heading.
+# ──────────────────────────────────
+font-body: "bunny:Inter:400"
+font-heading: "bunny:Inter:600"
+font-size: 1.00
+line-height: 1.55
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 78em
+nav-width: 20em

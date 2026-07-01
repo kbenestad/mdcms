@@ -1,0 +1,80 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — legal · court
+# Judicial brass on charcoal nav. Serif heads with sans body — formal but legible.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#8B6F1E"
+  background: "#FAFAF6"
+  nav-background: "#2A2A24"
+  text: "#1A1A14"
+  text-muted: "#5C5C56"
+  nav-link: "#E2E2E2"
+  nav-link-active: "#8B6F1E"
+  nav-section-heading: "#9A9A9A"
+  nav-sitename: "#FFFFFF"
+  nav-description: "#9A9A9A"
+  nav-toggle: "#9A9A9A"
+
+dark:
+  accent: "#D8B048"
+  background: "#0A0A08"
+  nav-background: "#1A1A14"
+  text: "#F0F0E8"
+  text-muted: "#A8A89A"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#2A4A8F"
+  warning: "#8B6F1E"
+  success: "#3F6B3C"
+  error: "#9C3A2A"
+
+colours-semantic-dark:
+  info: "#819DDA"
+  warning: "#E2C779"
+  success: "#8DD289"
+  error: "#DC8C7E"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#2A4A8F"
+    background-colour: "#2A4A8F"
+  warning:
+    icon: warning
+    primary-colour: "#8B6F1E"
+    background-colour: "#8B6F1E"
+  success:
+    icon: success
+    primary-colour: "#3F6B3C"
+    background-colour: "#3F6B3C"
+  error:
+    icon: error
+    primary-colour: "#9C3A2A"
+    background-colour: "#9C3A2A"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:Public Sans:400"
+font-heading: "bunny:EB Garamond:700"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.70      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

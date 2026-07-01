@@ -1,0 +1,85 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — os-chromeos
+# ChromeOS feel. Bright white shelf, soft Google-grey surface,
+# Google Blue accent. Material-rooted but its own dialect.
+#
+# Colours from Google's public ChromeOS / Material reference:
+#   Google Blue 600   #1A73E8  (accent light)
+#   Google Blue 200   #8AB4F8  (accent dark)
+#   Surface           #FFFFFF / #202124
+#   Surface variant   #F1F3F4 / #292A2D
+#   On-surface        #202124 / #E8EAED
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#1A73E8"
+  background: "#FFFFFF"
+  nav-background: "#F1F3F4"
+  text: "#202124"
+  text-muted: "#5F6368"
+
+dark:
+  accent: "#8AB4F8"
+  background: "#202124"
+  nav-background: "#292A2D"
+  text: "#E8EAED"
+  text-muted: "#9AA0A6"
+
+# ──────────────────────────────────
+# Semantic colours — Google standard hues
+#   Green 700 #1E8E3E / Green 300 #81C995
+#   Yellow 700 #F29900 / Yellow 300 #FDD663
+#   Red 600 #D93025 / Red 300 #F28B82
+# ──────────────────────────────────
+colours-semantic:
+  info: "#1A73E8"
+  warning: "#F29900"
+  success: "#1E8E3E"
+  error: "#D93025"
+
+colours-semantic-dark:
+  info: "#8AB4F8"
+  warning: "#FDD663"
+  success: "#81C995"
+  error: "#F28B82"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#1A73E8"
+    background-colour: "#1A73E8"
+  warning:
+    icon: warning
+    primary-colour: "#F29900"
+    background-colour: "#F29900"
+  success:
+    icon: success
+    primary-colour: "#1E8E3E"
+    background-colour: "#1E8E3E"
+  error:
+    icon: error
+    primary-colour: "#D93025"
+    background-colour: "#D93025"
+
+# ──────────────────────────────────
+# Typography
+# Roboto is the portable default and ChromeOS's body font.
+# Preferred for headings: "Google Sans" (proprietary, restricted).
+# Open near-equivalent for Google Sans display: "Product Sans"
+# — also restricted; use Roboto for both and you'll be fine.
+# ──────────────────────────────────
+font-body: "bunny:Roboto:400"
+font-heading: "bunny:Roboto:500"
+font-size: 1.00
+line-height: 1.55
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 78em
+nav-width: 20em

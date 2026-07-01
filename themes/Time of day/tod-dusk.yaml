@@ -1,0 +1,74 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — time · dusk
+# Twilight purple-pink. Reflective, end-of-day calm.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#5B3A8C"
+  background: "#F6F0F5"
+  nav-background: "#EBDFE8"
+  text: "#2A1F2E"
+  text-muted: "#75607A"
+
+dark:
+  accent: "#A78AD8"
+  background: "#14101C"
+  nav-background: "#1F1828"
+  text: "#E8DCEC"
+  text-muted: "#A0909A"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#5B3A8C"
+  warning: "#B26A1F"
+  success: "#3F6B3C"
+  error: "#9C3A4A"
+
+colours-semantic-dark:
+  info: "#A689D2"
+  warning: "#E7AF74"
+  success: "#8DD289"
+  error: "#D38894"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#5B3A8C"
+    background-colour: "#5B3A8C"
+  warning:
+    icon: warning
+    primary-colour: "#B26A1F"
+    background-colour: "#B26A1F"
+  success:
+    icon: success
+    primary-colour: "#3F6B3C"
+    background-colour: "#3F6B3C"
+  error:
+    icon: error
+    primary-colour: "#9C3A4A"
+    background-colour: "#9C3A4A"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:Manrope:400"
+font-heading: "bunny:Manrope:700"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.70      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

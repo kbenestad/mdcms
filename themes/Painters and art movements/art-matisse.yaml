@@ -1,0 +1,86 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — matisse
+# Cut-paper joy — Matisse coral and lapis on warm cream. La Gerbe.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#E04D2A"
+  background: "#FAF2DC"
+  nav-background: "#1E5BAE"
+  text: "#1A2238"
+  text-muted: "#6E6852"
+  nav-link: "rgba(255,255,255,0.92)"
+  nav-link-active: "#FFFFFF"
+  nav-section-heading: "rgba(255,255,255,0.65)"
+  nav-sitename: "#FFFFFF"
+  nav-description: "rgba(255,255,255,0.70)"
+  nav-toggle: "rgba(255,255,255,0.70)"
+
+dark:
+  accent: "#FF7050"
+  background: "#0E1830"
+  nav-background: "#0A2858"
+  text: "#FBE8C0"
+  text-muted: "#B8A88E"
+  nav-link: "rgba(255,255,255,0.92)"
+  nav-link-active: "#FF7050"
+  nav-section-heading: "rgba(255,255,255,0.65)"
+  nav-sitename: "#FFFFFF"
+  nav-description: "rgba(255,255,255,0.70)"
+  nav-toggle: "rgba(255,255,255,0.70)"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#1E5BAE"
+  warning: "#E0A018"
+  success: "#3F8A5A"
+  error: "#E04D2A"
+
+colours-semantic-dark:
+  info: "#74A5E7"
+  warning: "#EFC56C"
+  success: "#89D2A3"
+  error: "#EA8871"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#1E5BAE"
+    background-colour: "#1E5BAE"
+  warning:
+    icon: warning
+    primary-colour: "#E0A018"
+    background-colour: "#E0A018"
+  success:
+    icon: success
+    primary-colour: "#3F8A5A"
+    background-colour: "#3F8A5A"
+  error:
+    icon: error
+    primary-colour: "#E04D2A"
+    background-colour: "#E04D2A"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:Manrope:400"
+font-heading: "bunny:Manrope:800"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.65      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 78em
+nav-width: 20em

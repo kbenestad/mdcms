@@ -1,0 +1,80 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — dracula
+# Gothic purple-on-shadow. The canonical IDE pink + purple + cyan palette.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#BD93F9"
+  background: "#F8F8F2"
+  nav-background: "#E8E6F0"
+  text: "#282A36"
+  text-muted: "#6272A4"
+  nav-link: "#282A36"
+  nav-link-active: "#1A1A1A"
+  nav-section-heading: "#6272A4"
+  nav-sitename: "#282A36"
+  nav-description: "#6272A4"
+  nav-toggle: "#6272A4"
+
+dark:
+  accent: "#BD93F9"
+  background: "#282A36"
+  nav-background: "#21222C"
+  text: "#F8F8F2"
+  text-muted: "#6272A4"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#8BE9FD"
+  warning: "#FFB86C"
+  success: "#50FA7B"
+  error: "#FF5555"
+
+colours-semantic-dark:
+  info: "#8BE9FD"
+  warning: "#FFB86C"
+  success: "#50FA7B"
+  error: "#FF5C5C"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#8BE9FD"
+    background-colour: "#8BE9FD"
+  warning:
+    icon: warning
+    primary-colour: "#FFB86C"
+    background-colour: "#FFB86C"
+  success:
+    icon: success
+    primary-colour: "#50FA7B"
+    background-colour: "#50FA7B"
+  error:
+    icon: error
+    primary-colour: "#FF5555"
+    background-colour: "#FF5555"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:IBM Plex Sans:300"
+font-heading: "bunny:IBM Plex Sans:600"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.70      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

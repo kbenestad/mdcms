@@ -1,0 +1,46 @@
+# mdcms theme — The Kitchen Table
+light:
+  accent: "#B7410E"
+  background: "#FFFDF7"
+  nav-background: "#FFF8EE"
+  text: "#2D2016"
+  text-muted: "#8B6914"
+
+dark:
+  accent: "#F59E0B"
+  background: "#1C1208"
+  nav-background: "#241910"
+  text: "#FEF3C7"
+  text-muted: "#D97706"
+
+colours-semantic:
+  info: "#2563EB"
+  warning: "#D97706"
+  success: "#16A34A"
+  error: "#DC2626"
+
+callouts:
+  info:
+    icon: info
+    primary-colour: "#2563EB"
+    background-colour: "#2563EB"
+  warning:
+    icon: warning
+    primary-colour: "#D97706"
+    background-colour: "#D97706"
+  success:
+    icon: success
+    primary-colour: "#16A34A"
+    background-colour: "#16A34A"
+  error:
+    icon: error
+    primary-colour: "#DC2626"
+    background-colour: "#DC2626"
+
+font-body: "bunny:Merriweather:400"
+font-heading: "bunny:Playfair Display:700"
+font-size: 1.0
+line-height: 1.8
+
+main-width: 72em
+nav-width: 18em

@@ -1,0 +1,74 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — monokai
+# The 2006 TextMate classic — high-saturation on warm charcoal.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#F92672"
+  background: "#FAFAF6"
+  nav-background: "#F0EFE8"
+  text: "#272822"
+  text-muted: "#75715E"
+
+dark:
+  accent: "#F92672"
+  background: "#272822"
+  nav-background: "#1E1F1B"
+  text: "#F8F8F2"
+  text-muted: "#75715E"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#66D9EF"
+  warning: "#FD971F"
+  success: "#A6E22E"
+  error: "#F92672"
+
+colours-semantic-dark:
+  info: "#66D9EF"
+  warning: "#FEB45D"
+  success: "#A6E22E"
+  error: "#FB6098"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#66D9EF"
+    background-colour: "#66D9EF"
+  warning:
+    icon: warning
+    primary-colour: "#FD971F"
+    background-colour: "#FD971F"
+  success:
+    icon: success
+    primary-colour: "#A6E22E"
+    background-colour: "#A6E22E"
+  error:
+    icon: error
+    primary-colour: "#F92672"
+    background-colour: "#F92672"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:IBM Plex Sans:300"
+font-heading: "bunny:IBM Plex Sans:600"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.70      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em

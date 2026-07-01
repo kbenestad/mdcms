@@ -1,0 +1,23 @@
+{
+  "id": "/",
+  "name": "MD-CMS Phase 7 Test",
+  "short_name": "MDCMS Test",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563EB",
+  "icons": [
+    {
+      "src": "assets/images/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/images/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

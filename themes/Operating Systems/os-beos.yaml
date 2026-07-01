@@ -1,0 +1,80 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — os-beos
+# BeOS / Haiku revival. Iconic yellow window tab, cream paper,
+# navy text. The friendly weird desktop of 1996 that won't quit.
+#
+# Colours from Haiku's default "Beige" palette:
+#   panel background  #DCDCDC
+#   document-tab yellow  #FFCB00
+#   text         #000000
+#   accent (link/button) #336699 navy
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#336699"
+  background: "#F8F8E8"
+  nav-background: "#FFCB00"
+  text: "#000000"
+  text-muted: "#4A4A3E"
+
+dark:
+  accent: "#FFCB00"
+  background: "#1A1A14"
+  nav-background: "#2A2515"
+  text: "#F8F8E8"
+  text-muted: "#A89E70"
+
+# ──────────────────────────────────
+# Semantic colours
+# ──────────────────────────────────
+colours-semantic:
+  info: "#336699"
+  warning: "#CC7700"
+  success: "#3F8F3F"
+  error: "#B22222"
+
+colours-semantic-dark:
+  info: "#7FB2E0"
+  warning: "#FFCB00"
+  success: "#86C58B"
+  error: "#E07A7A"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#336699"
+    background-colour: "#336699"
+  warning:
+    icon: warning
+    primary-colour: "#CC7700"
+    background-colour: "#CC7700"
+  success:
+    icon: success
+    primary-colour: "#3F8F3F"
+    background-colour: "#3F8F3F"
+  error:
+    icon: error
+    primary-colour: "#B22222"
+    background-colour: "#B22222"
+
+# ──────────────────────────────────
+# Typography
+# Noto Sans is the portable default and Haiku's actual UI font.
+# Preferred (BeOS original): Swis721 BT / "Be Sans" (proprietary, paid).
+# DejaVu Sans is a very close free alternative.
+# ──────────────────────────────────
+font-body: "bunny:Noto Sans:400"
+font-heading: "bunny:Noto Sans:700"
+font-size: 1.00
+line-height: 1.55
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 78em
+nav-width: 20em

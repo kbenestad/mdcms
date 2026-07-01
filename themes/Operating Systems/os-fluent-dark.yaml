@@ -1,0 +1,71 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — os-fluent-dark
+# Windows 11 dark mica. Same accent system, dark-first defaults.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#005FB8"
+  background: "#202020"
+  nav-background: "#2C2C2C"
+  text: "#FFFFFF"
+  text-muted: "#C7C7C7"
+
+dark:
+  accent: "#60CDFF"
+  background: "#1A1A1A"
+  nav-background: "#202020"
+  text: "#FFFFFF"
+  text-muted: "#C7C7C7"
+
+# ──────────────────────────────────
+# Semantic colours
+# ──────────────────────────────────
+colours-semantic:
+  info: "#60CDFF"
+  warning: "#FCE100"
+  success: "#6CCB5F"
+  error: "#FF99A4"
+
+colours-semantic-dark:
+  info: "#60CDFF"
+  warning: "#FCE100"
+  success: "#6CCB5F"
+  error: "#FF99A4"
+
+# ──────────────────────────────────
+# Callout defaults
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#60CDFF"
+    background-colour: "#60CDFF"
+  warning:
+    icon: warning
+    primary-colour: "#FCE100"
+    background-colour: "#FCE100"
+  success:
+    icon: success
+    primary-colour: "#6CCB5F"
+    background-colour: "#6CCB5F"
+  error:
+    icon: error
+    primary-colour: "#FF99A4"
+    background-colour: "#FF99A4"
+
+# ──────────────────────────────────
+# Typography
+# Inter portable default. Preferred: Segoe UI Variable / Selawik.
+# ──────────────────────────────────
+font-body: "bunny:Inter:400"
+font-heading: "bunny:Inter:600"
+font-size: 1.00
+line-height: 1.55
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 78em
+nav-width: 20em

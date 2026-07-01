@@ -1,0 +1,86 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — o'keeffe
+# Ghost Ranch — bone, ochre, sage. New Mexico desert at midday.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+light:
+  accent: "#B85230"
+  background: "#F5EBDA"
+  nav-background: "#B85230"
+  text: "#2A1A14"
+  text-muted: "#7A6A54"
+  nav-link: "rgba(255,255,255,0.92)"
+  nav-link-active: "#FFFFFF"
+  nav-section-heading: "rgba(255,255,255,0.65)"
+  nav-sitename: "#FFFFFF"
+  nav-description: "rgba(255,255,255,0.70)"
+  nav-toggle: "rgba(255,255,255,0.70)"
+
+dark:
+  accent: "#E08862"
+  background: "#1A1108"
+  nav-background: "#2A1610"
+  text: "#F4E5D0"
+  text-muted: "#B8A088"
+  nav-link: "#E2E2E2"
+  nav-link-active: "#E08862"
+  nav-section-heading: "#9A9A9A"
+  nav-sitename: "#FFFFFF"
+  nav-description: "#9A9A9A"
+  nav-toggle: "#9A9A9A"
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#5A7A8A"
+  warning: "#B85230"
+  success: "#6E8A5A"
+  error: "#9C2A1F"
+
+colours-semantic-dark:
+  info: "#89BAD2"
+  warning: "#DD957E"
+  success: "#A7D289"
+  error: "#E48077"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#5A7A8A"
+    background-colour: "#5A7A8A"
+  warning:
+    icon: warning
+    primary-colour: "#B85230"
+    background-colour: "#B85230"
+  success:
+    icon: success
+    primary-colour: "#6E8A5A"
+    background-colour: "#6E8A5A"
+  error:
+    icon: error
+    primary-colour: "#9C2A1F"
+    background-colour: "#9C2A1F"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:Lora:400"
+font-heading: "bunny:Lora:600"
+font-size: 1.05        # unitless multiplier (1.0 = 16px base)
+line-height: 1.70      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 78em
+nav-width: 20em
