@@ -1,17 +1,18 @@
 # mdcms theme — The Kitchen Table
-light:
-  accent: "#B7410E"
-  background: "#FFFDF7"
-  nav-background: "#FFF8EE"
-  text: "#2D2016"
-  text-muted: "#8B6914"
+palette:
+  light:
+    primary: "#B7410E"
+    surface: "#FFF8EE"
+    page: "#FFFDF7"
+    ink: "#2D2016"
+    ink-muted: "#8B6914"
+  dark:
+    primary: "#F59E0B"
+    surface: "#241910"
+    page: "#1C1208"
+    ink: "#FEF3C7"
+    ink-muted: "#D97706"
 
-dark:
-  accent: "#F59E0B"
-  background: "#1C1208"
-  nav-background: "#241910"
-  text: "#FEF3C7"
-  text-muted: "#D97706"
 
 colours-semantic:
   info: "#2563EB"

@@ -13,19 +13,20 @@
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
-light:
-  accent: "#007AFF"
-  background: "#FFFFFF"
-  nav-background: "#F2F2F7"
-  text: "#000000"
-  text-muted: "#8E8E93"
+palette:
+  light:
+    primary: "#007AFF"
+    surface: "#F2F2F7"
+    page: "#FFFFFF"
+    ink: "#000000"
+    ink-muted: "#8E8E93"
+  dark:
+    primary: "#0A84FF"
+    surface: "#1C1C1E"
+    page: "#000000"
+    ink: "#FFFFFF"
+    ink-muted: "#8E8E93"
 
-dark:
-  accent: "#0A84FF"
-  background: "#000000"
-  nav-background: "#1C1C1E"
-  text: "#FFFFFF"
-  text-muted: "#8E8E93"
 
 # ──────────────────────────────────
 # Semantic colours — iOS system colours

@@ -13,19 +13,20 @@
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
-light:
-  accent: "#1A73E8"
-  background: "#FFFFFF"
-  nav-background: "#F1F3F4"
-  text: "#202124"
-  text-muted: "#5F6368"
+palette:
+  light:
+    primary: "#1A73E8"
+    surface: "#F1F3F4"
+    page: "#FFFFFF"
+    ink: "#202124"
+    ink-muted: "#5F6368"
+  dark:
+    primary: "#8AB4F8"
+    surface: "#292A2D"
+    page: "#202124"
+    ink: "#E8EAED"
+    ink-muted: "#9AA0A6"
 
-dark:
-  accent: "#8AB4F8"
-  background: "#202124"
-  nav-background: "#292A2D"
-  text: "#E8EAED"
-  text-muted: "#9AA0A6"
 
 # ──────────────────────────────────
 # Semantic colours — Google standard hues

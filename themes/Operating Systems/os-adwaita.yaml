@@ -9,19 +9,20 @@
 #          fg ~rgba(0,0,0,0.8), dim ~rgba(0,0,0,0.55)
 #   dark:  window_bg_color #242424, view_bg #1e1e1e, accent #78aeed (blue 1)
 # ──────────────────────────────────
-light:
-  accent: "#1C71D8"
-  background: "#FFFFFF"
-  nav-background: "#FAFAFA"
-  text: "#202020"
-  text-muted: "#5E5C64"
+palette:
+  light:
+    primary: "#1C71D8"
+    surface: "#FAFAFA"
+    page: "#FFFFFF"
+    ink: "#202020"
+    ink-muted: "#5E5C64"
+  dark:
+    primary: "#78AEED"
+    surface: "#242424"
+    page: "#1E1E1E"
+    ink: "#FFFFFF"
+    ink-muted: "#C0BFBC"
 
-dark:
-  accent: "#78AEED"
-  background: "#1E1E1E"
-  nav-background: "#242424"
-  text: "#FFFFFF"
-  text-muted: "#C0BFBC"
 
 # ──────────────────────────────────
 # Semantic colours — Adwaita "named colors": green-3, yellow-5, red-3

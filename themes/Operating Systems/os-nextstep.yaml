@@ -14,19 +14,20 @@
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
-light:
-  accent: "#C72A86"
-  background: "#DDDDDD"
-  nav-background: "#555555"
-  text: "#000000"
-  text-muted: "#5A5A5A"
+palette:
+  light:
+    primary: "#C72A86"
+    surface: "#555555"
+    page: "#DDDDDD"
+    ink: "#000000"
+    ink-muted: "#5A5A5A"
+  dark:
+    primary: "#E579B5"
+    surface: "#000000"
+    page: "#1A1A1A"
+    ink: "#DDDDDD"
+    ink-muted: "#A0A0A0"
 
-dark:
-  accent: "#E579B5"
-  background: "#1A1A1A"
-  nav-background: "#000000"
-  text: "#DDDDDD"
-  text-muted: "#A0A0A0"
 
 # ──────────────────────────────────
 # Semantic colours — kept restrained, in keeping with the grey-on-grey

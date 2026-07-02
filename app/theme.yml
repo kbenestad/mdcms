@@ -1,38 +1,45 @@
 # mdcms v0.4 | DO NOT REMOVE THIS COMMENT
-# MD-CMS v0.4 — Theme configuration
+# MD-CMS — Theme configuration
 #
-# Edit colours, fonts, and layout here. See docs for full reference.
+# Colours are declared as a neutral `palette:` with a `light:` and a `dark:`
+# block. Both blocks use the same fixed token names; only the values differ.
+# Each token maps to one or more features (see the reference docs).
 
 # ──────────────────────────────────
-# Colours
+# Colour palette
 # ──────────────────────────────────
-light:
-  accent: "#2563EB"
-  background: "#FFFFFF"
-  nav-background: "#F8FAFC"
-  text: "#1E293B"
-  text-muted: "#64748B"
-  # nav-link: "#1E293B"          # inactive nav link text (defaults to text)
-  # nav-link-active: "#2563EB"   # active nav link text (defaults to accent)
-  # nav-section-heading: "#64748B" # nav section label text (defaults to text-muted)
-  # nav-sitename: "#1E293B"      # site name in sidebar header (defaults to nav-link)
-  # nav-description: "#64748B"   # site description in sidebar header (defaults to nav-section-heading)
-  # nav-toggle: "#64748B"        # dark/light mode toggle (defaults to nav-section-heading)
-  # divider: "#CBD5E1"           # border/hr colour (defaults to color-mix of background + text)
+palette:
+  light:
+    primary: "#2563EB"      # brand colour — headings, content links, active nav, tab underline
+    surface: "#F8FAFC"      # nav / panel background
+    page: "#FFFFFF"         # page background
+    ink: "#1E293B"          # body text
+    ink-muted: "#64748B"    # secondary / muted text
+    # ── Nav-on-surface (optional) ──────────────────────────────
+    # Only needed when `surface` is a strong/dark colour and the defaults
+    # (which derive from ink / primary) would be illegible on it. Set all six
+    # together. Omit the whole group for a light, subtle nav.
+    # on-surface: "#1E293B"         # inactive nav link text
+    # on-surface-active: "#2563EB"  # active nav link text
+    # on-surface-title: "#1E293B"   # site name in the nav header
+    # on-surface-heading: "#64748B" # nav section-heading labels
+    # on-surface-note: "#64748B"    # site description under the title
+    # on-surface-icon: "#64748B"    # dark/light toggle
+    # divider: "#CBD5E1"            # borders / rules (defaults to a mix of page + ink)
 
-dark:
-  accent: "#60A5FA"
-  background: "#0F172A"
-  nav-background: "#1E293B"
-  text: "#F1F5F9"
-  text-muted: "#94A3B8"
-  # nav-link: "#E2E8F0"          # inactive nav link text (defaults to text)
-  # nav-link-active: "#60A5FA"   # active nav link text (defaults to accent)
-  # nav-section-heading: "#94A3B8" # nav section label text (defaults to text-muted)
-  # nav-sitename: "#E2E8F0"      # site name in sidebar header (defaults to nav-link)
-  # nav-description: "#94A3B8"   # site description in sidebar header (defaults to nav-section-heading)
-  # nav-toggle: "#94A3B8"        # dark/light mode toggle (defaults to nav-section-heading)
-  # divider: "#334155"           # border/hr colour (defaults to color-mix of background + text)
+  dark:
+    primary: "#60A5FA"
+    surface: "#1E293B"
+    page: "#0F172A"
+    ink: "#F1F5F9"
+    ink-muted: "#94A3B8"
+    # on-surface: "#E2E8F0"
+    # on-surface-active: "#60A5FA"
+    # on-surface-title: "#E2E8F0"
+    # on-surface-heading: "#94A3B8"
+    # on-surface-note: "#94A3B8"
+    # on-surface-icon: "#94A3B8"
+    # divider: "#334155"
 
 # ──────────────────────────────────
 # Semantic colours

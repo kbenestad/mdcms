@@ -13,19 +13,20 @@
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
-light:
-  accent: "#000000"
-  background: "#FFFFFF"
-  nav-background: "#DDDDDD"
-  text: "#000000"
-  text-muted: "#555555"
+palette:
+  light:
+    primary: "#000000"
+    surface: "#DDDDDD"
+    page: "#FFFFFF"
+    ink: "#000000"
+    ink-muted: "#555555"
+  dark:
+    primary: "#FFFFFF"
+    surface: "#262626"
+    page: "#1A1A1A"
+    ink: "#FFFFFF"
+    ink-muted: "#A0A0A0"
 
-dark:
-  accent: "#FFFFFF"
-  background: "#1A1A1A"
-  nav-background: "#262626"
-  text: "#FFFFFF"
-  text-muted: "#A0A0A0"
 
 # ──────────────────────────────────
 # Semantic colours — restrained, since System 7 was a 1-bit interface

@@ -18,19 +18,20 @@
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
-light:
-  accent: "#3DAEE9"
-  background: "#FCFCFC"
-  nav-background: "#EFF0F1"
-  text: "#232629"
-  text-muted: "#7F8C8D"
+palette:
+  light:
+    primary: "#3DAEE9"
+    surface: "#EFF0F1"
+    page: "#FCFCFC"
+    ink: "#232629"
+    ink-muted: "#7F8C8D"
+  dark:
+    primary: "#3DAEE9"
+    surface: "#232629"
+    page: "#1B1E20"
+    ink: "#FCFCFC"
+    ink-muted: "#A1A9B1"
 
-dark:
-  accent: "#3DAEE9"
-  background: "#1B1E20"
-  nav-background: "#232629"
-  text: "#FCFCFC"
-  text-muted: "#A1A9B1"
 
 # ──────────────────────────────────
 # Semantic colours — Breeze "positive / neutral / negative" tones

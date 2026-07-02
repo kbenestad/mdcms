@@ -10,53 +10,72 @@ theme: theme.yml
 
 ---
 
-## Colours — light and dark mode
+## Colours — the palette
 
-`light` and `dark` are the two mode blocks. Both accept the same keys. mdcms switches between them based on the user's system preference or the theme toggle.
+Colours are declared under a single `palette:` key with `light:` and `dark:` blocks. Both blocks use the **same fixed, neutral token names** — only the values differ. mdcms switches between them based on the user's system preference or the theme toggle. Every token maps to one or more rendered features (the mapping lives in the renderer, not the theme).
 
-### Base colours
+### Core tokens (required)
 
 ```yaml
-light:
-  accent: "#2563EB"            # Primary accent — links, active nav item, focus rings.
-  background: "#FFFFFF"        # Main content area background.
-  nav-background: "#F8FAFC"    # Sidebar / topbar background.
-  text: "#1E293B"              # Body text colour.
-  text-muted: "#64748B"        # Secondary text — descriptions, timestamps, captions.
-  divider: "#CBD5E1"           # Border and hr colour.
-                               # Omit to auto-derive: color-mix(background 85%, text).
-
-dark:
-  accent: "#60A5FA"
-  background: "#0F172A"
-  nav-background: "#1E293B"
-  text: "#F1F5F9"
-  text-muted: "#94A3B8"
-  divider: "#334155"           # Omit to auto-derive.
+palette:
+  light:
+    primary: "#2563EB"      # Brand colour — headings, content links, active nav, tab underline, focus rings.
+    surface: "#F8FAFC"      # Nav / panel background (sidebar or topbar).
+    page: "#FFFFFF"         # Page (content) background.
+    ink: "#1E293B"          # Body text.
+    ink-muted: "#64748B"    # Secondary text — descriptions, timestamps, captions.
+  dark:
+    primary: "#60A5FA"
+    surface: "#1E293B"
+    page: "#0F172A"
+    ink: "#F1F5F9"
+    ink-muted: "#94A3B8"
 ```
 
 All values are CSS colour strings (hex, `rgb()`, `hsl()`, named colours, `rgba()`).
 
-### Nav colours
+The relationship between these three tells you the theme's style:
 
-These control every element inside the sidebar. When `nav-background` is a neutral near-white or near-black the defaults (which fall back to the base colours) work fine and can be omitted. Set them explicitly whenever `nav-background` is a saturated brand colour, a dark sidebar in an otherwise light design, or any noticeably tinted background.
+- `surface` **≈** `page` → subtle nav that blends into the page (`primary` carries the look).
+- `surface` a distinct colour → a two-tone theme (a separate nav surface + `primary` accent).
+- `surface` **==** `primary` → a single bold colour drives both the nav and the accent.
+
+### Nav-on-surface tokens (optional)
+
+These colour the text/controls **inside** the nav surface. Omit the whole group when `surface` is a neutral near-white or near-black — the defaults (derived from `ink` / `primary`) are legible. Set them when `surface` is a strong/dark/brand colour. Set the group together.
 
 ```yaml
-light:
-  # Nav links and section labels
-  nav-link: "#1E293B"              # Inactive nav link text. Defaults to text.
-  nav-link-active: "#2563EB"       # Active (current page) nav link. Defaults to accent.
-  nav-section-heading: "#64748B"   # Section label text (uppercase, small). Defaults to text-muted.
-
-  # Sidebar header elements
-  nav-sitename: "#1E293B"          # Site name in the sidebar header. Defaults to nav-link.
-  nav-description: "#64748B"       # Site description below the site name. Defaults to nav-section-heading.
-  nav-toggle: "#64748B"            # Dark/light mode toggle button. Defaults to nav-section-heading.
+palette:
+  light:
+    on-surface: "#1E293B"         # Inactive nav link text.
+    on-surface-active: "#2563EB"  # Active (current page) nav link.
+    on-surface-title: "#1E293B"   # Site name in the nav header.
+    on-surface-heading: "#64748B" # Section-heading labels (uppercase, small).
+    on-surface-note: "#64748B"    # Site description below the title.
+    on-surface-icon: "#64748B"    # Dark/light toggle button.
+    # divider: "#CBD5E1"          # Borders / rules. Omit to auto-derive: color-mix(page 85%, ink).
 ```
 
-The same keys apply in the `dark:` block.
+The same tokens apply in the `dark:` block.
 
-**When nav-background is a bold colour** (e.g. brand red, navy, deep green), set all six nav keys explicitly so links, labels, the site name, description, and toggle are all legible against the nav background. A common pattern is white (`#FFFFFF`) for `nav-link`, `nav-link-active`, and `nav-sitename`, and a semi-transparent white (e.g. `rgba(255,255,255,0.65)`) for `nav-section-heading`, `nav-description`, and `nav-toggle`.
+**When `surface` is a bold colour** (brand red, navy, deep green), a common pattern is white (`#FFFFFF`) for `on-surface-active` / `on-surface-title` and a semi-transparent white (e.g. `rgba(255,255,255,0.65)`) for `on-surface-heading` / `on-surface-note` / `on-surface-icon`.
+
+### Token → feature reference
+
+| Token | Feature(s) it colours |
+|---|---|
+| `primary` | headings, content links, active nav item, tab underline / accordion bar (subtle nav), table-header tint, focus rings |
+| `surface` | nav / panel background; filled tab & accordion surface (bold nav) |
+| `page` | page background, search field background |
+| `ink` | body text, code text |
+| `ink-muted` | muted text; nav headings/description (unless `on-surface-*` set) |
+| `on-surface` | inactive nav link |
+| `on-surface-active` | active nav link |
+| `on-surface-title` | site name in nav header |
+| `on-surface-heading` | nav section-heading labels |
+| `on-surface-note` | site description |
+| `on-surface-icon` | theme toggle |
+| `divider` | borders / rules (auto-derived if omitted) |
 
 ---
 

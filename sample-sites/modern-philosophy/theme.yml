@@ -1,17 +1,18 @@
 # mdcms theme — Foundations of Modern Philosophy
-light:
-  accent: "#744210"
-  background: "#FFFFF8"
-  nav-background: "#F7F3E9"
-  text: "#1A202C"
-  text-muted: "#718096"
+palette:
+  light:
+    primary: "#744210"
+    surface: "#F7F3E9"
+    page: "#FFFFF8"
+    ink: "#1A202C"
+    ink-muted: "#718096"
+  dark:
+    primary: "#F6AD55"
+    surface: "#211D18"
+    page: "#1A1611"
+    ink: "#EDF2F7"
+    ink-muted: "#A0AEC0"
 
-dark:
-  accent: "#F6AD55"
-  background: "#1A1611"
-  nav-background: "#211D18"
-  text: "#EDF2F7"
-  text-muted: "#A0AEC0"
 
 colours-semantic:
   info: "#2B6CB0"

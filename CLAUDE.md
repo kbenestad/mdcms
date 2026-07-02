@@ -231,26 +231,26 @@ Fenced `mdcms` blocks with `callout-info`, `callout-warning`, `callout-success`,
 Fenced `mdcms` block with `toc`. Renders a section-grouped list of all visible, non-draft pages in the active category, excluding the TOC page itself. Groups by nav section.
 
 ### Theme system (`theme.yml`)
-Presentational config separate from `config.yml`. Controls accent colour, dark/light mode palette, fonts, and layout. `index.html` loads it at runtime.
+Presentational config separate from `config.yml`. Controls the colour palette, fonts, and layout. `index.html` loads it at runtime.
 
-**Colour keys per mode** (`light:` and `dark:` blocks):
+**Colours use a neutral `palette:` block** with `light:` and `dark:` sub-blocks. Both use the same fixed token names; the renderer owns the token → CSS-variable mapping (in `applyThemeYml`). This is **not** backward compatible with the old top-level `light:`/`dark:` role keys (`accent`, `nav-background`, `nav-link`, …) — those are no longer read.
 
-| Key | CSS variable | Default |
+| Token | CSS variable | Default |
 |---|---|---|
-| `accent` | `--accent` | `#2563EB` / `#60A5FA` |
-| `background` | `--bg-main` | `#FFFFFF` / `#0F172A` |
-| `nav-background` | `--bg-nav` | `#F8FAFC` / `#1E293B` |
-| `text` | `--font-colour` | `#1E293B` / `#F1F5F9` |
-| `text-muted` | `--font-colour-muted` | `#64748B` / `#94A3B8` |
-| `nav-link` | `--nav-link-colour` | falls back to `text` |
-| `nav-link-active` | `--nav-link-active-colour` | falls back to `accent` |
-| `nav-section-heading` | `--nav-section-heading-colour` | falls back to `text-muted` |
-| `nav-sitename` | `--nav-sitename-colour` | falls back to `nav-link` |
-| `nav-description` | `--nav-description-colour` | falls back to `nav-section-heading` |
-| `nav-toggle` | `--nav-toggle-colour` | falls back to `nav-section-heading` |
-| `divider` | `--divider` | `color-mix(in srgb, background 85%, text)` |
+| `primary` | `--accent` (+ derived `--nav-active-bg`, `--link-colour`, …) | `#2563EB` / `#60A5FA` |
+| `page` | `--bg-main` | `#FFFFFF` / `#0F172A` |
+| `surface` | `--bg-nav` | `#F8FAFC` / `#1E293B` |
+| `ink` | `--font-colour` | `#1E293B` / `#F1F5F9` |
+| `ink-muted` | `--font-colour-muted` | `#64748B` / `#94A3B8` |
+| `on-surface` | `--nav-link-colour` | falls back to `ink` |
+| `on-surface-active` | `--nav-link-active-colour` | falls back to `primary` |
+| `on-surface-heading` | `--nav-section-heading-colour` | falls back to `ink-muted` |
+| `on-surface-title` | `--nav-sitename-colour` | falls back to `on-surface` |
+| `on-surface-note` | `--nav-description-colour` | falls back to `on-surface-heading` |
+| `on-surface-icon` | `--nav-toggle-colour` | falls back to `on-surface-heading` |
+| `divider` | `--divider` | `color-mix(in srgb, page 85%, ink)` |
 
-**When to use nav-link keys:** When `nav-background` matches or is very close to `accent`, the default behaviour (active link coloured with `accent`) makes links invisible. Set `nav-link`, `nav-link-active`, and `nav-section-heading` explicitly so all three are legible against `nav-background`. Example: a red nav background needs white (`#FFFFFF`) for all three nav colour keys.
+`primary`, `surface`, `page`, `ink`, `ink-muted` are the required core (5). The six `on-surface-*` tokens are optional — set the group when `surface` is a strong/dark colour so nav text stays legible; omit for a subtle near-neutral nav. The style reads off three tokens: `surface≈page` (subtle), `surface` distinct (two-tone), `surface==primary` (bold single colour).
 
 **Semantic colours:**
 

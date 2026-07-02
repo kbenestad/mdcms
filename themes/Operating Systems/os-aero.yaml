@@ -14,19 +14,20 @@
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
-light:
-  accent: "#1A78D4"
-  background: "#F4F9FE"
-  nav-background: "#B8D6F0"
-  text: "#1B1B1B"
-  text-muted: "#525E6E"
+palette:
+  light:
+    primary: "#1A78D4"
+    surface: "#B8D6F0"
+    page: "#F4F9FE"
+    ink: "#1B1B1B"
+    ink-muted: "#525E6E"
+  dark:
+    primary: "#4FC3F7"
+    surface: "#1A2A40"
+    page: "#0F1A2A"
+    ink: "#EAF2FC"
+    ink-muted: "#8FA8C4"
 
-dark:
-  accent: "#4FC3F7"
-  background: "#0F1A2A"
-  nav-background: "#1A2A40"
-  text: "#EAF2FC"
-  text-muted: "#8FA8C4"
 
 # ──────────────────────────────────
 # Semantic colours — Vista/7 standard hues
