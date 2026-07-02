@@ -11,19 +11,20 @@
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
-light:
-  accent: "#3689E6"
-  background: "#FAFAFA"
-  nav-background: "#F4F4F4"
-  text: "#333333"
-  text-muted: "#7E8087"
+palette:
+  light:
+    primary: "#3689E6"
+    surface: "#F4F4F4"
+    page: "#FAFAFA"
+    ink: "#333333"
+    ink-muted: "#7E8087"
+  dark:
+    primary: "#64BAFF"
+    surface: "#262626"
+    page: "#1A1A1A"
+    ink: "#FFFFFF"
+    ink-muted: "#A6A6A6"
 
-dark:
-  accent: "#64BAFF"
-  background: "#1A1A1A"
-  nav-background: "#262626"
-  text: "#FFFFFF"
-  text-muted: "#A6A6A6"
 
 # ──────────────────────────────────
 # Semantic colours — elementary named palette

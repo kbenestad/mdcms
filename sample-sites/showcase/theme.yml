@@ -6,26 +6,20 @@
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
-light:
-  accent: "#2563EB"
-  background: "#FFFFFF"
-  nav-background: "#F8FAFC"
-  text: "#1E293B"
-  text-muted: "#64748B"
-  # nav-link: "#1E293B"          # inactive nav link text (defaults to text)
-  # nav-link-active: "#2563EB"   # active nav link text (defaults to accent)
-  # nav-section-heading: "#64748B" # nav section label text (defaults to text-muted)
-  # nav-sitename: "#1E293B"      # site name in sidebar header (defaults to nav-link)
-  # nav-description: "#64748B"   # site description in sidebar header (defaults to nav-section-heading)
-  # nav-toggle: "#64748B"        # dark/light mode toggle (defaults to nav-section-heading)
-  # divider: "#CBD5E1"           # border/hr colour (defaults to color-mix of background + text)
+palette:
+  light:
+    primary: "#2563EB"
+    surface: "#F8FAFC"
+    page: "#FFFFFF"
+    ink: "#1E293B"
+    ink-muted: "#64748B"
+  dark:
+    primary: "#60A5FA"
+    surface: "#1E293B"
+    page: "#0F172A"
+    ink: "#F1F5F9"
+    ink-muted: "#94A3B8"
 
-dark:
-  accent: "#60A5FA"
-  background: "#0F172A"
-  nav-background: "#1E293B"
-  text: "#F1F5F9"
-  text-muted: "#94A3B8"
   # nav-link: "#E2E8F0"          # inactive nav link text (defaults to text)
   # nav-link-active: "#60A5FA"   # active nav link text (defaults to accent)
   # nav-section-heading: "#94A3B8" # nav section label text (defaults to text-muted)

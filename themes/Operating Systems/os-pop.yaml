@@ -12,19 +12,20 @@
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
-light:
-  accent: "#FAA41A"
-  background: "#FAFAFA"
-  nav-background: "#F2F2F2"
-  text: "#181818"
-  text-muted: "#5C5C5C"
+palette:
+  light:
+    primary: "#FAA41A"
+    surface: "#F2F2F2"
+    page: "#FAFAFA"
+    ink: "#181818"
+    ink-muted: "#5C5C5C"
+  dark:
+    primary: "#FAA41A"
+    surface: "#2D2D2D"
+    page: "#232323"
+    ink: "#F2F2F2"
+    ink-muted: "#A8A8A8"
 
-dark:
-  accent: "#FAA41A"
-  background: "#232323"
-  nav-background: "#2D2D2D"
-  text: "#F2F2F2"
-  text-muted: "#A8A8A8"
 
 # ──────────────────────────────────
 # Semantic colours — Pop palette greens/yellows/reds with the warm cast

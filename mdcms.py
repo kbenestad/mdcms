@@ -32,8 +32,8 @@ import certifi
 import click
 import yaml
 
-CLI_VERSION = "0.6.1"
-CLI_RELEASE_DATE = "1 July 2026"
+CLI_VERSION = "0.6.2"
+CLI_RELEASE_DATE = "2 July 2026"
 MIN_SUPPORTED_VERSION = "0.3"
 
 MARKER_RE = re.compile(r"mdcms v(\d+\.\d+)", re.IGNORECASE)

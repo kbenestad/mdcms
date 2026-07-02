@@ -343,3 +343,19 @@ In `navigation: topbar` mode, hovering or clicking a section (or a page group wi
 3. **Click fought hover.** On hover-capable devices `mouseenter` opened the menu, then the trigger's `click` toggled it straight back closed. Hover handlers are now bound only on `(hover: hover)` devices, and click is a clean open/close that also closes sibling menus. Touch devices get reliable tap-to-toggle.
 
 Verified end-to-end (light and dark) with the `neuraldb-docs` and `showcase` sample sites; the showcase gained a **Reference** section (three pages) to exercise a section dropdown directly.
+
+---
+
+## Theme colours: neutral `palette:` model (BREAKING) (`app/index.html`, all themes)
+
+Theme colours are now declared under a single `palette:` key with `light:`/`dark:` sub-blocks that use a **fixed, neutral token vocabulary** identical across every theme. The renderer owns the token → CSS-variable mapping, so the per-feature colour assignments live in one place instead of being restated in every theme file.
+
+**Tokens** — core (required): `primary`, `surface`, `page`, `ink`, `ink-muted`. Nav-on-surface (optional, set as a group when the nav surface is a strong colour): `on-surface`, `on-surface-active`, `on-surface-title`, `on-surface-heading`, `on-surface-note`, `on-surface-icon`. Plus optional `divider`.
+
+The three "patterns" now read straight off the values: `surface ≈ page` (subtle nav), `surface` distinct (two-tone), `surface == primary` (bold single colour).
+
+**Breaking:** the old top-level `light:`/`dark:` role keys (`accent`, `background`, `nav-background`, `text`, `text-muted`, `nav-link*`, …) are no longer read. `applyThemeYml` reads only `palette`. `colours-semantic`, `colours-semantic-dark`, `callouts`, typography and layout keys are unchanged.
+
+**Conversion:** all 224 library themes, the seven sample-site themes, and the starter `app/theme.yml` were converted with a 1:1 token rename and verified to resolve to byte-identical CSS variables as before (231/231 lossless) — no theme's appearance changes. Verified end-to-end in the renderer (subtle, two-tone, and bold themes; light and dark; direct and via the picker's `?theme=` override).
+
+Released as CLI **v0.6.2**.

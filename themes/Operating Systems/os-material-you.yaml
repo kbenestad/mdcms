@@ -13,19 +13,20 @@
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
-light:
-  accent: "#6750A4"
-  background: "#FEF7FF"
-  nav-background: "#F7F2FA"
-  text: "#1D1B20"
-  text-muted: "#49454F"
+palette:
+  light:
+    primary: "#6750A4"
+    surface: "#F7F2FA"
+    page: "#FEF7FF"
+    ink: "#1D1B20"
+    ink-muted: "#49454F"
+  dark:
+    primary: "#D0BCFF"
+    surface: "#1D1B20"
+    page: "#141218"
+    ink: "#E6E0E9"
+    ink-muted: "#CAC4D0"
 
-dark:
-  accent: "#D0BCFF"
-  background: "#141218"
-  nav-background: "#1D1B20"
-  text: "#E6E0E9"
-  text-muted: "#CAC4D0"
 
 # ──────────────────────────────────
 # Semantic colours — M3 baseline error + standard tertiary/green/yellow

@@ -13,19 +13,20 @@
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
-light:
-  accent: "#007AFF"
-  background: "#FFFFFF"
-  nav-background: "#F2F2F7"
-  text: "#1D1D1F"
-  text-muted: "#6E6E73"
+palette:
+  light:
+    primary: "#007AFF"
+    surface: "#F2F2F7"
+    page: "#FFFFFF"
+    ink: "#1D1D1F"
+    ink-muted: "#6E6E73"
+  dark:
+    primary: "#0A84FF"
+    surface: "#2C2C2E"
+    page: "#1E1E1E"
+    ink: "#F5F5F7"
+    ink-muted: "#98989D"
 
-dark:
-  accent: "#0A84FF"
-  background: "#1E1E1E"
-  nav-background: "#2C2C2E"
-  text: "#F5F5F7"
-  text-muted: "#98989D"
 
 # ──────────────────────────────────
 # Semantic colours — Apple system colours (light / dark)

@@ -12,19 +12,20 @@
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
-light:
-  accent: "#005FB8"
-  background: "#F9F9F9"
-  nav-background: "#F3F3F3"
-  text: "#1A1A1A"
-  text-muted: "#5C5C5C"
+palette:
+  light:
+    primary: "#005FB8"
+    surface: "#F3F3F3"
+    page: "#F9F9F9"
+    ink: "#1A1A1A"
+    ink-muted: "#5C5C5C"
+  dark:
+    primary: "#60CDFF"
+    surface: "#2C2C2C"
+    page: "#202020"
+    ink: "#FFFFFF"
+    ink-muted: "#C7C7C7"
 
-dark:
-  accent: "#60CDFF"
-  background: "#202020"
-  nav-background: "#2C2C2C"
-  text: "#FFFFFF"
-  text-muted: "#C7C7C7"
 
 # ──────────────────────────────────
 # Semantic colours — Fluent persona / shared colours

@@ -1,17 +1,18 @@
 # mdcms theme — The Wandering Algorithm
-light:
-  accent: "#4A5568"
-  background: "#FAFAF8"
-  nav-background: "#F2F0EB"
-  text: "#2D3748"
-  text-muted: "#718096"
+palette:
+  light:
+    primary: "#4A5568"
+    surface: "#F2F0EB"
+    page: "#FAFAF8"
+    ink: "#2D3748"
+    ink-muted: "#718096"
+  dark:
+    primary: "#9F7AEA"
+    surface: "#161B22"
+    page: "#0D1117"
+    ink: "#E6EDF3"
+    ink-muted: "#8B949E"
 
-dark:
-  accent: "#9F7AEA"
-  background: "#0D1117"
-  nav-background: "#161B22"
-  text: "#E6EDF3"
-  text-muted: "#8B949E"
 
 colours-semantic:
   info: "#4299E1"

@@ -1457,31 +1457,35 @@ body {
       return s;
     };
 
+    // Colours are declared as a neutral `palette:` with `light:`/`dark:` blocks.
+    // Each block uses the same fixed token vocabulary, mapped to CSS variables
+    // here (the single source of truth for token → feature).
     let modeCss = '';
+    const palette = tc.palette || {};
     ['light', 'dark'].forEach(mode => {
-      const m = tc[mode];
+      const m = palette[mode];
       if (!m) return;
       const vars = [];
-      if (m.accent) {
-        const rgb = hexToRgb(m.accent);
-        vars.push(`--accent: ${m.accent}`);
+      if (m.primary) {
+        const rgb = hexToRgb(m.primary);
+        vars.push(`--accent: ${m.primary}`);
         vars.push(`--accent-rgb: ${rgb}`);
         vars.push(`--nav-active-bg: rgba(${rgb}, 0.10)`);
         vars.push(`--nav-hover-bg: rgba(${rgb}, 0.05)`);
         vars.push(`--table-header-bg: rgba(${rgb}, 0.08)`);
-        vars.push(`--link-colour: ${m.accent}`);
+        vars.push(`--link-colour: ${m.primary}`);
       }
-      if (m.background) { vars.push(`--bg-main: ${m.background}`); vars.push(`--search-bg: ${m.background}`); }
-      if (m['nav-background']) vars.push(`--bg-nav: ${m['nav-background']}`);
-      if (m.text) { vars.push(`--font-colour: ${m.text}`); vars.push(`--code-font: ${m.text}`); }
-      if (m['text-muted']) vars.push(`--font-colour-muted: ${m['text-muted']}`);
-      if (m['nav-link'])            vars.push(`--nav-link-colour: ${m['nav-link']}`);
-      if (m['nav-link-active'])     vars.push(`--nav-link-active-colour: ${m['nav-link-active']}`);
-      if (m['nav-section-heading']) vars.push(`--nav-section-heading-colour: ${m['nav-section-heading']}`);
-      if (m['nav-sitename'])        vars.push(`--nav-sitename-colour: ${m['nav-sitename']}`);
-      if (m['nav-description'])     vars.push(`--nav-description-colour: ${m['nav-description']}`);
-      if (m['nav-toggle'])          vars.push(`--nav-toggle-colour: ${m['nav-toggle']}`);
-      if (m['divider'])             vars.push(`--divider: ${m['divider']}`);
+      if (m.page)    { vars.push(`--bg-main: ${m.page}`); vars.push(`--search-bg: ${m.page}`); }
+      if (m.surface)   vars.push(`--bg-nav: ${m.surface}`);
+      if (m.ink)     { vars.push(`--font-colour: ${m.ink}`); vars.push(`--code-font: ${m.ink}`); }
+      if (m['ink-muted']) vars.push(`--font-colour-muted: ${m['ink-muted']}`);
+      if (m['on-surface'])         vars.push(`--nav-link-colour: ${m['on-surface']}`);
+      if (m['on-surface-active'])  vars.push(`--nav-link-active-colour: ${m['on-surface-active']}`);
+      if (m['on-surface-heading']) vars.push(`--nav-section-heading-colour: ${m['on-surface-heading']}`);
+      if (m['on-surface-title'])   vars.push(`--nav-sitename-colour: ${m['on-surface-title']}`);
+      if (m['on-surface-note'])    vars.push(`--nav-description-colour: ${m['on-surface-note']}`);
+      if (m['on-surface-icon'])    vars.push(`--nav-toggle-colour: ${m['on-surface-icon']}`);
+      if (m.divider)               vars.push(`--divider: ${m.divider}`);
       if (vars.length) modeCss += `:root[data-theme="${mode}"] { ${vars.join('; ')}; }\n`;
     });
     if (modeCss) getOrCreateStyle('theme-overrides').textContent = modeCss;

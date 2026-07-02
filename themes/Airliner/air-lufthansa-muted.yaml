@@ -5,25 +5,26 @@
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
-light:
-  accent: "#1F3A6B"
-  background: "#FBFAF3"
-  nav-background: "#F0E8D0"
-  text: "#1A2238"
-  text-muted: "#6E7588"
+palette:
+  light:
+    primary: "#1F3A6B"
+    surface: "#F0E8D0"
+    page: "#FBFAF3"
+    ink: "#1A2238"
+    ink-muted: "#6E7588"
+  dark:
+    primary: "#D8A848"
+    surface: "#16203A"
+    page: "#0E1422"
+    ink: "#EAEDF2"
+    ink-muted: "#988E70"
+    on-surface: "#E2E2E2"
+    on-surface-active: "#D8A848"
+    on-surface-title: "#FFFFFF"
+    on-surface-heading: "#9A9A9A"
+    on-surface-note: "#9A9A9A"
+    on-surface-icon: "#9A9A9A"
 
-dark:
-  accent: "#D8A848"
-  background: "#0E1422"
-  nav-background: "#16203A"
-  text: "#EAEDF2"
-  text-muted: "#988E70"
-  nav-link: "#E2E2E2"
-  nav-link-active: "#D8A848"
-  nav-section-heading: "#9A9A9A"
-  nav-sitename: "#FFFFFF"
-  nav-description: "#9A9A9A"
-  nav-toggle: "#9A9A9A"
 
 # ──────────────────────────────────
 # Semantic colours

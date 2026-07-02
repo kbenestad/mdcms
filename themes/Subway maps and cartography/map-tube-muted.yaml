@@ -5,19 +5,20 @@
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
-light:
-  accent: "#9C2A24"
-  background: "#FBF8F3"
-  nav-background: "#E0E0EA"
-  text: "#1F1A1A"
-  text-muted: "#6E6E78"
+palette:
+  light:
+    primary: "#9C2A24"
+    surface: "#E0E0EA"
+    page: "#FBF8F3"
+    ink: "#1F1A1A"
+    ink-muted: "#6E6E78"
+  dark:
+    primary: "#D85050"
+    surface: "#1A1A22"
+    page: "#0F0E10"
+    ink: "#EFEAE5"
+    ink-muted: "#9C98A0"
 
-dark:
-  accent: "#D85050"
-  background: "#0F0E10"
-  nav-background: "#1A1A22"
-  text: "#EFEAE5"
-  text-muted: "#9C98A0"
 
 # ──────────────────────────────────
 # Semantic colours

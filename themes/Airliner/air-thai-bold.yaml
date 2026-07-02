@@ -5,31 +5,32 @@
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
-light:
-  accent: "#D4B062"
-  background: "#FFFFFF"
-  nav-background: "#4E1A6E"
-  text: "#2A0F40"
-  text-muted: "#6E5C7A"
-  nav-link: "rgba(255,255,255,0.92)"
-  nav-link-active: "#D4B062"
-  nav-section-heading: "rgba(255,255,255,0.65)"
-  nav-sitename: "#FFFFFF"
-  nav-description: "rgba(255,255,255,0.70)"
-  nav-toggle: "rgba(255,255,255,0.70)"
+palette:
+  light:
+    primary: "#D4B062"
+    surface: "#4E1A6E"
+    page: "#FFFFFF"
+    ink: "#2A0F40"
+    ink-muted: "#6E5C7A"
+    on-surface: "rgba(255,255,255,0.92)"
+    on-surface-active: "#D4B062"
+    on-surface-title: "#FFFFFF"
+    on-surface-heading: "rgba(255,255,255,0.65)"
+    on-surface-note: "rgba(255,255,255,0.70)"
+    on-surface-icon: "rgba(255,255,255,0.70)"
+  dark:
+    primary: "#E5BD6A"
+    surface: "#1A0628"
+    page: "#2A0F40"
+    ink: "#FFFFFF"
+    ink-muted: "#B0A0C0"
+    on-surface: "#E2E2E2"
+    on-surface-active: "#E5BD6A"
+    on-surface-title: "#FFFFFF"
+    on-surface-heading: "#9A9A9A"
+    on-surface-note: "#9A9A9A"
+    on-surface-icon: "#9A9A9A"
 
-dark:
-  accent: "#E5BD6A"
-  background: "#2A0F40"
-  nav-background: "#1A0628"
-  text: "#FFFFFF"
-  text-muted: "#B0A0C0"
-  nav-link: "#E2E2E2"
-  nav-link-active: "#E5BD6A"
-  nav-section-heading: "#9A9A9A"
-  nav-sitename: "#FFFFFF"
-  nav-description: "#9A9A9A"
-  nav-toggle: "#9A9A9A"
 
 # ──────────────────────────────────
 # Semantic colours

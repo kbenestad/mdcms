@@ -13,19 +13,20 @@
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
-light:
-  accent: "#FF8800"
-  background: "#FFFFFF"
-  nav-background: "#0055AA"
-  text: "#000000"
-  text-muted: "#555555"
+palette:
+  light:
+    primary: "#FF8800"
+    surface: "#0055AA"
+    page: "#FFFFFF"
+    ink: "#000000"
+    ink-muted: "#555555"
+  dark:
+    primary: "#FF8800"
+    surface: "#003D7A"
+    page: "#0055AA"
+    ink: "#FFFFFF"
+    ink-muted: "#AAC4E0"
 
-dark:
-  accent: "#FF8800"
-  background: "#0055AA"
-  nav-background: "#003D7A"
-  text: "#FFFFFF"
-  text-muted: "#AAC4E0"
 
 # ──────────────────────────────────
 # Semantic colours
