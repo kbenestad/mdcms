@@ -410,10 +410,19 @@ body {
 .topbar-nav .nav-group.has-active > .nav-trigger { background: var(--nav-active-bg); }
 .topbar-nav .nav-caret { font-size: 0.6rem; color: var(--font-colour-muted); opacity: 0.55; line-height: 1; }
 .topbar-nav .nav-dropdown {
-  display: none; position: absolute; top: calc(100% + 4px); left: 0;
+  /* position: fixed (placed by JS) so the menu escapes the .topbar-nav
+     overflow-x:auto clip — otherwise the panel is clipped to the bar height
+     and never appears. */
+  display: none; position: fixed;
   background: var(--bg-nav); border: 1px solid var(--divider);
   border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.1);
   min-width: 160px; z-index: 200; padding: 0.25rem 0;
+}
+/* Invisible bridge over the 4px gap between the trigger and the menu, so moving
+   the cursor from the trigger into the menu doesn't fire mouseleave and close
+   it. Without this the dropdown items are unreachable by mouse. */
+.topbar-nav .nav-dropdown::before {
+  content: ''; position: absolute; top: -8px; left: 0; right: 0; height: 8px;
 }
 .topbar-nav .nav-group.open > .nav-dropdown { display: block; }
 .topbar-nav .nav-dropdown .nav-item {
@@ -1115,6 +1124,35 @@ body {
   let sectionnamesMode = 'same';  // 'same' | 'per-category'
   let loadedFonts = new Set();    // track which font files have been loaded
   let defaultLineHeight = null;   // theme/CSS default, captured after theme is applied
+
+  // Hover-open the topbar dropdowns only on devices that actually hover. On
+  // touch, a tap fires a synthetic mouseenter that would race the click toggle,
+  // so there we rely on click alone.
+  const HOVER_CAPABLE = !window.matchMedia || window.matchMedia('(hover: hover)').matches;
+
+  function closeTopbarGroups(except) {
+    document.querySelectorAll('.topbar-nav .nav-group.open').forEach(g => {
+      if (g !== except) g.classList.remove('open');
+    });
+  }
+
+  // Place a fixed-position dropdown under its trigger (kept out of the
+  // overflow-clipped nav bar). Clamps to the viewport so it never runs off-edge.
+  function positionDropdown(trigger, dropdown) {
+    const r = trigger.getBoundingClientRect();
+    const width = dropdown.offsetWidth || 160;
+    let left = r.left;
+    const maxLeft = window.innerWidth - width - 8;
+    if (left > maxLeft) left = Math.max(8, maxLeft);
+    dropdown.style.left = left + 'px';
+    dropdown.style.top = (r.bottom + 4) + 'px';
+  }
+
+  function openTopbarGroup(group, trigger, dropdown) {
+    closeTopbarGroups(group);
+    group.classList.add('open');
+    positionDropdown(trigger, dropdown);
+  }
 
   // ─── Icons ────────────────────────────────────────────────
   const STANDARD_ICONS = ['dark_mode','light_mode','menu','search','arrow_right','arrow_drop_down','mobile_arrow_down','language','info','warning','error','success','exclamation','dangerous','report','history','text_compare','keyboard_arrow_right','keyboard_arrow_down','keyboard_double_arrow_right','keyboard_double_arrow_down','expand_content','collapse_content','add','minimize'];
@@ -2565,9 +2603,11 @@ function fmtDatetime(dtStr) {
       hamburger.innerHTML = ''; hamburger.appendChild(iconEl('menu'));
     };
 
-    document.addEventListener('click', () => {
-      document.querySelectorAll('.topbar-nav .nav-group.open').forEach(g => g.classList.remove('open'));
-    });
+    document.addEventListener('click', () => closeTopbarGroups(null));
+    // Fixed-position dropdowns are placed relative to the viewport, so close them
+    // on resize or horizontal nav scroll rather than let them drift out of place.
+    window.addEventListener('resize', () => closeTopbarGroups(null));
+    navLinksEl.addEventListener('scroll', () => closeTopbarGroups(null));
   }
 
   function buildSearchWidget() {
@@ -2943,12 +2983,15 @@ function fmtDatetime(dtStr) {
         const dropdown = el('div', { className: 'nav-dropdown' });
         children.forEach(p => { const it = makeNavItem(p, 0); if (it) dropdown.appendChild(it); });
         group.appendChild(dropdown);
-        group.addEventListener('mouseenter', () => group.classList.add('open'));
-        group.addEventListener('mouseleave', () => group.classList.remove('open'));
+        if (HOVER_CAPABLE) {
+          group.addEventListener('mouseenter', () => openTopbarGroup(group, trigger, dropdown));
+          group.addEventListener('mouseleave', () => group.classList.remove('open'));
+        }
         trigger.addEventListener('click', e => {
           e.preventDefault();
           e.stopPropagation();
-          group.classList.toggle('open');
+          if (group.classList.contains('open')) closeTopbarGroups(null);
+          else openTopbarGroup(group, trigger, dropdown);
           navigateTo(primary.file);
           if (window._closeMobileMenu) window._closeMobileMenu();
         });
@@ -2986,15 +3029,20 @@ function fmtDatetime(dtStr) {
       const trigger = el('button', { className: 'nav-trigger', type: 'button' });
       trigger.appendChild(el('span', { textContent: name }));
       trigger.appendChild(iconEl('arrow_drop_down', 'nav-caret'));
-      trigger.addEventListener('click', e => { e.stopPropagation(); group.classList.toggle('open'); });
       group.appendChild(trigger);
 
       const dropdown = el('div', { className: 'nav-dropdown' });
       pages.forEach(p => { const it = makeNavItem(p, 0); if (it) dropdown.appendChild(it); });
       group.appendChild(dropdown);
 
-      if (!isHidden) {
-        group.addEventListener('mouseenter', () => group.classList.add('open'));
+      trigger.addEventListener('click', e => {
+        e.stopPropagation();
+        if (group.classList.contains('open')) closeTopbarGroups(null);
+        else openTopbarGroup(group, trigger, dropdown);
+      });
+
+      if (!isHidden && HOVER_CAPABLE) {
+        group.addEventListener('mouseenter', () => openTopbarGroup(group, trigger, dropdown));
         group.addEventListener('mouseleave', () => group.classList.remove('open'));
       }
     }
