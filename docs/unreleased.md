@@ -331,3 +331,15 @@ Released as CLI **v0.6.1**.
 ## GitHub Pages deployment for sample sites (`.github/workflows/pages.yml`)
 
 A new workflow publishes the repository to GitHub Pages on every push to `main`, so the sample-site gallery and theme library are browsable online. The whole repo is deployed as the Pages artifact to keep the picker's relative `../../themes/...` links intact. Entry point: `/<repo>/sample-sites/`.
+
+---
+
+## Fix: topbar section dropdowns were invisible / unusable (`app/index.html`)
+
+In `navigation: topbar` mode, hovering or clicking a section (or a page group with children) did nothing visible — the dropdown menu never appeared. Three compounding bugs:
+
+1. **The menu was clipped.** `.topbar-nav` has `overflow-x: auto` (for horizontal scrolling of many items), which per CSS forces vertical clipping too, so an absolutely-positioned dropdown was clipped to the 56px bar height and never painted. The dropdown is now `position: fixed`, placed under its trigger by JS, so it escapes the clip; it closes on resize / nav-scroll to stay aligned.
+2. **A hover dead-zone.** The 4px gap between the trigger and the menu fired `mouseleave` (closing the menu) as the cursor crossed it, making items unreachable. An invisible `::before` bridge now spans the gap.
+3. **Click fought hover.** On hover-capable devices `mouseenter` opened the menu, then the trigger's `click` toggled it straight back closed. Hover handlers are now bound only on `(hover: hover)` devices, and click is a clean open/close that also closes sibling menus. Touch devices get reliable tap-to-toggle.
+
+Verified end-to-end (light and dark) with the `neuraldb-docs` and `showcase` sample sites; the showcase gained a **Reference** section (three pages) to exercise a section dropdown directly.

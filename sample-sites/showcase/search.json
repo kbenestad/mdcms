@@ -72,6 +72,42 @@
     "body": "# MD-CMS Showcase\n\nWelcome. This sample site is a working tour of the MD-CMS renderer. It uses\n**topbar navigation** and demonstrates the tags and layout features added in\nv0.4–v0.6, all rendered client-side from plain markdown.\n\n```mdcms callout-info\nmessage: preview\n```\n\n## What you can explore\n\n- **Callouts** — coloured info / warning / success / error blocks. See *Callouts*.\n- **Tabs & accordions** — interactive content panels. See *Components*.\n- **Table of contents** — an auto-generated page index. See *Contents*.\n- **Posts** — chronological post listings with pagination. See *Blog*.\n\nUse the search box in the top bar to jump to any page, or the theme toggle to\nswitch between light and dark.\n\n## Why topbar?\n\nThis site sets `navigation: topbar` in `config.yml`. Sections become dropdown\nmenus and unsectioned pages sit inline. Try the **Guides** dropdown above.\n"
   },
   {
+    "file": "pages/ref-api.md",
+    "title": "API reference",
+    "section-id": "reference",
+    "keywords": "",
+    "description": "Renderer tags and theme keys.",
+    "author": null,
+    "created": "",
+    "modified": "",
+    "language": "en",
+    "body": "# API reference\n\nAnother page under the **Reference** dropdown. Sibling pages appear together in\nthe topbar menu, sorted by their `sort` value.\n"
+  },
+  {
+    "file": "pages/ref-cli.md",
+    "title": "CLI reference",
+    "section-id": "reference",
+    "keywords": "",
+    "description": "mdcms build, register, view, fetch-deps.",
+    "author": null,
+    "created": "",
+    "modified": "",
+    "language": "en",
+    "body": "# CLI reference\n\nThe third page under **Reference**. Three or more pages in one section make the\ntopbar dropdown obvious to test.\n"
+  },
+  {
+    "file": "pages/ref-config.md",
+    "title": "Config reference",
+    "section-id": "reference",
+    "keywords": "",
+    "description": "Every config.yml key at a glance.",
+    "author": null,
+    "created": "",
+    "modified": "",
+    "language": "en",
+    "body": "# Config reference\n\nA representative page living under the **Reference** section. In topbar mode this\nsection renders as a dropdown menu — hover or tap *Reference* in the top bar to\nsee the pages grouped beneath it.\n\nSee also the *API reference* and *CLI reference* pages in the same dropdown.\n"
+  },
+  {
     "file": "posts/2026-02-10-launch.md",
     "title": "Introducing the MD-CMS Showcase",
     "section-id": null,

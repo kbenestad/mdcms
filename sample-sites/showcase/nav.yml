@@ -8,6 +8,11 @@ sections:
     sort: 100
     pagesvisibility: visible
 
+  - code: reference
+    defaultname: Reference
+    sort: 110
+    pagesvisibility: visible
+
 pages:
   - file: pages/home.md
     title: Home
@@ -31,6 +36,21 @@ pages:
   - file: pages/blog.md
     title: Blog
     sort: 300
+
+  - file: pages/ref-config.md
+    title: Config reference
+    section-id: reference
+    sort: 410
+
+  - file: pages/ref-api.md
+    title: API reference
+    section-id: reference
+    sort: 420
+
+  - file: pages/ref-cli.md
+    title: CLI reference
+    section-id: reference
+    sort: 430
 
   - file: pages/about.md
     title: About
