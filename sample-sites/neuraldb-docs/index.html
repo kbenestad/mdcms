@@ -773,6 +773,8 @@ body {
   .topbar-nav { display: none; }
   .topbar-search { display: none; }
   .layout-topbar .hamburger { display: inline-flex; }
+  /* .topbar-nav carries flex:1; with it hidden, push the actions to the right edge */
+  .layout-topbar .topbar-actions { margin-left: auto; }
 
   .layout-topbar .mobile-nav-panel {
     display: block;

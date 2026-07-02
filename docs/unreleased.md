@@ -346,6 +346,12 @@ Verified end-to-end (light and dark) with the `neuraldb-docs` and `showcase` sam
 
 ---
 
+## Fix: topbar hamburger and theme toggle left-aligned on narrow screens (`app/index.html`)
+
+When a `navigation: topbar` site is too narrow for the topbar and collapses to the hamburger menu (≤768px), the hamburger and light/dark toggle sat next to the site name on the left. Cause: the mobile stylesheet hides `.topbar-nav`, which is the flex item (`flex: 1`) that normally pushes `.topbar-actions` to the right edge. The mobile media query now gives `.topbar-actions` a `margin-left: auto` so the actions stay right-aligned. Applied to `app/index.html` and all sample-site renderer copies.
+
+---
+
 ## Theme colours: neutral `palette:` model (BREAKING) (`app/index.html`, all themes)
 
 Theme colours are now declared under a single `palette:` key with `light:`/`dark:` sub-blocks that use a **fixed, neutral token vocabulary** identical across every theme. The renderer owns the token → CSS-variable mapping, so the per-feature colour assignments live in one place instead of being restated in every theme file.
