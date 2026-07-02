@@ -32,7 +32,7 @@ import certifi
 import click
 import yaml
 
-CLI_VERSION = "0.6.2"
+CLI_VERSION = "0.6.3"
 CLI_RELEASE_DATE = "2 July 2026"
 MIN_SUPPORTED_VERSION = "0.3"
 
