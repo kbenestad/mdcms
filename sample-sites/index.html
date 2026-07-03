@@ -159,6 +159,17 @@
       encodeURIComponent(branch) + "/sample-sites/" + encodeURIComponent(dir) + "/";
   }
 
+  // themes.json itself is subject to the same branch problem: this picker page
+  // is only deployed to GitHub Pages from `main`, so a plain relative fetch
+  // always reads main's manifest even after switching the branch selector to
+  // "development". Route it through the same jsDelivr base as the sites.
+  function themesJsonUrl() {
+    var branch = branchSel.value;
+    if (!branch) return "themes.json";
+    return "https://cdn.jsdelivr.net/gh/" + REPO_OWNER + "/" + REPO_NAME + "@" +
+      encodeURIComponent(branch) + "/sample-sites/themes.json";
+  }
+
   function currentTheme() {
     var fam = familySel.value;
     if (!fam) return null;
@@ -225,11 +236,45 @@
     });
   }
 
-  branchSel.addEventListener("change", renderCards);
+  function loadThemes() {
+    var keepFamily = familySel.value;
+    var keepTheme = themeSel.value;
+    return fetch(themesJsonUrl())
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (data) {
+        themes = data || [];
+        byFamily = {};
+        themes.forEach(function (t) { (byFamily[t.family] = byFamily[t.family] || []).push(t); });
+        familySel.innerHTML = "<option value=''>— site default —</option>";
+        Object.keys(byFamily).sort().forEach(function (fam) {
+          var o = document.createElement("option");
+          o.value = fam; o.textContent = fam + " (" + byFamily[fam].length + ")";
+          familySel.appendChild(o);
+        });
+        document.getElementById("tcount").textContent = themes.length;
+        document.getElementById("fcount").textContent = Object.keys(byFamily).length;
+        // Restore the previous family/theme selection if the new manifest still has it.
+        if (keepFamily && byFamily[keepFamily]) {
+          familySel.value = keepFamily;
+          populateThemeSel();
+          if (keepTheme && (byFamily[keepFamily] || []).some(function (t) { return t.path === keepTheme; })) {
+            themeSel.value = keepTheme;
+          }
+        } else {
+          populateThemeSel();
+        }
+        renderCards();
+      })
+      .catch(function () { renderCards(); });
+  }
+
+  branchSel.addEventListener("change", loadThemes);
   familySel.addEventListener("change", function () { populateThemeSel(); renderCards(); });
   themeSel.addEventListener("change", renderCards);
   document.getElementById("reset").addEventListener("click", function () {
-    branchSel.value = ""; familySel.value = ""; populateThemeSel(); renderCards();
+    var branchChanged = branchSel.value !== "";
+    branchSel.value = ""; familySel.value = "";
+    if (branchChanged) { loadThemes(); } else { populateThemeSel(); renderCards(); }
   });
   document.getElementById("random").addEventListener("click", function () {
     if (!themes.length) return;
@@ -238,23 +283,7 @@
     themeSel.value = t.path; renderCards();
   });
 
-  fetch("themes.json")
-    .then(function (r) { return r.ok ? r.json() : []; })
-    .then(function (data) {
-      themes = data || [];
-      themes.forEach(function (t) { (byFamily[t.family] = byFamily[t.family] || []).push(t); });
-      Object.keys(byFamily).sort().forEach(function (fam) {
-        var o = document.createElement("option");
-        o.value = fam; o.textContent = fam + " (" + byFamily[fam].length + ")";
-        familySel.appendChild(o);
-      });
-      document.getElementById("tcount").textContent = themes.length;
-      document.getElementById("fcount").textContent = Object.keys(byFamily).length;
-      renderCards();
-    })
-    .catch(function () { renderCards(); });
-
-  renderCards();
+  loadThemes();
 })();
 </script>
 </body>

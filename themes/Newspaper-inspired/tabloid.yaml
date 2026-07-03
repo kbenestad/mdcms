@@ -1,0 +1,75 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — tabloid
+# Bold Montserrat headlines, serif body, salmon newsprint background.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+palette:
+  light:
+    primary: "#B3261E"
+    surface: "#F7D9CB"
+    page: "#FFFFFF"
+    ink: "#161616"
+    ink-muted: "#6E5A52"
+  dark:
+    primary: "#F1A18C"
+    surface: "#2B1D18"
+    page: "#1A1412"
+    ink: "#F3E5DD"
+    ink-muted: "#B29A8E"
+
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#2B5C8C"
+  warning: "#A3620F"
+  success: "#2F6B3C"
+  error: "#8C1F17"
+
+colours-semantic-dark:
+  info: "#8CB4DE"
+  warning: "#F0B26A"
+  success: "#89D299"
+  error: "#F08072"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#2B5C8C"
+    background-colour: "#2B5C8C"
+  warning:
+    icon: warning
+    primary-colour: "#A3620F"
+    background-colour: "#A3620F"
+  success:
+    icon: success
+    primary-colour: "#2F6B3C"
+    background-colour: "#2F6B3C"
+  error:
+    icon: error
+    primary-colour: "#8C1F17"
+    background-colour: "#8C1F17"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:Source Serif 4:400"
+font-heading: "bunny:Montserrat:800"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.55      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 74em
+nav-width: 20em

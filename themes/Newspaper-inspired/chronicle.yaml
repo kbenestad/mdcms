@@ -1,0 +1,75 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — chronicle
+# All-serif editorial: Playfair Display headlines, PT Serif body. Dusty pink page.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+palette:
+  light:
+    primary: "#7A2E3B"
+    surface: "#F6E1E6"
+    page: "#FFFFFF"
+    ink: "#1C1414"
+    ink-muted: "#6B5458"
+  dark:
+    primary: "#E7A9B4"
+    surface: "#241418"
+    page: "#171012"
+    ink: "#F2E2E5"
+    ink-muted: "#AE8D93"
+
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#3A5A8C"
+  warning: "#9C6B12"
+  success: "#2F6B3C"
+  error: "#9B1B1B"
+
+colours-semantic-dark:
+  info: "#93B2DE"
+  warning: "#E8B15E"
+  success: "#89D299"
+  error: "#E77474"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#3A5A8C"
+    background-colour: "#3A5A8C"
+  warning:
+    icon: warning
+    primary-colour: "#9C6B12"
+    background-colour: "#9C6B12"
+  success:
+    icon: success
+    primary-colour: "#2F6B3C"
+    background-colour: "#2F6B3C"
+  error:
+    icon: error
+    primary-colour: "#9B1B1B"
+    background-colour: "#9B1B1B"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:PT Serif:400"
+font-heading: "bunny:Playfair Display:700"
+font-size: 1.05        # unitless multiplier (1.0 = 16px base)
+line-height: 1.60      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 74em
+nav-width: 20em
