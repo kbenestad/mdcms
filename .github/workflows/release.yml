@@ -72,6 +72,15 @@ jobs:
         with:
           python-version: "3.12"
 
+      # On a tagged release, stamp the tag's version into mdcms.py / pyproject /
+      # config.yml / index.html *before* building, so the binary reports it and
+      # the package metadata matches. Skipped on workflow_dispatch (which just
+      # rebuilds latest/ from whatever is committed).
+      - name: Apply release version from tag
+        if: github.ref_type == 'tag'
+        shell: bash
+        run: python scripts/bump_version.py "${GITHUB_REF_NAME}"
+
       - name: Resolve version
         id: ver
         shell: bash
@@ -144,6 +153,17 @@ jobs:
           ref: main
           fetch-depth: 0
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Apply the same version bump to main so the committed source (and the
+      # next `pip install mdcms` / template download) matches the released tag.
+      - name: Apply release version from tag
+        if: github.ref_type == 'tag'
+        shell: bash
+        run: python scripts/bump_version.py "${GITHUB_REF_NAME}"
+
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -165,13 +185,13 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add latest
+          git add latest mdcms.py pyproject.toml app/config.yml app/index.html
           if git diff --staged --quiet; then
-            echo "No changes to latest/ — nothing to commit."
+            echo "Nothing to commit."
           else
             MSG="Update latest/ binaries"
             if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
-              MSG="Update latest/ binaries for ${GITHUB_REF_NAME}"
+              MSG="Release ${GITHUB_REF_NAME}: bump version and update latest/ binaries"
             fi
             git commit -m "$MSG"
             git push origin HEAD:main

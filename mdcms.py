@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 #
-# mdcms v0.6.0 — CLI companion
+# MD-CMS - Markdown Content Management System
+# kbenestad/mdcms - https://github.com/kbenestad/mdcms
+#
+# Licensed under Apache 2.0 licence.
+#
+# CURRENT VERSION: 0.6.6 - 3 July 2026
 #
 # Copyright 2026 Kristian Benestad
 #
@@ -16,7 +21,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""MD-CMS v0.6.0 — CLI tool for managing and building MD-CMS sites."""
+"""MD-CMS — CLI tool for managing and building MD-CMS sites."""
 
 import json
 import os
@@ -32,11 +37,16 @@ import certifi
 import click
 import yaml
 
-CLI_VERSION = "0.6.5"
+CLI_VERSION = "0.6.6"
 CLI_RELEASE_DATE = "3 July 2026"
 MIN_SUPPORTED_VERSION = "0.3"
 
-MARKER_RE = re.compile(r"mdcms v(\d+\.\d+)", re.IGNORECASE)
+# Version detection in a site's config.yml. The current header carries the
+# version on a `CURRENT VERSION: X.Y[.Z] - <date>` line; older sites (still in
+# the wild) carry a legacy `mdcms vX.Y | DO NOT REMOVE THIS COMMENT` marker.
+# Both are recognised so existing sites keep building after this format change.
+VERSION_LINE_RE = re.compile(r"CURRENT VERSION:\s*v?(\d+\.\d+(?:\.\d+)?)", re.IGNORECASE)
+MARKER_RE = re.compile(r"mdcms v(\d+\.\d+(?:\.\d+)?)", re.IGNORECASE)
 CATEGORY_CODE_RE = re.compile(r"^[a-zA-Z0-9\-]+$")
 
 REGISTRY_FILE = Path.home() / ".config" / "mdcms" / "sites.json"
@@ -55,7 +65,8 @@ GITHUB_URL_RE = re.compile(
 # ─── Version helpers ──────────────────────────────────────────
 
 def _parse_ver(v: str) -> tuple:
-    return tuple(int(x) for x in v.split("."))
+    core = v.strip().lstrip("vV").split("-", 1)[0].split("+", 1)[0]
+    return tuple(int(x) for x in re.findall(r"\d+", core))
 
 
 def read_site_version(site_path: Path) -> "str | None":
@@ -63,11 +74,14 @@ def read_site_version(site_path: Path) -> "str | None":
     if not config.exists():
         return None
     try:
-        first_line = config.read_text(encoding="utf-8").split("\n", 1)[0]
-        m = MARKER_RE.search(first_line)
-        return m.group(1) if m else None
+        # The version lives in the leading comment header. Scan the first lines
+        # so both the `CURRENT VERSION:` banner and the legacy first-line marker
+        # are found, without matching anything in the config body below.
+        header = "\n".join(config.read_text(encoding="utf-8").splitlines()[:25])
     except OSError:
         return None
+    m = VERSION_LINE_RE.search(header) or MARKER_RE.search(header)
+    return m.group(1) if m else None
 
 
 def version_status(site_version: str) -> "tuple[str, str]":

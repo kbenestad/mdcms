@@ -23,41 +23,17 @@ That's the only setup required. No secrets, no tokens, no third-party services.
 
 ## The release checklist
 
-### Update version number
-Before tagging a release, update the version number in at least places:
+### The version is the tag — no manual bump needed
 
-**`mdcms.py`** — find this line near the top and bump it:
-```python
-CLI_VERSION = "0.3.8"
-```
+As of v0.6.6, versioning is **tag-driven**. You do not hand-edit version numbers before releasing: pushing the tag `v0.6.7` makes the workflow stamp `0.6.7` (and today's date) into every file that carries the version — `mdcms.py` (`CLI_VERSION`, `CLI_RELEASE_DATE`, and the header banner), `pyproject.toml`, and the `app/config.yml` / `app/index.html` header banners — then builds the binaries from that stamped source and commits it all to `main`.
 
-**`pyproject.toml`** — bump the matching line:
-```toml
-version = "0.3.8"
-```
+The one thing you may still edit by hand is `MIN_SUPPORTED_VERSION` in `mdcms.py`, and only when you want to drop support for older site formats.
 
-If you have made changes that affect the `index.html` and/or `config.yml`, update the minimum supported version comment at the top of each file:
-
-**`app/index.html`** — bump the matching line:
-```html
-<!-- Minimum supported version: mdcms v0.3.8 | DO NOT REMOVE THIS COMMENT -->
-```
-
-**`app/config.yml`** — bump the matching line:
-```yml
-# Minimum supported version: mdcms v0.3.2 | DO NOT REMOVE THIS COMMENT
-``` 
-
-
-#### Commit locally
-Commit the version bump:
+If you ever need to bump the version locally (outside a release), run the same script the workflow uses:
 ```bash
-git add mdcms.py pyproject.toml
-git commit -m "Bump version to 0.3.8"
-git push origin main
+python scripts/bump_version.py 0.6.7          # or: v0.6.7, or v0.6.7-beta.1
 ```
-#### Commit on the web
-Save each file with a version bump notice: `"Bump version to 0.3.8"`.
+It strips a leading `v` and any pre-release suffix, so the numeric version written into the files stays clean.
 
 ### Tagging the release
 
@@ -96,9 +72,9 @@ The workflow (`.github/workflows/release.yml`) runs five parallel build jobs:
 | `macos-13` | Intel (x86_64) | standalone binary | `latest/macos/intel/` |
 | `windows-latest` | amd64 | `mdcms.exe` | `latest/windows/` |
 
-Each binary is built with PyInstaller — Python is bundled inside, so end users need nothing pre-installed. The `.deb` is built with `fpm` and installs mdcms to `/usr/local/bin`. The arm64 Linux job runs on GitHub's free native ARM64 runner (`ubuntu-22.04-arm`), so the Raspberry Pi binary is compiled natively — no cross-compilation or emulation. Both Linux jobs use the 22.04 runners (glibc 2.35) rather than the newest image so the binaries also run on older-glibc systems, notably current Raspberry Pi OS / Debian 12 (glibc 2.36); a binary built against a newer glibc will not run there.
+On a tagged run, each build job first runs `scripts/bump_version.py "$GITHUB_REF_NAME"` to stamp the tag's version and today's date into `mdcms.py`, `pyproject.toml`, and the `app/config.yml` / `app/index.html` header banners, so the binary it builds reports the released version. Each binary is then built with PyInstaller — Python is bundled inside, so end users need nothing pre-installed. The `.deb` is built with `fpm` and installs mdcms to `/usr/local/bin`. The arm64 Linux job runs on GitHub's free native ARM64 runner (`ubuntu-22.04-arm`), so the Raspberry Pi binary is compiled natively — no cross-compilation or emulation. Both Linux jobs use the 22.04 runners (glibc 2.35) rather than the newest image so the binaries also run on older-glibc systems, notably current Raspberry Pi OS / Debian 12 (glibc 2.36); a binary built against a newer glibc will not run there.
 
-A final `publish` job collects all artifacts, commits them into `latest/` on `main` (this is what serves the `raw.githubusercontent.com/.../main/latest/...` download URLs in `install.md`), and — when the run was triggered by a version tag — also creates a GitHub release with the same binaries attached under descriptive names (`mdcms-linux-amd64`, `mdcms-linux-arm64`, `mdcms-macos-silicon`, `mdcms-macos-intel`, `mdcms-windows-amd64.exe`, plus the `.deb` packages).
+A final `publish` job applies the same version bump to `main`, collects all artifacts, commits the bumped source + binaries into `latest/` on `main` (this is what serves the `raw.githubusercontent.com/.../main/latest/...` download URLs in `install.md`), and — when the run was triggered by a version tag — also creates a GitHub release with the same binaries attached under descriptive names (`mdcms-linux-amd64`, `mdcms-linux-arm64`, `mdcms-macos-silicon`, `mdcms-macos-intel`, `mdcms-windows-amd64.exe`, plus the `.deb` packages).
 
 The workflow can also be run manually from the **Actions** tab (**Run workflow**, `workflow_dispatch`) to refresh `latest/` without cutting a tagged release.
 
