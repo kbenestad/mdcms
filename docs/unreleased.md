@@ -34,3 +34,17 @@ Changes merged into `development` that have not yet been released to `main`.
   Affected: air-klm, air-norse, air-emirates, air-swiss, lit-pentecost, lit-rose,
   canada, china, ireland, italy, med-wellness, greenland, map-osm, map-paris-metro,
   map-swisstopo, map-tokyo-metro, map-tunnelbana, tx-db, tx-hapag, tx-maersk, un-blue.
+- **south-africa-bold — readable section headings.** Its muted `#9A9A9A` heading/note/icon
+  labels (dim on the black nav surface) now point at `var(--nav-link-colour)`.
+
+## Sample sites
+
+- **Refreshed the bundled renderer in all seven sample sites.** Their copies of
+  `index.html` were stale, predating the topbar/mobile-nav colour variables: the topbar
+  site title and dropdown triggers were hardcoded to `var(--font-colour)` (page ink),
+  so on bold themes with a dark nav surface they rendered ink-on-dark ("black on black")
+  regardless of the theme's nav-surface tokens. Recopied `app/index.html` so the topbar
+  and mobile nav honour `--nav-sitename-colour`, `--nav-link-colour`,
+  `--nav-link-active-colour` and `--nav-toggle-colour`, matching the sidebar. This only
+  affected the sample-site previews; the canonical `app/index.html` renderer was already
+  correct.

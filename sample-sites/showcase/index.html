@@ -383,7 +383,7 @@ body {
   font-family: var(--font-title);
   font-weight: var(--font-title-weight);
   font-size: 1rem;
-  color: var(--font-colour);
+  color: var(--nav-sitename-colour);
 }
 
 .topbar-nav { display: flex; align-items: center; gap: 0.25rem; flex: 1; overflow-x: auto; }
@@ -394,7 +394,13 @@ body {
   white-space: nowrap;
   font-size: 0.85rem;
 }
-.topbar-nav .nav-item.active { border-left: none; background: var(--nav-active-bg); }
+.topbar-nav .nav-item.active {
+  border-left: none;
+  background: var(--nav-active-bg);
+  color: var(--nav-link-active-colour, var(--accent));
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--nav-link-active-colour, var(--accent));
+}
 
 /* ─── Topbar grouped navigation (dropdowns) ─── */
 .topbar-nav .nav-group { position: relative; }
@@ -402,13 +408,18 @@ body {
   display: flex; align-items: center; gap: 0.25rem;
   padding: 0.35rem 0.75rem; border-radius: 5px;
   background: none; border: none; cursor: pointer;
-  color: var(--font-colour); font-size: 0.85rem;
+  color: var(--nav-link-colour, var(--font-colour)); font-size: 0.85rem;
   font-family: inherit; white-space: nowrap; text-decoration: none; line-height: inherit;
 }
 .topbar-nav .nav-trigger:hover,
 .topbar-nav .nav-group.open > .nav-trigger { background: var(--nav-hover-bg); }
-.topbar-nav .nav-group.has-active > .nav-trigger { background: var(--nav-active-bg); }
-.topbar-nav .nav-caret { font-size: 0.6rem; color: var(--font-colour-muted); opacity: 0.55; line-height: 1; }
+.topbar-nav .nav-group.has-active > .nav-trigger {
+  background: var(--nav-active-bg);
+  color: var(--nav-link-active-colour, var(--accent));
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--nav-link-active-colour, var(--accent));
+}
+.topbar-nav .nav-caret { font-size: 0.6rem; color: var(--nav-toggle-colour); opacity: 0.55; line-height: 1; }
 .topbar-nav .nav-dropdown {
   /* position: fixed (placed by JS) so the menu escapes the .topbar-nav
      overflow-x:auto clip — otherwise the panel is clipped to the bar height
@@ -427,10 +438,15 @@ body {
 .topbar-nav .nav-group.open > .nav-dropdown { display: block; }
 .topbar-nav .nav-dropdown .nav-item {
   display: block; padding: 0.45rem 1rem;
-  border-left: none; border-radius: 0; white-space: nowrap;
+  border-left: 3px solid transparent; border-radius: 0; white-space: nowrap;
 }
 .topbar-nav .nav-dropdown .nav-item:hover { background: var(--nav-hover-bg); }
-.topbar-nav .nav-dropdown .nav-item.active { background: var(--nav-active-bg); font-weight: 600; }
+.topbar-nav .nav-dropdown .nav-item.active {
+  background: var(--nav-active-bg);
+  border-left-color: var(--nav-link-active-colour, var(--accent));
+  color: var(--nav-link-active-colour, var(--accent));
+  font-weight: 600;
+}
 
 .topbar-actions { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
 
@@ -793,18 +809,23 @@ body {
   .layout-topbar .mobile-nav-panel .nav-item {
     padding: 0.6rem 1.25rem;
     font-size: 1rem;
-    border-left: none;
+    border-left: 3px solid transparent;
   }
-  .layout-topbar .mobile-nav-panel .nav-item.active { border-left: none; font-weight: 600; }
+  .layout-topbar .mobile-nav-panel .nav-item.active {
+    background: var(--nav-active-bg);
+    border-left-color: var(--nav-link-active-colour, var(--accent));
+    color: var(--nav-link-active-colour, var(--accent));
+    font-weight: 600;
+  }
   .layout-topbar .mobile-nav-panel .nav-group-row { display: flex; align-items: stretch; }
   .layout-topbar .mobile-nav-panel .nav-group-row .nav-item { flex: 1; }
   .layout-topbar .mobile-nav-panel .nav-section-label {
     flex: 1; display: flex; align-items: center;
-    padding: 0.6rem 1.25rem; font-size: 1rem; color: var(--font-colour); font-weight: 500;
+    padding: 0.6rem 1.25rem; font-size: 1rem; color: var(--nav-link-colour, var(--font-colour)); font-weight: 500;
   }
   .layout-topbar .mobile-nav-panel .nav-expand-btn {
     background: none; border: none; cursor: pointer;
-    color: var(--font-colour-muted); padding: 0 1.25rem; font-size: 1.2rem; line-height: 1; flex-shrink: 0;
+    color: var(--nav-toggle-colour); padding: 0 1.25rem; font-size: 1.2rem; line-height: 1; flex-shrink: 0;
   }
   .layout-topbar .mobile-nav-panel .nav-group-children { display: none; }
   .layout-topbar .mobile-nav-panel .nav-group-children.open { display: block; }
