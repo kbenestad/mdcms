@@ -22,6 +22,21 @@ Changes merged into `development` that have not yet been released to `main`.
     preserved, commented example keys are uncommented in place, and structured
     blocks (e.g. dict-form `offline-message`) are left untouched.
 
+## CI / release
+
+- **New `release.yml` workflow — multi-platform binaries that land in `latest/`.**
+  Builds standalone PyInstaller binaries for five targets on a runner matrix and
+  commits them into `latest/` on `main` (the source of the
+  `raw.githubusercontent.com/.../main/latest/...` download URLs), and additionally
+  attaches them to a GitHub release when triggered by a `v*` tag.
+  - Targets: `linux/amd64` (binary + `.deb`), `linux/arm64` (binary + `.deb`,
+    **native ARM64 build for Raspberry Pi 3/4/5** on the free `ubuntu-24.04-arm`
+    runner), `macos/silicon` (Apple Silicon), `macos/intel`, and `windows`.
+  - Triggers on `v*` tags and on manual `workflow_dispatch`.
+- **Install docs updated** (`install.md`, `workflows.md`, `README.md`,
+  `dev-release.md`) for the new per-architecture `latest/` layout and the
+  Raspberry Pi / Apple Silicon / Intel choices.
+
 ## Themes
 
 - **Bold themes — readable nav surface colours.** Fixed 21 `*-bold` themes whose nav

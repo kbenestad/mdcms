@@ -207,15 +207,19 @@ Reliable tags (others are known-broken): `posts-created-chronological-byyearmont
 
 ## Release workflow
 
-`.github/workflows/release.yml` triggers on version tags (`v*`). Uses a matrix of three runners:
+`.github/workflows/release.yml` triggers on version tags (`v*`) and on manual `workflow_dispatch`. Uses a matrix of five runners:
 
-| Runner | Output |
-|---|---|
-| `ubuntu-latest` | `mdcms-linux-amd64` binary + `mdcms_<version>_amd64.deb` (via PyInstaller + fpm) |
-| `macos-latest` | `mdcms-macos-arm64` binary |
-| `windows-latest` | `mdcms-windows-amd64.exe` |
+| Runner | Arch | Output | Lands in `latest/` |
+|---|---|---|---|
+| `ubuntu-22.04` | amd64 | binary + `mdcms.deb` (PyInstaller + fpm) | `linux/amd64/` |
+| `ubuntu-22.04-arm` | arm64 (Raspberry Pi) | binary + `mdcms.deb` (native ARM64 build) | `linux/arm64/` |
+| `macos-14` | Apple Silicon (arm64) | binary | `macos/silicon/` |
+| `macos-13` | Intel (x86_64) | binary | `macos/intel/` |
+| `windows-latest` | amd64 | `mdcms.exe` | `windows/` |
 
-All artifacts are attached to the GitHub release using `gh release create`. The workflow sets `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` to opt into the Node.js 24 runner ahead of the June 2026 forced migration.
+The Linux jobs run on `ubuntu-22.04` (glibc 2.35) rather than the newest runner so the binaries also run on older-glibc systems — notably current Raspberry Pi OS / Debian 12 (glibc 2.36). A final `publish` job commits all built binaries into `latest/` on `main` — these serve the `raw.githubusercontent.com/kbenestad/mdcms/main/latest/...` download URLs documented in `docs/install.md`. When the run is triggered by a `v*` tag, `publish` also attaches the same binaries to a GitHub release (under descriptive names) using `gh release create`. The workflow sets `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` to opt into the Node.js 24 runner ahead of the June 2026 forced migration.
+
+Because `publish` pushes to `main`, the repo's **Actions → Workflow permissions** must be **Read and write**, and any branch protection on `main` must permit the `github-actions[bot]` push.
 
 **Release checklist** — before tagging:
 1. Update `CLI_VERSION` in `mdcms.py`

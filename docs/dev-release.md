@@ -86,17 +86,23 @@ The tag must start with `v`. The workflow triggers immediately.
 
 ## What the workflow does
 
-The workflow (`.github/workflows/release.yml`) runs three parallel jobs:
+The workflow (`.github/workflows/release.yml`) runs five parallel build jobs:
 
-| Runner | Output |
-|---|---|
-| `ubuntu-latest` | `mdcms-linux-amd64` (standalone binary) + `mdcms_0.3.1_amd64.deb` |
-| `macos-latest` | `mdcms-macos-arm64` (standalone binary) |
-| `windows-latest` | `mdcms-windows-amd64.exe` |
+| Runner | Arch | Output | Lands in |
+|---|---|---|---|
+| `ubuntu-22.04` | amd64 | standalone binary + `.deb` | `latest/linux/amd64/` |
+| `ubuntu-22.04-arm` | arm64 (Raspberry Pi) | standalone binary + `.deb` | `latest/linux/arm64/` |
+| `macos-14` | Apple Silicon (arm64) | standalone binary | `latest/macos/silicon/` |
+| `macos-13` | Intel (x86_64) | standalone binary | `latest/macos/intel/` |
+| `windows-latest` | amd64 | `mdcms.exe` | `latest/windows/` |
 
-Each binary is built with PyInstaller — Python is bundled inside, so end users need nothing pre-installed. The `.deb` is built with `fpm` and installs mdcms to `/usr/local/bin`.
+Each binary is built with PyInstaller — Python is bundled inside, so end users need nothing pre-installed. The `.deb` is built with `fpm` and installs mdcms to `/usr/local/bin`. The arm64 Linux job runs on GitHub's free native ARM64 runner (`ubuntu-22.04-arm`), so the Raspberry Pi binary is compiled natively — no cross-compilation or emulation. Both Linux jobs use the 22.04 runners (glibc 2.35) rather than the newest image so the binaries also run on older-glibc systems, notably current Raspberry Pi OS / Debian 12 (glibc 2.36); a binary built against a newer glibc will not run there.
 
-A final job collects all artifacts and creates the GitHub release with auto-generated release notes.
+A final `publish` job collects all artifacts, commits them into `latest/` on `main` (this is what serves the `raw.githubusercontent.com/.../main/latest/...` download URLs in `install.md`), and — when the run was triggered by a version tag — also creates a GitHub release with the same binaries attached under descriptive names (`mdcms-linux-amd64`, `mdcms-linux-arm64`, `mdcms-macos-silicon`, `mdcms-macos-intel`, `mdcms-windows-amd64.exe`, plus the `.deb` packages).
+
+The workflow can also be run manually from the **Actions** tab (**Run workflow**, `workflow_dispatch`) to refresh `latest/` without cutting a tagged release.
+
+> **Note on `main` protection:** the `publish` job pushes the built binaries directly to `main` using the built-in `GITHUB_TOKEN`. If `main` has a branch-protection rule that blocks direct pushes, either allow the `github-actions[bot]` actor to bypass it, or point the commit step at a different branch.
 
 ## Monitoring the build
 
@@ -120,7 +126,7 @@ git push origin v0.3.8
 
 Once all jobs pass, the release appears under **Releases** on the repository with:
 - Auto-generated changelog (commits since the last tag)
-- All four artifacts attached for download
+- All platform artifacts attached for download (Linux amd64/arm64 binaries + `.deb`s, macOS silicon/intel, Windows `.exe`)
 
 ## Follow-up
-If you serve `latest` binaries from a standard URL, you also have to make sure to update these.
+The workflow keeps the `latest/` download URLs in sync automatically — the `publish` job commits every fresh binary into `latest/` on `main` as part of each run, so there is no separate manual step to update them.
