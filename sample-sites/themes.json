@@ -715,6 +715,12 @@
   },
   {
     "family": "Newspaper-inspired",
+    "file": "city.yaml",
+    "path": "themes/Newspaper-inspired/city.yaml",
+    "label": "city"
+  },
+  {
+    "family": "Newspaper-inspired",
     "file": "folio.yaml",
     "path": "themes/Newspaper-inspired/folio.yaml",
     "label": "folio"
@@ -727,9 +733,21 @@
   },
   {
     "family": "Newspaper-inspired",
+    "file": "gotham.yaml",
+    "path": "themes/Newspaper-inspired/gotham.yaml",
+    "label": "gotham"
+  },
+  {
+    "family": "Newspaper-inspired",
     "file": "ledger.yaml",
     "path": "themes/Newspaper-inspired/ledger.yaml",
     "label": "ledger"
+  },
+  {
+    "family": "Newspaper-inspired",
+    "file": "manhattan.yaml",
+    "path": "themes/Newspaper-inspired/manhattan.yaml",
+    "label": "manhattan"
   },
   {
     "family": "Newspaper-inspired",
