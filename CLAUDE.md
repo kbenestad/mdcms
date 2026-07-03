@@ -207,19 +207,21 @@ Reliable tags (others are known-broken): `posts-created-chronological-byyearmont
 
 ## Release workflow
 
-`.github/workflows/release.yml` triggers on version tags (`v*`) and on manual `workflow_dispatch`. Uses a matrix of five runners:
+`.github/workflows/release.yml` triggers on version tags (`v*`) and on manual `workflow_dispatch`. A four-runner `build` matrix plus a separate `build-intel` job:
 
-| Runner | Arch | Output | Lands in `latest/` |
-|---|---|---|---|
-| `ubuntu-22.04` | amd64 | binary + `mdcms.deb` (PyInstaller + fpm) | `linux/amd64/` |
-| `ubuntu-22.04-arm` | arm64 (Raspberry Pi) | binary + `mdcms.deb` (native ARM64 build) | `linux/arm64/` |
-| `macos-14` | Apple Silicon (arm64) | binary | `macos/silicon/` |
-| `macos-13` | Intel (x86_64) | binary | `macos/intel/` |
-| `windows-latest` | amd64 | `mdcms.exe` | `windows/` |
+| Job | Runner | Arch | Output | Lands in `latest/` |
+|---|---|---|---|---|
+| `build` | `ubuntu-22.04` | amd64 | binary + `mdcms.deb` (PyInstaller + fpm) | `linux/amd64/` |
+| `build` | `ubuntu-22.04-arm` | arm64 (Raspberry Pi) | binary + `mdcms.deb` (native ARM64 build) | `linux/arm64/` |
+| `build` | `macos-14` | Apple Silicon (arm64) | binary | `macos/silicon/` |
+| `build` | `windows-latest` | amd64 | `mdcms.exe` | `windows/` |
+| `build-intel` | `macos-15-intel` | Intel (x86_64) | binary | `macos/intel/` |
 
-The Linux jobs run on `ubuntu-22.04` (glibc 2.35) rather than the newest runner so the binaries also run on older-glibc systems — notably current Raspberry Pi OS / Debian 12 (glibc 2.36). A final `publish` job commits all built binaries into `latest/` on `main` — these serve the `raw.githubusercontent.com/kbenestad/mdcms/main/latest/...` download URLs documented in `docs/install.md`. When the run is triggered by a `v*` tag, `publish` also attaches the same binaries to a GitHub release (under descriptive names) using `gh release create`. The workflow sets `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` to opt into the Node.js 24 runner ahead of the June 2026 forced migration.
+The Linux jobs run on `ubuntu-22.04` (glibc 2.35) rather than the newest runner so the binaries also run on older-glibc systems — notably current Raspberry Pi OS / Debian 12 (glibc 2.36).
 
-Because `publish` pushes to `main`, the repo's **Actions → Workflow permissions** must be **Read and write**, and any branch protection on `main` must permit the `github-actions[bot]` push.
+**macOS Intel is deliberately outside the matrix.** Intel runner capacity is scarce (`macos-13` was retired in December 2025 and its jobs queue forever; `macos-15-intel` is the last Intel image, supported until Fall 2027), so the Intel build gets its own `build-intel` job and its own `publish-intel` job. `publish` (`needs: build`) therefore never waits on the Intel queue: it commits the four fast binaries into `latest/` on `main` (preserving the existing `latest/macos/intel/` via an rsync exclude) and, on a `v*` tag, creates the GitHub release with those binaries attached. `publish-intel` (`needs: [build-intel, publish]`) then commits the Intel binary into `latest/macos/intel/` and uploads it to the same release (`gh release upload --clobber`) whenever the Intel runner gets around to it. The `latest/` download URLs serve `raw.githubusercontent.com/kbenestad/mdcms/main/latest/...` as documented in `docs/install.md`. The workflow sets `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` to opt into the Node.js 24 runner ahead of the June 2026 forced migration.
+
+Because `publish` and `publish-intel` push to `main`, the repo's **Actions → Workflow permissions** must be **Read and write**, and any branch protection on `main` must permit the `github-actions[bot]` push.
 
 **Version bumping is tag-driven.** The tag *is* the version. On a `v*` tag, every build job runs `scripts/bump_version.py "$GITHUB_REF_NAME"` before building — stamping the tag's version and today's date into `mdcms.py` (`CLI_VERSION`, `CLI_RELEASE_DATE`, banner), `pyproject.toml` (`version`), and the `app/config.yml` / `app/index.html` banners — so the built binary reports the right version. The `publish` job applies the same bump to its `main` checkout and commits it alongside the `latest/` binaries. `scripts/bump_version.py` strips a leading `v` and any pre-release suffix (e.g. `v0.6.6-beta.1` → `0.6.6`) so version comparisons stay well-defined; run it locally too (`python scripts/bump_version.py 0.6.6`) if you need to bump by hand.
 

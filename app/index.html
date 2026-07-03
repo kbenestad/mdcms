@@ -217,7 +217,7 @@ body {
 }
 .sidebar-sitename:hover { color: var(--nav-link-active-colour, var(--accent)); }
 
-.sidebar-description { font-size: 0.8rem; color: var(--nav-description-colour); margin-top: 0.25rem; line-height: 1.4; }
+.sidebar-description { font-size: 0.8rem; font-weight: 500; color: var(--nav-description-colour); margin-top: 0.25rem; line-height: 1.4; }
 
 /* Search */
 .search-container { padding: 0.75rem 1.25rem; flex-shrink: 0; }
@@ -328,6 +328,7 @@ body {
   display: block;
   padding: 0.45rem 1.25rem;
   font-size: 0.875rem;
+  font-weight: 500;
   color: var(--nav-link-colour, var(--nav-font-colour, var(--font-colour)));
   text-decoration: none;
   transition: background 0.1s, color 0.1s;
@@ -354,6 +355,7 @@ body {
   gap: 0.5rem;
   padding: 0.4rem 0.6rem;
   font-size: 0.8rem;
+  font-weight: 500;
   color: var(--nav-toggle-colour);
   background: none;
   border: 1px solid color-mix(in srgb, var(--bg-nav) 70%, var(--nav-toggle-colour));
@@ -416,6 +418,7 @@ body {
   padding: 0.35rem 0.75rem; border-radius: 5px;
   background: none; border: none; cursor: pointer;
   color: var(--nav-link-colour, var(--font-colour)); font-size: 0.85rem;
+  font-weight: 500;
   font-family: inherit; white-space: nowrap; text-decoration: none; line-height: inherit;
 }
 .topbar-nav .nav-trigger:hover,
@@ -657,6 +660,7 @@ body {
   padding: 0.55rem 0.85rem;
   cursor: pointer;
   font-size: 0.88rem;
+  font-weight: 500;
   color: var(--nav-link-colour, var(--font-colour));
   border-bottom: 1px solid var(--divider);
   transition: background 0.1s;
@@ -969,7 +973,7 @@ body {
   border-bottom: 1px solid var(--mdcms-strip-border, color-mix(in srgb, var(--font-colour) 12%, transparent));
 }
 .mdcms-tabs-underline .mdcms-tab-btn {
-  padding: 8px 2px;
+  padding: 10px 4px;
   border: none;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
@@ -992,7 +996,7 @@ body {
 /* Filled variant */
 .mdcms-tabs-filled .mdcms-tabs-strip { display: flex; flex-wrap: wrap; gap: 4px; }
 .mdcms-tabs-filled .mdcms-tab-btn {
-  padding: 6px 11px;
+  padding: 8px 13px;
   border-radius: 4px;
   border: 1px solid var(--mdcms-filled-border, rgba(var(--accent-rgb), 0.30));
   background: var(--mdcms-filled-bg, rgba(var(--accent-rgb), 0.10));
@@ -1060,10 +1064,7 @@ body {
 }
 .mdcms-accordion-underline .mdcms-accordion-chevron { color: var(--mdcms-bar, var(--accent)); }
 .mdcms-accordion-underline .mdcms-accordion-body {
-  border-left: 1px solid var(--mdcms-bar, var(--accent));
-  border-right: 1px solid var(--mdcms-bar, var(--accent));
   border-bottom: 1px solid var(--mdcms-bar, var(--accent));
-  border-radius: 0 0 3px 3px;
   padding: 8px 10px 9px;
   color: var(--font-colour-muted);
 }

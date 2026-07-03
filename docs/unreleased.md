@@ -53,6 +53,20 @@ Changes merged into `development` that have not yet been released to `main`.
 
 ## CI / release
 
+- **Fixed: release runs stalled forever on the retired `macos-13` runner.** The
+  macOS Intel build targeted `macos-13`, which GitHub retired in December 2025 —
+  the job never got a runner, and because `publish` needed every build job, the
+  binaries were never committed to `latest/` and never attached to the GitHub
+  release. The Intel build now runs on `macos-15-intel` (GitHub's last Intel
+  image, supported until Fall 2027).
+- **Split macOS Intel out of the release critical path.** The Intel build is now
+  its own `build-intel` job, and `publish` no longer waits for it: `latest/` is
+  committed and the GitHub release is created as soon as the four fast builds
+  finish (typically ~3 minutes). A new `publish-intel` job appends the Intel
+  binary to `latest/macos/intel/` and uploads it to the release whenever the
+  Intel runner completes — a slow (or failed) Intel job can no longer block a
+  release. `publish` preserves the previously published Intel binary in
+  `latest/` so its download URL keeps working until the new one lands.
 - **New `release.yml` workflow — multi-platform binaries that land in `latest/`.**
   Builds standalone PyInstaller binaries for five targets on a runner matrix and
   commits them into `latest/` on `main` (the source of the
@@ -65,6 +79,36 @@ Changes merged into `development` that have not yet been released to `main`.
 - **Install docs updated** (`install.md`, `workflows.md`, `README.md`,
   `dev-release.md`) for the new per-architecture `latest/` layout and the
   Raspberry Pi / Apple Silicon / Intel choices.
+
+## Renderer (`app/index.html`)
+
+- **Bolder nav text on surface backgrounds.** Sidebar/topbar links, the site
+  description, the theme toggle, dropdown triggers, and the category picker
+  now render at `font-weight: 500` instead of inheriting the body weight —
+  legible on strong/bold `surface` colours where the previous regular weight
+  read as too faint.
+- **Slightly more breathing room on tabs.** Both the underline and filled tab
+  variants got a touch more button padding.
+- **Underlined accordions no longer box in the open body.** The underline
+  accordion's expanded body dropped its left/right borders (and the now-moot
+  corner radius); only the bottom border remains, matching the header's
+  underline instead of drawing a full frame.
+
+## Sample sites
+
+- **Sample-site picker: branch switcher.** `sample-sites/index.html` only
+  deploys to GitHub Pages from `main`, so it couldn't show `development`'s
+  content. Added a **Branch** selector — picking "development (preview)"
+  rewrites each site's launch link to jsDelivr's GitHub CDN
+  (`cdn.jsdelivr.net/gh/kbenestad/mdcms@development/...`), which serves that
+  branch's files (and the relative `config.yml`/`nav.yml`/pages/theme fetches
+  the renderer makes) directly, with no deploy needed. Also removed the
+  secondary "Default" launch button from each card — a single "Open" /
+  "Open with theme" button now covers both cases.
+- **Recopied `app/index.html` into all seven sample sites** so the nav
+  font-weight, tab padding, and underlined-accordion border fixes above
+  actually show up in the previews (each sample site carries its own static
+  copy of the renderer, not a live link to `app/index.html`).
 
 ## Themes
 

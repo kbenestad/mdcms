@@ -65,8 +65,6 @@
   }
   a.btn.primary { background: var(--accent); color: var(--accent-ink); }
   a.btn.primary:hover { filter: brightness(1.05); }
-  a.btn.sec { border: 1px solid var(--line); color: var(--ink); }
-  a.btn.sec:hover { border-color: var(--accent); color: var(--accent); }
   footer { margin-top: 2.5rem; color: var(--muted); font-size: 0.85rem; }
   footer code { background: var(--chip); padding: 0.1rem 0.35rem; border-radius: 5px; }
   .count { color: var(--muted); font-size: 0.82rem; }
@@ -81,6 +79,11 @@
   </header>
 
   <div class="theme-bar">
+    <label for="branch">Branch</label>
+    <select id="branch">
+      <option value="">main (current)</option>
+      <option value="development">development (preview)</option>
+    </select>
     <label for="family">Theme family</label>
     <select id="family"><option value="">— site default —</option></select>
     <select id="theme" class="grow" disabled><option value="">(all default)</option></select>
@@ -102,6 +105,16 @@
 (function () {
   "use strict";
 
+  // This page is only deployed to GitHub Pages from `main` (see
+  // .github/workflows/pages.yml), so it has no way to show `development`'s
+  // content itself. The branch switch below instead points the site links at
+  // jsDelivr's GitHub CDN, which serves any branch of a public repo verbatim
+  // — including relative fetches the renderer makes for config.yml, nav.yml,
+  // pages/*.md and theme files — so picking "development" previews that
+  // branch's sample sites without deploying anything.
+  var REPO_OWNER = "kbenestad";
+  var REPO_NAME  = "mdcms";
+
   // Sample sites live in sibling folders. `nav` is informational only.
   var SITES = [
     { dir: "showcase",            name: "MD-CMS Showcase",            nav: "topbar",
@@ -120,6 +133,7 @@
       desc: "A novel by Elena Marchetti, chapter by chapter." }
   ];
 
+  var branchSel = document.getElementById("branch");
   var familySel = document.getElementById("family");
   var themeSel  = document.getElementById("theme");
   var hint      = document.getElementById("hint");
@@ -134,6 +148,17 @@
     return "../../" + path;
   }
 
+  // Base URL for a site's folder: same-origin relative path on `main`, or a
+  // jsDelivr GitHub CDN URL rooted at the chosen branch otherwise. Either way
+  // the result ends in a trailing slash so relative fetches inside the site
+  // resolve against the right branch.
+  function siteBase(dir) {
+    var branch = branchSel.value;
+    if (!branch) return encodeURIComponent(dir) + "/";
+    return "https://cdn.jsdelivr.net/gh/" + REPO_OWNER + "/" + REPO_NAME + "@" +
+      encodeURIComponent(branch) + "/sample-sites/" + encodeURIComponent(dir) + "/";
+  }
+
   function currentTheme() {
     var fam = familySel.value;
     if (!fam) return null;
@@ -144,7 +169,7 @@
   }
 
   function siteUrl(site) {
-    var base = encodeURIComponent(site.dir) + "/index.html";
+    var base = siteBase(site.dir) + "index.html";
     var t = currentTheme();
     if (!t) return base;
     return base + "?theme=" + encodeURIComponent(relThemeForSite(t.path));
@@ -161,22 +186,21 @@
         "<h2></h2><p class='desc'></p>" +
         '<div class="actions">' +
           '<a class="btn primary" target="_blank" rel="noopener"></a>' +
-          '<a class="btn sec" target="_blank" rel="noopener">Default</a>' +
         "</div>";
       card.querySelector("h2").textContent = site.name;
       card.querySelector(".desc").textContent = site.desc;
       var primary = card.querySelector(".btn.primary");
       primary.href = siteUrl(site);
       primary.textContent = t ? "Open with theme" : "Open";
-      var sec = card.querySelector(".btn.sec");
-      sec.href = encodeURIComponent(site.dir) + "/index.html";
-      sec.style.display = t ? "" : "none";
       grid.appendChild(card);
     });
-    hint.innerHTML = t
+    var branchNote = branchSel.value
+      ? "Branch <strong>" + escapeHtml(branchSel.value) + "</strong> (via jsDelivr). "
+      : "";
+    hint.innerHTML = branchNote + (t
       ? 'Previewing <strong>' + escapeHtml(t.label) + "</strong> <span class='count'>(" +
         escapeHtml(t.family) + " · " + escapeHtml(t.file) + ")</span>."
-      : "No theme selected — each site opens with its own <code>theme.yml</code>.";
+      : "No theme selected — each site opens with its own <code>theme.yml</code>.");
   }
 
   function escapeHtml(s) {
@@ -201,10 +225,11 @@
     });
   }
 
+  branchSel.addEventListener("change", renderCards);
   familySel.addEventListener("change", function () { populateThemeSel(); renderCards(); });
   themeSel.addEventListener("change", renderCards);
   document.getElementById("reset").addEventListener("click", function () {
-    familySel.value = ""; populateThemeSel(); renderCards();
+    branchSel.value = ""; familySel.value = ""; populateThemeSel(); renderCards();
   });
   document.getElementById("random").addEventListener("click", function () {
     if (!themes.length) return;
