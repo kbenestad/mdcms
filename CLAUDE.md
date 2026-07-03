@@ -109,7 +109,7 @@ offline-message:
 
 Single-module Python script. Logical layers in order:
 
-1. **Version helpers** — `read_site_version()` reads the `mdcms v0.3` marker from the first line of `config.yml`. `version_status()` classifies sites as `ok`, `outdated`, `newer`, or `unsupported` against `MIN_SUPPORTED_VERSION`.
+1. **Version helpers** — `read_site_version()` scans the leading comment header of `config.yml` for the `CURRENT VERSION:` line (falling back to the legacy `mdcms vX.Y` marker). `version_status()` classifies sites as `ok`, `outdated`, `newer`, or `unsupported` against `MIN_SUPPORTED_VERSION`.
 2. **Registry** — `~/.config/mdcms/sites.json` stores `{name: {path, version}}`. `load_registry()` / `save_registry()` / `resolve_site_path()`.
 3. **Config reading** — `read_config()` reads `config.yml` with `yaml.safe_load()`. `get_category_info()` extracts category settings from the parsed dict.
 4. **Frontmatter parser** (`parse_frontmatter`) — reads `---` YAML blocks using `yaml.safe_load()`. Returns `(meta_dict, body_text)`.
@@ -122,17 +122,17 @@ Single-module Python script. Logical layers in order:
 
 ## Version markers
 
-Every mdcms site has a version marker on the first line of two files:
+Every mdcms file carries a common header banner. Its last line is the version marker:
 
-- `config.yml` line 1: `# mdcms v0.4 | DO NOT REMOVE THIS COMMENT`
-- `index.html` line 1: `<!-- mdcms v0.4 | DO NOT REMOVE THIS COMMENT -->`
-- `theme.yml` line 1: `# mdcms v0.4 | DO NOT REMOVE THIS COMMENT`
+```
+CURRENT VERSION: 0.6.6 - 3 July 2026
+```
 
-`register` and `build` both read the marker from `config.yml` to detect and validate the site. Sites with no marker are not recognised as mdcms sites. Sites below `MIN_SUPPORTED_VERSION` are rejected.
+This banner (with file-appropriate comment syntax) heads `mdcms.py`, `app/config.yml`, and `app/index.html`. `register` and `build` detect and validate a site by reading the version out of the **`config.yml`** header: `read_site_version()` scans the leading comment block for the `CURRENT VERSION:` line. Sites with no recognisable version are not treated as mdcms sites; sites below `MIN_SUPPORTED_VERSION` are rejected.
 
-There are two distinct version numbers:
-- **CLI version** (`CLI_VERSION` in `mdcms.py`, `version` in `pyproject.toml`) — bumped with every release.
-- **Site format version** (markers in `config.yml` and `index.html`) — only bumped when the site file format has a breaking change. Many CLI releases may share the same site format version.
+**Backward compatibility:** the parser (`VERSION_LINE_RE`, then `MARKER_RE`) also still recognises the pre-0.6.6 legacy marker — `# mdcms vX.Y | DO NOT REMOVE THIS COMMENT` on line 1 — so sites created before this format change keep building. `theme.yml` still carries a legacy `# mdcms vX.Y` comment; nothing parses it, so it is cosmetic.
+
+**One version stream.** As of v0.6.6 there is a single version number, applied to `mdcms.py` (`CLI_VERSION` + `CLI_RELEASE_DATE` + banner), `pyproject.toml` (`version`), and the `app/config.yml` / `app/index.html` banners together. A release sets all of them at once (see the release workflow). The earlier CLI-vs-site-format split is retired.
 
 ## Site structure
 
@@ -221,14 +221,11 @@ The Linux jobs run on `ubuntu-22.04` (glibc 2.35) rather than the newest runner 
 
 Because `publish` pushes to `main`, the repo's **Actions → Workflow permissions** must be **Read and write**, and any branch protection on `main` must permit the `github-actions[bot]` push.
 
-**Release checklist** — before tagging:
-1. Update `CLI_VERSION` in `mdcms.py`
-2. Update `version` in `pyproject.toml`
-3. Update site format markers in `app/config.yml` and `app/index.html` only if the site format changed
+**Version bumping is tag-driven.** The tag *is* the version. On a `v*` tag, every build job runs `scripts/bump_version.py "$GITHUB_REF_NAME"` before building — stamping the tag's version and today's date into `mdcms.py` (`CLI_VERSION`, `CLI_RELEASE_DATE`, banner), `pyproject.toml` (`version`), and the `app/config.yml` / `app/index.html` banners — so the built binary reports the right version. The `publish` job applies the same bump to its `main` checkout and commits it alongside the `latest/` binaries. `scripts/bump_version.py` strips a leading `v` and any pre-release suffix (e.g. `v0.6.6-beta.1` → `0.6.6`) so version comparisons stay well-defined; run it locally too (`python scripts/bump_version.py 0.6.6`) if you need to bump by hand.
 
-Then: `git tag v0.4.1 && git push origin v0.4.1`
+**Release checklist:** just tag. `git tag v0.6.7 && git push origin v0.6.7` — the workflow does the version bump, the build, the `latest/` commit, and the GitHub release. Update `MIN_SUPPORTED_VERSION` in `mdcms.py` only when dropping support for older site formats.
 
-**Note:** Git tag pushes must be done from a local machine — the cloud environment cannot push tags (HTTP 403). Use `gh release create <tag>` locally after pushing the tag.
+**Note:** Git tag pushes must be done from a local machine — the cloud environment cannot push tags (HTTP 403).
 
 ## Known limitations
 

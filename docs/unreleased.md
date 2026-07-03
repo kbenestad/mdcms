@@ -4,6 +4,35 @@ Changes merged into `development` that have not yet been released to `main`.
 
 ---
 
+## CLI v0.6.6
+
+### Changed
+- **Unified, tag-driven versioning.** Retired the separate CLI-version / site-format-version
+  split in favour of a single version stream. Every version-bearing file now carries a common
+  header banner ending in `CURRENT VERSION: X.Y.Z - <date>`:
+  ```
+  MD-CMS - Markdown Content Management System
+  kbenestad/mdcms - https://github.com/kbenestad/mdcms
+
+  Licensed under Apache 2.0 licence.
+
+  CURRENT VERSION: 0.6.6 - 3 July 2026
+  ```
+  Applied to `mdcms.py`, `app/config.yml`, and `app/index.html` (the old
+  `# mdcms vX.Y | DO NOT REMOVE THIS COMMENT` markers are gone).
+- **`read_site_version()` now reads the `CURRENT VERSION:` line** from the `config.yml` header
+  instead of a fixed line-1 marker. It still recognises the legacy `mdcms vX.Y` marker, so sites
+  created before this change keep building. `_parse_ver` tolerates `v` prefixes and pre-release
+  suffixes.
+
+### Added
+- **`scripts/bump_version.py`** — sets the release version across `mdcms.py` (`CLI_VERSION`,
+  `CLI_RELEASE_DATE`, banner), `pyproject.toml`, and the `app/config.yml` / `app/index.html`
+  banners in one shot. Strips a leading `v` and any pre-release suffix.
+- **Release workflow now bumps the version from the tag.** Pushing `v0.6.7` makes every build job
+  stamp `0.6.7` before building (so binaries report it) and the `publish` job commit the bump to
+  `main` alongside the `latest/` binaries. No manual version editing before tagging.
+
 ## CLI v0.6.5
 
 ### Added
