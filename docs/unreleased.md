@@ -94,6 +94,13 @@ Changes merged into `development` that have not yet been released to `main`.
   corner radius); only the bottom border remains, matching the header's
   underline instead of drawing a full frame.
 
+## Sample sites
+
+- **Recopied `app/index.html` into all seven sample sites** so the nav
+  font-weight, tab padding, and underlined-accordion border fixes above
+  actually show up in the previews (each sample site carries its own static
+  copy of the renderer, not a live link to `app/index.html`).
+
 ## Themes
 
 - **Bold themes — readable nav surface colours.** Fixed 21 `*-bold` themes whose nav
