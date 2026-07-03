@@ -13,7 +13,7 @@ palette:
     ink: "#2A0F0F"
     ink-muted: "#7A4A4A"
     on-surface: "rgba(255,255,255,0.92)"
-    on-surface-active: "#C9A23E"
+    on-surface-active: "var(--nav-link-colour)"
     on-surface-title: "#FFFFFF"
     on-surface-heading: "rgba(255,255,255,0.65)"
     on-surface-note: "rgba(255,255,255,0.70)"

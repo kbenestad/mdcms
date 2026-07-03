@@ -15,9 +15,9 @@ palette:
     on-surface: "rgba(255,255,255,0.92)"
     on-surface-active: "#FFFFFF"
     on-surface-title: "#FFFFFF"
-    on-surface-heading: "rgba(255,255,255,0.65)"
-    on-surface-note: "rgba(255,255,255,0.70)"
-    on-surface-icon: "rgba(255,255,255,0.70)"
+    on-surface-heading: "var(--nav-link-colour)"
+    on-surface-note: "var(--nav-link-colour)"
+    on-surface-icon: "var(--nav-link-colour)"
   dark:
     primary: "#FFCD00"
     surface: "#000000"
