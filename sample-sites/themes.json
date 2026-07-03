@@ -709,9 +709,33 @@
   },
   {
     "family": "Newspaper-inspired",
+    "file": "chronicle.yaml",
+    "path": "themes/Newspaper-inspired/chronicle.yaml",
+    "label": "chronicle"
+  },
+  {
+    "family": "Newspaper-inspired",
+    "file": "folio.yaml",
+    "path": "themes/Newspaper-inspired/folio.yaml",
+    "label": "folio"
+  },
+  {
+    "family": "Newspaper-inspired",
+    "file": "gazette.yaml",
+    "path": "themes/Newspaper-inspired/gazette.yaml",
+    "label": "gazette"
+  },
+  {
+    "family": "Newspaper-inspired",
     "file": "ledger.yaml",
     "path": "themes/Newspaper-inspired/ledger.yaml",
     "label": "ledger"
+  },
+  {
+    "family": "Newspaper-inspired",
+    "file": "tabloid.yaml",
+    "path": "themes/Newspaper-inspired/tabloid.yaml",
+    "label": "tabloid"
   },
   {
     "family": "Nordic flags",

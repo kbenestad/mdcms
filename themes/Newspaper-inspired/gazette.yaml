@@ -1,0 +1,75 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — gazette
+# Sans-serif Montserrat headlines over a serif body. Cream page, black ink.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+palette:
+  light:
+    primary: "#1A1A1A"
+    surface: "#F3ECDD"
+    page: "#FFFFFF"
+    ink: "#1A1A1A"
+    ink-muted: "#6B6152"
+  dark:
+    primary: "#E9DCC0"
+    surface: "#241F17"
+    page: "#171310"
+    ink: "#EFE7D8"
+    ink-muted: "#A79C89"
+
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#345B8C"
+  warning: "#9C6B12"
+  success: "#2E6E45"
+  error: "#B23A2E"
+
+colours-semantic-dark:
+  info: "#8FB0DE"
+  warning: "#E8B15E"
+  success: "#82CC9A"
+  error: "#EE8A79"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#345B8C"
+    background-colour: "#345B8C"
+  warning:
+    icon: warning
+    primary-colour: "#9C6B12"
+    background-colour: "#9C6B12"
+  success:
+    icon: success
+    primary-colour: "#2E6E45"
+    background-colour: "#2E6E45"
+  error:
+    icon: error
+    primary-colour: "#B23A2E"
+    background-colour: "#B23A2E"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:Lora:400"
+font-heading: "bunny:Montserrat:700"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.60      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 76em
+nav-width: 20em
