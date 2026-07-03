@@ -15,9 +15,9 @@ palette:
     on-surface: "#E2E2E2"
     on-surface-active: "#007749"
     on-surface-title: "#FFFFFF"
-    on-surface-heading: "#9A9A9A"
-    on-surface-note: "#9A9A9A"
-    on-surface-icon: "#9A9A9A"
+    on-surface-heading: "var(--nav-link-colour)"
+    on-surface-note: "var(--nav-link-colour)"
+    on-surface-icon: "var(--nav-link-colour)"
   dark:
     primary: "#FFB81C"
     surface: "#000000"

@@ -21,3 +21,30 @@ Changes merged into `development` that have not yet been released to `main`.
   - Config edits are surgical — comments and file structure in `config.yml` are
     preserved, commented example keys are uncommented in place, and structured
     blocks (e.g. dict-form `offline-message`) are left untouched.
+
+## Themes
+
+- **Bold themes — readable nav surface colours.** Fixed 21 `*-bold` themes whose nav
+  text (site title, links, section headings) was hardcoded to white/near-white and
+  became unreadable on light or bright surfaces. Nav-surface text tokens now reference
+  the theme's CSS variables instead of literal colours: light-surface themes point the
+  whole `on-surface` group at `var(--font-colour)` / `var(--nav-link-colour)` (dark ink),
+  and dark-surface themes point their faint muted labels at `var(--nav-link-colour)`.
+  All bold themes now clear a 3:1 contrast floor for every nav-surface token.
+  Affected: air-klm, air-norse, air-emirates, air-swiss, lit-pentecost, lit-rose,
+  canada, china, ireland, italy, med-wellness, greenland, map-osm, map-paris-metro,
+  map-swisstopo, map-tokyo-metro, map-tunnelbana, tx-db, tx-hapag, tx-maersk, un-blue.
+- **south-africa-bold — readable section headings.** Its muted `#9A9A9A` heading/note/icon
+  labels (dim on the black nav surface) now point at `var(--nav-link-colour)`.
+
+## Sample sites
+
+- **Refreshed the bundled renderer in all seven sample sites.** Their copies of
+  `index.html` were stale, predating the topbar/mobile-nav colour variables: the topbar
+  site title and dropdown triggers were hardcoded to `var(--font-colour)` (page ink),
+  so on bold themes with a dark nav surface they rendered ink-on-dark ("black on black")
+  regardless of the theme's nav-surface tokens. Recopied `app/index.html` so the topbar
+  and mobile nav honour `--nav-sitename-colour`, `--nav-link-colour`,
+  `--nav-link-active-colour` and `--nav-toggle-colour`, matching the sidebar. This only
+  affected the sample-site previews; the canonical `app/index.html` renderer was already
+  correct.
