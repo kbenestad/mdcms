@@ -1,0 +1,194 @@
+name: Release binaries
+
+# Builds standalone mdcms binaries for every supported platform and lands them
+# in latest/ on main, so the raw.githubusercontent.com/.../main/latest/... URLs
+# documented in install.md always serve the newest build. When triggered by a
+# version tag (v*), it additionally publishes a GitHub release with the same
+# binaries attached under descriptive names.
+#
+# Targets:
+#   linux/amd64   — ubuntu-22.04       (binary + .deb)
+#   linux/arm64   — ubuntu-22.04-arm   (binary + .deb)   ← Raspberry Pi 3/4/5 (64-bit OS)
+#   macos/silicon — macos-14 (arm64)   (binary)          ← Apple Silicon
+#   macos/intel   — macos-13 (x86_64)  (binary)          ← Intel Macs
+#   windows       — windows-latest     (mdcms.exe)
+#
+# The Linux jobs run on 22.04 (glibc 2.35) rather than the newest runner so the
+# binaries also run on older-glibc systems — notably current Raspberry Pi OS /
+# Debian 12 (glibc 2.36). A binary built on a newer glibc will not run there.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+# Opt into the Node.js 24 runner ahead of the June 2026 forced migration.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: linux-amd64
+            runner: ubuntu-22.04
+            dest: linux/amd64
+            relname: mdcms-linux-amd64
+            deb: true
+            deb_arch: amd64
+          - target: linux-arm64
+            runner: ubuntu-22.04-arm
+            dest: linux/arm64
+            relname: mdcms-linux-arm64
+            deb: true
+            deb_arch: arm64
+          - target: macos-silicon
+            runner: macos-14
+            dest: macos/silicon
+            relname: mdcms-macos-silicon
+            deb: false
+          - target: macos-intel
+            runner: macos-13
+            dest: macos/intel
+            relname: mdcms-macos-intel
+            deb: false
+          - target: windows-amd64
+            runner: windows-latest
+            dest: windows
+            relname: mdcms-windows-amd64
+            deb: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Resolve version
+        id: ver
+        shell: bash
+        run: |
+          VERSION=$(python -c "import re;print(re.search(r'version\s*=\s*\"([^\"]+)\"', open('pyproject.toml').read()).group(1))")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Building mdcms $VERSION for ${{ matrix.target }}"
+
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install .
+
+      - name: Build binary (PyInstaller)
+        shell: bash
+        run: |
+          pyinstaller --onefile --name mdcms --collect-data certifi mdcms.py
+
+      - name: Build .deb (fpm)
+        if: matrix.deb
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ruby ruby-dev build-essential
+          sudo gem install --no-document fpm
+          fpm -s dir -t deb \
+            -n mdcms \
+            -v "${{ steps.ver.outputs.version }}" \
+            -a "${{ matrix.deb_arch }}" \
+            --license "Apache-2.0" \
+            --description "MD-CMS — Markdown-based CMS companion CLI" \
+            --url "https://github.com/kbenestad/mdcms" \
+            --maintainer "Kristian Benestad" \
+            -p mdcms.deb \
+            dist/mdcms=/usr/local/bin/mdcms
+
+      - name: Stage artifacts
+        shell: bash
+        run: |
+          mkdir -p "out/latest/${{ matrix.dest }}" out/release
+          if [ "${{ matrix.target }}" = "windows-amd64" ]; then
+            cp dist/mdcms.exe "out/latest/${{ matrix.dest }}/mdcms.exe"
+            cp dist/mdcms.exe "out/release/${{ matrix.relname }}.exe"
+          else
+            cp dist/mdcms "out/latest/${{ matrix.dest }}/mdcms"
+            cp dist/mdcms "out/release/${{ matrix.relname }}"
+          fi
+          if [ "${{ matrix.deb }}" = "true" ]; then
+            cp mdcms.deb "out/latest/${{ matrix.dest }}/mdcms.deb"
+            cp mdcms.deb "out/release/${{ matrix.relname }}.deb"
+          fi
+          ls -R out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.target }}
+          path: out
+          if-no-files-found: error
+
+  publish:
+    name: Publish to latest/ and release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: dist-*
+          merge-multiple: true
+
+      - name: Update latest/ tree
+        shell: bash
+        run: |
+          rm -rf latest
+          mkdir -p latest
+          cp -r artifacts/latest/. latest/
+          echo "latest/ now contains:"
+          find latest -type f | sort
+
+      - name: Commit binaries to main
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add latest
+          if git diff --staged --quiet; then
+            echo "No changes to latest/ — nothing to commit."
+          else
+            MSG="Update latest/ binaries"
+            if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+              MSG="Update latest/ binaries for ${GITHUB_REF_NAME}"
+            fi
+            git commit -m "$MSG"
+            git push origin HEAD:main
+          fi
+
+      - name: Publish GitHub release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          PRERELEASE=""
+          case "${GITHUB_REF_NAME}" in
+            *-*) PRERELEASE="--prerelease" ;;
+          esac
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes \
+            $PRERELEASE \
+            artifacts/release/*

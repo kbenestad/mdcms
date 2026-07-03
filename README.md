@@ -29,11 +29,11 @@ and `search.json`, and can wire up automatic builds via GitHub Actions.
     [latest release](https://github.com/kbenestad/mdcms/releases/latest).
 2.  Move the binary and make it executable
 	- Linux
-		- Download the [latest mdcms](latest/linux/mdcms)
+		- Download the latest mdcms for your architecture: [amd64](latest/linux/amd64/mdcms) · [arm64 / Raspberry Pi](latest/linux/arm64/mdcms) (`.deb`: [amd64](latest/linux/amd64/mdcms.deb) · [arm64](latest/linux/arm64/mdcms.deb))
 		- Move it to `/usr/local/bin/`: `sudo mv mdcms /usr/local/bin/mdcms`
 		- Make it executable: `sudo chmod +x /usr/local/bin/mdcms`
 	- Mac
-		- Download the [latest mdcms](latest/macos/mdcms)
+		- Download the latest mdcms for your Mac: [Apple Silicon](latest/macos/silicon/mdcms) · [Intel](latest/macos/intel/mdcms)
 		- Move it to `/usr/local/bin/`: `sudo mv mdcms /usr/local/bin/mdcms`
 		- Make it executable: `sudo chmod +x /usr/local/bin/mdcms`
 		- Remove the quarantine flag: `xattr -dr com.apple.quarantine /usr/local/bin/mdcms`
