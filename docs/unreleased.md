@@ -80,6 +80,20 @@ Changes merged into `development` that have not yet been released to `main`.
   `dev-release.md`) for the new per-architecture `latest/` layout and the
   Raspberry Pi / Apple Silicon / Intel choices.
 
+## Renderer (`app/index.html`)
+
+- **Bolder nav text on surface backgrounds.** Sidebar/topbar links, the site
+  description, the theme toggle, dropdown triggers, and the category picker
+  now render at `font-weight: 500` instead of inheriting the body weight —
+  legible on strong/bold `surface` colours where the previous regular weight
+  read as too faint.
+- **Slightly more breathing room on tabs.** Both the underline and filled tab
+  variants got a touch more button padding.
+- **Underlined accordions no longer box in the open body.** The underline
+  accordion's expanded body dropped its left/right borders (and the now-moot
+  corner radius); only the bottom border remains, matching the header's
+  underline instead of drawing a full frame.
+
 ## Themes
 
 - **Bold themes — readable nav surface colours.** Fixed 21 `*-bold` themes whose nav
