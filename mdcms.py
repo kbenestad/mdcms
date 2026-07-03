@@ -32,7 +32,7 @@ import certifi
 import click
 import yaml
 
-CLI_VERSION = "0.6.4"
+CLI_VERSION = "0.6.5"
 CLI_RELEASE_DATE = "3 July 2026"
 MIN_SUPPORTED_VERSION = "0.3"
 
@@ -42,6 +42,9 @@ CATEGORY_CODE_RE = re.compile(r"^[a-zA-Z0-9\-]+$")
 REGISTRY_FILE = Path.home() / ".config" / "mdcms" / "sites.json"
 TEMPLATE_BASE_URL = "https://raw.githubusercontent.com/kbenestad/mdcms/main/app"
 MANIFEST_FILENAME = "mdcms.json"
+
+REPO_RAW_BASE = "https://raw.githubusercontent.com/kbenestad/mdcms/main"
+THEMES_MANIFEST_PATH = "sample-sites/themes.json"
 
 GITHUB_URL_RE = re.compile(
     r"https?://github\.com/([^/]+)/([^/]+?)(?:\.git)?"
@@ -841,6 +844,330 @@ def download_template(dest: Path, source: str = None):
         raise click.ClickException(f"Download failed: {e}")
 
 
+# ─── Config editing ───────────────────────────────────────────
+
+# Top-level scalar keys the `config` command may edit. Structured blocks
+# (categories, callouts, and dict-form offline-message) are intentionally
+# excluded — they are edited by hand.
+EDITABLE_KEYS = [
+    "sitename", "navigation", "theme", "homepage", "sitedescription",
+    "logo", "favicon", "footer", "nav-position", "search", "default-theme",
+    "pwa", "pwa-name", "pwa-shortname", "pwa-colour", "offline-message",
+]
+
+_NAV_CHOICES = ["sidebar", "topbar"]
+_THEME_MODE_CHOICES = ["light", "dark", "system"]
+_NAV_POS_CHOICES = ["left", "right"]
+
+_CONFIG_KEY_RE = re.compile(r"^(#\s*)?([A-Za-z][\w-]*):(\s*)(.*)$")
+
+
+def _format_config_scalar(value) -> str:
+    """Render a Python value as a YAML scalar, quoting only when necessary."""
+    s = str(value)
+    if s == "":
+        return '""'
+    if s.lower() in ("yes", "no", "true", "false", "null", "on", "off"):
+        return s  # keep boolean/keyword words bare
+    if (
+        s != s.strip()
+        or any(c in s for c in ":#'\"")
+        or s[0] in "!&*[]{}|>@`%,?-"
+    ):
+        return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
+    return s
+
+
+def set_config_keys(site_path: Path, updates: dict) -> list:
+    """Update or insert top-level scalar keys in config.yml, preserving comments.
+
+    `updates` maps key -> value (a value of None deletes the key line if present).
+    Existing lines — including commented example lines — are replaced in place so
+    the file's structure and surrounding comments survive. Keys not found are
+    appended at the end. Keys whose current value is a structured block (a mapping
+    or list) are left untouched and returned in the skipped list.
+    """
+    config_file = site_path / "config.yml"
+    lines = config_file.read_text(encoding="utf-8").split("\n")
+    remaining = dict(updates)
+    skipped: list = []
+    out: list = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        m = _CONFIG_KEY_RE.match(line)
+        if m and m.group(2) in remaining:
+            key = m.group(2)
+            after = m.group(4).strip()
+            commented = m.group(1) is not None
+            next_indented = i + 1 < len(lines) and re.match(r"^\s+\S", lines[i + 1])
+            if not commented and after == "" and next_indented:
+                # Active key introducing a block mapping/list — don't clobber it.
+                remaining.pop(key)
+                skipped.append(key)
+                out.append(line)
+                i += 1
+                continue
+            val = remaining.pop(key)
+            if val is not None:
+                out.append(f"{key}: {_format_config_scalar(val)}")
+            i += 1
+            continue
+        out.append(line)
+        i += 1
+
+    leftover = {k: v for k, v in remaining.items() if v is not None}
+    if leftover:
+        if out and out[-1].strip() != "":
+            out.append("")
+        for k, v in leftover.items():
+            out.append(f"{k}: {_format_config_scalar(v)}")
+
+    config_file.write_text("\n".join(out), encoding="utf-8")
+    return skipped
+
+
+def _validate_updates(updates: dict):
+    choices = {
+        "navigation": _NAV_CHOICES,
+        "default-theme": _THEME_MODE_CHOICES,
+        "nav-position": _NAV_POS_CHOICES,
+    }
+    for key, allowed in choices.items():
+        if key in updates and str(updates[key]) not in allowed:
+            raise click.ClickException(
+                f"Invalid value for {key}: '{updates[key]}'. Allowed: {', '.join(allowed)}"
+            )
+    if "pwa" in updates and str(updates["pwa"]).lower() not in ("yes", "no", "true", "false"):
+        raise click.ClickException("pwa must be 'yes' or 'no'.")
+
+
+# ─── Theme library ────────────────────────────────────────────
+
+def _local_repo_root() -> "Path | None":
+    """If mdcms.py is running from a checkout that ships the theme library, return its root."""
+    root = Path(__file__).resolve().parent
+    if (root / THEMES_MANIFEST_PATH).exists() and (root / "themes").is_dir():
+        return root
+    return None
+
+
+def load_theme_index() -> list:
+    """Return the theme manifest as a list of {family, file, path, label} dicts.
+
+    Uses the local checkout when available (development), otherwise fetches the
+    manifest published on the repository's main branch.
+    """
+    root = _local_repo_root()
+    try:
+        if root:
+            raw = (root / THEMES_MANIFEST_PATH).read_text(encoding="utf-8")
+        else:
+            raw = _http_get(f"{REPO_RAW_BASE}/{THEMES_MANIFEST_PATH}").decode("utf-8")
+    except (OSError, urllib.error.URLError) as e:
+        raise click.ClickException(f"Could not load theme index: {e}")
+    try:
+        entries = json.loads(raw)
+    except json.JSONDecodeError as e:
+        raise click.ClickException(f"Theme index is not valid JSON: {e}")
+    return [
+        e for e in entries
+        if isinstance(e, dict) and e.get("path") and e.get("file") and e.get("family")
+    ]
+
+
+def _fetch_theme_bytes(entry: dict) -> bytes:
+    root = _local_repo_root()
+    if root:
+        local = root / entry["path"]
+        if local.exists():
+            return local.read_bytes()
+    return _http_get(f"{REPO_RAW_BASE}/{entry['path']}")
+
+
+def install_theme(site_path: Path, entry: dict) -> str:
+    """Download a theme into assets/themes/ and point config.yml's theme: at it.
+
+    Returns the site-relative path written to config.yml.
+    """
+    dest_dir = site_path / "assets" / "themes"
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest = dest_dir / entry["file"]
+    dest.write_bytes(_fetch_theme_bytes(entry))
+    rel = f"assets/themes/{entry['file']}"
+    set_config_keys(site_path, {"theme": rel})
+    return rel
+
+
+def _resolve_theme_query(entries: list, query: str) -> dict:
+    """Resolve a non-interactive --theme query to exactly one theme entry."""
+    q = query.strip().lower()
+    exact = [
+        e for e in entries
+        if q in (e["file"].lower(), e["file"].lower().rsplit(".", 1)[0],
+                 e["label"].lower(), e["path"].lower())
+    ]
+    matches = exact or [
+        e for e in entries
+        if q in e["label"].lower() or q in e["file"].lower() or q in e["family"].lower()
+    ]
+    if not matches:
+        raise click.ClickException(
+            f"No theme matched '{query}'. Run 'mdcms config --list-themes' to browse."
+        )
+    if len(matches) > 1:
+        listing = "\n".join(
+            f"  - {e['family']} — {e['label']}  [{e['file']}]" for e in matches[:15]
+        )
+        extra = "" if len(matches) <= 15 else f"\n  ... and {len(matches) - 15} more"
+        raise click.ClickException(
+            f"'{query}' matches {len(matches)} themes:\n{listing}{extra}\nBe more specific."
+        )
+    return matches[0]
+
+
+def _print_theme_list(entries: list):
+    current_family = None
+    for e in sorted(entries, key=lambda x: (x["family"].lower(), x["label"].lower())):
+        if e["family"] != current_family:
+            current_family = e["family"]
+            click.echo(click.style(f"\n{current_family}", bold=True))
+        click.echo(f"  {e['label']:<34} {e['file']}")
+    click.echo(f"\n{len(entries)} themes available.")
+
+
+def _pick_and_install_theme(site_path: Path):
+    entries = load_theme_index()
+    families = sorted({e["family"] for e in entries})
+    click.echo("\nTheme families:")
+    for idx, fam in enumerate(families, 1):
+        count = sum(1 for e in entries if e["family"] == fam)
+        click.echo(f"  {idx:>2}. {fam} ({count})")
+
+    sel = click.prompt(
+        "\nEnter a family number, a search keyword, or blank to cancel",
+        default="", show_default=False,
+    ).strip()
+    if sel == "":
+        click.echo("Cancelled.")
+        return
+
+    if sel.isdigit() and 1 <= int(sel) <= len(families):
+        subset = [e for e in entries if e["family"] == families[int(sel) - 1]]
+    else:
+        q = sel.lower()
+        subset = [
+            e for e in entries
+            if q in e["label"].lower() or q in e["family"].lower() or q in e["file"].lower()
+        ]
+    if not subset:
+        click.echo("No themes matched.")
+        return
+
+    click.echo("")
+    for idx, e in enumerate(subset, 1):
+        click.echo(f"  {idx:>2}. {e['family']} — {e['label']}  [{e['file']}]")
+    pick = click.prompt(
+        "\nEnter a theme number to install (blank to cancel)",
+        default="", show_default=False,
+    ).strip()
+    if not (pick.isdigit() and 1 <= int(pick) <= len(subset)):
+        click.echo("Cancelled.")
+        return
+
+    entry = subset[int(pick) - 1]
+    click.echo(f"Downloading '{entry['label']}' ...")
+    rel = install_theme(site_path, entry)
+    click.echo(click.style(f"Installed → {rel}", fg="green"))
+    click.echo(click.style(f"Set theme: {rel} in config.yml", fg="green"))
+
+
+# ─── Interactive config editor ────────────────────────────────
+
+def _prompt_scalar(site_path: Path, cfg: dict, key: str, label: str, choices=None):
+    current = cfg.get(key)
+    if choices:
+        default = str(current) if current in choices else choices[0]
+        val = click.prompt(label, default=default, type=click.Choice(choices))
+    else:
+        default = str(current) if current is not None else ""
+        val = click.prompt(f"{label} (blank = keep current)", default=default,
+                           show_default=bool(default)).strip()
+        if val == "":
+            click.echo("  (unchanged)")
+            return
+    set_config_keys(site_path, {key: val})
+    click.echo(click.style(f"  {key} = {val}", fg="green"))
+
+
+def _edit_pwa(site_path: Path, cfg: dict):
+    enabled = str(cfg.get("pwa", "no")).lower() in ("yes", "true")
+    new_enabled = click.confirm("Enable PWA (installable / offline app)?", default=enabled)
+    updates = {"pwa": "yes" if new_enabled else "no"}
+    if new_enabled:
+        name = click.prompt("PWA name", default=str(cfg.get("pwa-name", cfg.get("sitename", ""))))
+        updates["pwa-name"] = name
+        updates["pwa-shortname"] = click.prompt(
+            "PWA short name", default=str(cfg.get("pwa-shortname", name))
+        )
+        updates["pwa-colour"] = click.prompt(
+            "PWA theme colour (hex)", default=str(cfg.get("pwa-colour", "#2563EB"))
+        )
+    set_config_keys(site_path, updates)
+    click.echo(click.style("  PWA settings updated.", fg="green"))
+    if new_enabled and not (site_path / "assets" / "images" / str(cfg.get("favicon", "favicon.png"))).exists():
+        click.echo(click.style(
+            "  Note: add a 192×192 favicon.png in assets/images/ for the install icon.",
+            fg="yellow",
+        ))
+
+
+def _interactive_config(site_path: Path):
+    click.echo(click.style(f"\nmdcms config — {site_path}", bold=True))
+    while True:
+        cfg = read_config(site_path)
+        click.echo("\nCurrent settings:")
+        click.echo(f"   sitename        : {cfg.get('sitename', '(not set)')}")
+        click.echo(f"   navigation      : {cfg.get('navigation', '(not set)')}")
+        click.echo(f"   theme           : {cfg.get('theme', '(not set)')}")
+        click.echo(f"   homepage        : {cfg.get('homepage', '(default: pages/home.md)')}")
+        click.echo(f"   sitedescription : {cfg.get('sitedescription', '(not set)')}")
+        click.echo(f"   footer          : {cfg.get('footer', '(not set)')}")
+        click.echo(f"   default-theme   : {cfg.get('default-theme', '(system)')}")
+        click.echo(f"   pwa             : {cfg.get('pwa', 'no')}")
+
+        menu = [
+            ("Site name", lambda c: _prompt_scalar(site_path, c, "sitename", "Site name")),
+            ("Navigation style (sidebar/topbar)",
+             lambda c: _prompt_scalar(site_path, c, "navigation", "Navigation", choices=_NAV_CHOICES)),
+            ("Theme — browse & install", lambda c: _pick_and_install_theme(site_path)),
+            ("Homepage", lambda c: _prompt_scalar(site_path, c, "homepage", "Homepage (e.g. pages/home.md)")),
+            ("Site description", lambda c: _prompt_scalar(site_path, c, "sitedescription", "Site description")),
+            ("Footer", lambda c: _prompt_scalar(site_path, c, "footer", "Footer text")),
+            ("Default colour mode (light/dark/system)",
+             lambda c: _prompt_scalar(site_path, c, "default-theme", "Default mode", choices=_THEME_MODE_CHOICES)),
+            ("Navigation position (left/right)",
+             lambda c: _prompt_scalar(site_path, c, "nav-position", "Nav position", choices=_NAV_POS_CHOICES)),
+            ("PWA settings", lambda c: _edit_pwa(site_path, c)),
+        ]
+        click.echo("\nWhat would you like to change?")
+        for idx, (label, _) in enumerate(menu, 1):
+            click.echo(f"  {idx}. {label}")
+        click.echo("  0. Quit")
+
+        choice = click.prompt("Select", type=int, default=0)
+        if choice == 0:
+            break
+        if 1 <= choice <= len(menu):
+            try:
+                menu[choice - 1][1](cfg)
+            except click.Abort:
+                click.echo("\nCancelled.")
+        else:
+            click.echo("Invalid selection.")
+    click.echo(click.style("Config saved to config.yml.", fg="green"))
+
+
 # ─── CLI commands ─────────────────────────────────────────────
 
 def _version_callback(ctx, param, value):
@@ -1091,6 +1418,77 @@ def fetch_deps(name, path_override):
     _patch_index_html(site_path, local_font_css)
 
     click.echo(click.style("Done. Site is ready for offline use.", fg="green"))
+
+
+@cli.command()
+@click.argument("name", required=False)
+@click.option("--path", "path_override", type=click.Path(), default=None,
+              help="Explicit site path (no registry lookup).")
+@click.option("--set", "sets", multiple=True, metavar="KEY=VALUE",
+              help="Set a config key non-interactively (repeatable).")
+@click.option("--theme", "theme_query", default=None, metavar="NAME",
+              help="Download and set a theme non-interactively (by label or filename).")
+@click.option("--list-themes", is_flag=True, help="List all available themes and exit.")
+def config(name, path_override, sets, theme_query, list_themes):
+    """Configure a site's config.yml and install themes.
+
+    With no options this launches an interactive editor for the most common
+    settings. Use --set / --theme for scripted, non-interactive changes.
+
+    \b
+    Examples:
+      mdcms config mysite                     # interactive
+      mdcms config --path ./site              # interactive, explicit path
+      mdcms config mysite --set navigation=topbar --set sitename="My Docs"
+      mdcms config mysite --theme "blue · charcoal"
+      mdcms config --list-themes
+    """
+    if list_themes:
+        _print_theme_list(load_theme_index())
+        return
+
+    site_path = resolve_site_path(name, path_override)
+    if not (site_path / "config.yml").exists():
+        raise click.ClickException(f"No config.yml found at {site_path}.")
+    if read_site_version(site_path) is None:
+        raise click.ClickException(
+            "No mdcms version marker in config.yml — is this an mdcms site?"
+        )
+
+    non_interactive = bool(sets) or theme_query is not None
+    if not non_interactive:
+        _interactive_config(site_path)
+        return
+
+    if sets:
+        updates: dict = {}
+        for pair in sets:
+            if "=" not in pair:
+                raise click.ClickException(f"Invalid --set '{pair}'. Use KEY=VALUE.")
+            key, val = pair.split("=", 1)
+            key = key.strip()
+            if key not in EDITABLE_KEYS:
+                raise click.ClickException(
+                    f"Unsupported key '{key}'. Editable keys: {', '.join(EDITABLE_KEYS)}"
+                )
+            updates[key] = val.strip()
+        _validate_updates(updates)
+        skipped = set_config_keys(site_path, updates)
+        for key, val in updates.items():
+            if key not in skipped:
+                click.echo(click.style(f"  {key} = {val}", fg="green"))
+        for key in skipped:
+            click.echo(click.style(
+                f"  Skipped '{key}' — it holds a structured block; edit config.yml by hand.",
+                fg="yellow",
+            ))
+
+    if theme_query is not None:
+        entry = _resolve_theme_query(load_theme_index(), theme_query)
+        rel = install_theme(site_path, entry)
+        click.echo(click.style(f"  theme = {rel}  ({entry['label']})", fg="green"))
+
+    click.echo(click.style("config.yml updated.", fg="green"))
 
 
 # ─── Entry point ─────────────────────────────────────────────
