@@ -96,6 +96,15 @@ Changes merged into `development` that have not yet been released to `main`.
 
 ## Sample sites
 
+- **Sample-site picker: branch switcher.** `sample-sites/index.html` only
+  deploys to GitHub Pages from `main`, so it couldn't show `development`'s
+  content. Added a **Branch** selector — picking "development (preview)"
+  rewrites each site's launch link to jsDelivr's GitHub CDN
+  (`cdn.jsdelivr.net/gh/kbenestad/mdcms@development/...`), which serves that
+  branch's files (and the relative `config.yml`/`nav.yml`/pages/theme fetches
+  the renderer makes) directly, with no deploy needed. Also removed the
+  secondary "Default" launch button from each card — a single "Open" /
+  "Open with theme" button now covers both cases.
 - **Recopied `app/index.html` into all seven sample sites** so the nav
   font-weight, tab padding, and underlined-accordion border fixes above
   actually show up in the previews (each sample site carries its own static

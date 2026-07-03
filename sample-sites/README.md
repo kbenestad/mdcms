@@ -27,7 +27,17 @@ Each folder is a complete, self-contained MD-CMS site (`index.html`, `config.yml
 `../themes/`) and, when you pick a theme, appends `?theme=<relative-path>` to the
 site's launch link. The renderer honours that override in place of the theme named
 in the site's `config.yml`, so the same markdown is shown in a different palette.
-"Default" always opens a site with its own `theme.yml`.
+
+## Previewing the `development` branch
+
+The picker (`index.html`) is only deployed to GitHub Pages from `main` (see
+`.github/workflows/pages.yml`), so it has no built-in way to show what's on
+`development`. The **Branch** selector works around that: choosing
+"development (preview)" rewrites every site's launch link to jsDelivr's GitHub
+CDN (`cdn.jsdelivr.net/gh/kbenestad/mdcms@development/...`), which serves that
+branch's files directly — including the relative fetches the renderer makes for
+`config.yml`, `nav.yml`, `pages/*.md` and theme files — so the site opens exactly
+as it looks on `development`, no deploy required.
 
 ## Running locally
 
