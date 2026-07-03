@@ -1,24 +1,24 @@
 # mdcms v0.4 | DO NOT REMOVE THIS COMMENT
 # mdcms theme — manhattan
-# Cream newsprint styled after The Wall Street Journal: elegant slab-serif
-# headlines over a Garamond-style body, deep masthead red accent.
+# White-on-white styled after The Wall Street Journal: bold black serif
+# headlines (Escrow-style) over a light-weight sans body, deep red accent.
 
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
 palette:
   light:
-    primary: "#8C1515"
-    surface: "#F4EEE1"
-    page: "#FBF8F0"
+    primary: "#AE1917"
+    surface: "#F4F5F7"
+    page: "#FFFFFF"
     ink: "#1A1A1A"
-    ink-muted: "#6B6355"
+    ink-muted: "#6F6F6F"
   dark:
-    primary: "#E28787"
-    surface: "#221E17"
-    page: "#17140F"
-    ink: "#EDE7D8"
-    ink-muted: "#A79C89"
+    primary: "#E58C8A"
+    surface: "#1D1D1D"
+    page: "#131313"
+    ink: "#EDEDED"
+    ink-muted: "#9A9A9A"
 
 
 # ──────────────────────────────────
@@ -29,13 +29,13 @@ palette:
 colours-semantic:
   info: "#1F3A6B"
   warning: "#9C5B12"
-  success: "#2F6B3C"
-  error: "#A3231F"
+  success: "#0A8200"
+  error: "#AE1917"
 
 colours-semantic-dark:
   info: "#8AA8D9"
   warning: "#EEB16D"
-  success: "#89D299"
+  success: "#7FD262"
   error: "#E77474"
 
 # ──────────────────────────────────
@@ -53,21 +53,21 @@ callouts:
     background-colour: "#9C5B12"
   success:
     icon: success
-    primary-colour: "#2F6B3C"
-    background-colour: "#2F6B3C"
+    primary-colour: "#0A8200"
+    background-colour: "#0A8200"
   error:
     icon: error
-    primary-colour: "#A3231F"
-    background-colour: "#A3231F"
+    primary-colour: "#AE1917"
+    background-colour: "#AE1917"
 
 # ──────────────────────────────────
 # Typography
 # Format: "provider:Font Name:weight"  (provider: bunny | google)
 # ──────────────────────────────────
-font-body: "bunny:EB Garamond:500"
+font-body: "bunny:Work Sans:300"
 font-heading: "bunny:Zilla Slab:700"
 font-size: 1.00        # unitless multiplier (1.0 = 16px base)
-line-height: 1.60      # unitless multiplier
+line-height: 1.55      # unitless multiplier
 
 # ──────────────────────────────────
 # Layout
