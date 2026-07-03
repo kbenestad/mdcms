@@ -53,6 +53,20 @@ Changes merged into `development` that have not yet been released to `main`.
 
 ## CI / release
 
+- **Fixed: release runs stalled forever on the retired `macos-13` runner.** The
+  macOS Intel build targeted `macos-13`, which GitHub retired in December 2025 —
+  the job never got a runner, and because `publish` needed every build job, the
+  binaries were never committed to `latest/` and never attached to the GitHub
+  release. The Intel build now runs on `macos-15-intel` (GitHub's last Intel
+  image, supported until Fall 2027).
+- **Split macOS Intel out of the release critical path.** The Intel build is now
+  its own `build-intel` job, and `publish` no longer waits for it: `latest/` is
+  committed and the GitHub release is created as soon as the four fast builds
+  finish (typically ~3 minutes). A new `publish-intel` job appends the Intel
+  binary to `latest/macos/intel/` and uploads it to the release whenever the
+  Intel runner completes — a slow (or failed) Intel job can no longer block a
+  release. `publish` preserves the previously published Intel binary in
+  `latest/` so its download URL keeps working until the new one lands.
 - **New `release.yml` workflow — multi-platform binaries that land in `latest/`.**
   Builds standalone PyInstaller binaries for five targets on a runner matrix and
   commits them into `latest/` on `main` (the source of the

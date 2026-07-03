@@ -69,12 +69,16 @@ The workflow (`.github/workflows/release.yml`) runs five parallel build jobs:
 | `ubuntu-22.04` | amd64 | standalone binary + `.deb` | `latest/linux/amd64/` |
 | `ubuntu-22.04-arm` | arm64 (Raspberry Pi) | standalone binary + `.deb` | `latest/linux/arm64/` |
 | `macos-14` | Apple Silicon (arm64) | standalone binary | `latest/macos/silicon/` |
-| `macos-13` | Intel (x86_64) | standalone binary | `latest/macos/intel/` |
+| `macos-15-intel` | Intel (x86_64) | standalone binary | `latest/macos/intel/` |
 | `windows-latest` | amd64 | `mdcms.exe` | `latest/windows/` |
+
+The macOS Intel build runs as its own job (`build-intel`) outside the matrix, because GitHub's Intel macOS runners are scarce and can queue for a long time — sometimes an hour or more — while every other job finishes in minutes. Splitting it out means the release is never held hostage by the Intel queue (see below).
 
 On a tagged run, each build job first runs `scripts/bump_version.py "$GITHUB_REF_NAME"` to stamp the tag's version and today's date into `mdcms.py`, `pyproject.toml`, and the `app/config.yml` / `app/index.html` header banners, so the binary it builds reports the released version. Each binary is then built with PyInstaller — Python is bundled inside, so end users need nothing pre-installed. The `.deb` is built with `fpm` and installs mdcms to `/usr/local/bin`. The arm64 Linux job runs on GitHub's free native ARM64 runner (`ubuntu-22.04-arm`), so the Raspberry Pi binary is compiled natively — no cross-compilation or emulation. Both Linux jobs use the 22.04 runners (glibc 2.35) rather than the newest image so the binaries also run on older-glibc systems, notably current Raspberry Pi OS / Debian 12 (glibc 2.36); a binary built against a newer glibc will not run there.
 
-A final `publish` job applies the same version bump to `main`, collects all artifacts, commits the bumped source + binaries into `latest/` on `main` (this is what serves the `raw.githubusercontent.com/.../main/latest/...` download URLs in `install.md`), and — when the run was triggered by a version tag — also creates a GitHub release with the same binaries attached under descriptive names (`mdcms-linux-amd64`, `mdcms-linux-arm64`, `mdcms-macos-silicon`, `mdcms-macos-intel`, `mdcms-windows-amd64.exe`, plus the `.deb` packages).
+A `publish` job applies the same version bump to `main`, collects the four fast build artifacts, commits the bumped source + binaries into `latest/` on `main` (this is what serves the `raw.githubusercontent.com/.../main/latest/...` download URLs in `install.md`), and — when the run was triggered by a version tag — also creates a GitHub release with those binaries attached under descriptive names (`mdcms-linux-amd64`, `mdcms-linux-arm64`, `mdcms-macos-silicon`, `mdcms-windows-amd64.exe`, plus the `.deb` packages). `publish` waits only for the matrix builds, **not** for the Intel build, and it leaves the existing `latest/macos/intel/` binary untouched so its download URL keeps serving the previous release in the meantime.
+
+A separate `publish-intel` job runs once both the Intel build and `publish` have finished: it commits the fresh Intel binary into `latest/macos/intel/` and uploads `mdcms-macos-intel` into the GitHub release that `publish` created. So if the Intel runner queues for an hour, the release goes out on time with four platforms and the Intel binary is appended automatically when it's ready.
 
 The workflow can also be run manually from the **Actions** tab (**Run workflow**, `workflow_dispatch`) to refresh `latest/` without cutting a tagged release.
 
@@ -84,9 +88,9 @@ The workflow can also be run manually from the **Actions** tab (**Run workflow**
 
 1. Go to **Actions** on the repository
 2. Click the workflow run triggered by your tag
-3. Each platform job takes roughly 3–5 minutes
+3. Each platform job takes roughly 3–5 minutes — except macOS Intel, which can additionally sit in the runner queue for a long time before it starts
 
-If a job fails, the release is not created. Fix the issue, delete the tag, and re-push:
+If only the Intel job fails (or is still queued), the release is still created with the other four platforms; the Intel binary is appended by `publish-intel` when its build succeeds. If any other build job fails, the release is not created. Fix the issue, delete the tag, and re-push:
 ```bash
 git tag -d v0.3.8
 git push origin --delete v0.3.8
