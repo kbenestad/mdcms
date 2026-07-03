@@ -72,6 +72,9 @@ During development, run directly: `python3 mdcms.py <command>`
 | `mdcms build <name>` | Build `nav.yml` and `search.json` for a registered site. |
 | `mdcms build --path <path>` | Build using an explicit path — no registry needed. Intended for CI/CD. |
 | `mdcms build` | Build using current working directory. Simplest form for GitHub Actions. |
+| `mdcms config [name]` | Interactively configure a site's `config.yml` (sitename, navigation, theme, homepage, footer, PWA, etc.) and browse/install a theme from the theme library into `assets/themes/`. Accepts `--path`. |
+| `mdcms config [name] --set KEY=VALUE` | Set config keys non-interactively (repeatable). Edits are surgical — comments are preserved and structured blocks are skipped. |
+| `mdcms config [name] --theme NAME` | Download a theme (by label or filename) into `assets/themes/` and set `theme:` in `config.yml`. `--list-themes` prints the whole library. |
 | `mdcms fetch-deps [name]` | Download all external JS/CSS deps to `assets/required/vendors/` and Bunny Fonts to `assets/fonts/`. Patches `index.html` to use local paths — no CDN requests after this. |
 | `mdcms fetch-deps --path <path>` | Same, using an explicit path. |
 
