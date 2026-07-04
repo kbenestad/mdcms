@@ -496,7 +496,7 @@ body {
 .md-content h4, .md-content h5, .md-content h6 {
   font-family: var(--font-title);
   font-weight: var(--font-title-weight);
-  color: var(--accent);
+  color: var(--heading-colour, var(--accent));
   line-height: 1.3;
   margin-top: 1.8em;
   margin-bottom: 0.6em;
@@ -1510,6 +1510,7 @@ body {
       if (m.surface)   vars.push(`--bg-nav: ${m.surface}`);
       if (m.ink)     { vars.push(`--font-colour: ${m.ink}`); vars.push(`--code-font: ${m.ink}`); }
       if (m['ink-muted']) vars.push(`--font-colour-muted: ${m['ink-muted']}`);
+      if (m.heading) vars.push(`--heading-colour: ${m.heading}`);
       if (m['on-surface'])         vars.push(`--nav-link-colour: ${m['on-surface']}`);
       if (m['on-surface-active'])  vars.push(`--nav-link-active-colour: ${m['on-surface-active']}`);
       if (m['on-surface-heading']) vars.push(`--nav-section-heading-colour: ${m['on-surface-heading']}`);

@@ -267,8 +267,11 @@ Presentational config separate from `config.yml`. Controls the colour palette, f
 | `on-surface-note` | `--nav-description-colour` | falls back to `on-surface-heading` |
 | `on-surface-icon` | `--nav-toggle-colour` | falls back to `on-surface-heading` |
 | `divider` | `--divider` | `color-mix(in srgb, page 85%, ink)` |
+| `heading` | `--heading-colour` | falls back to `primary` |
 
 `primary`, `surface`, `page`, `ink`, `ink-muted` are the required core (5). The six `on-surface-*` tokens are optional — set the group when `surface` is a strong/dark colour so nav text stays legible; omit for a subtle near-neutral nav. The style reads off three tokens: `surface≈page` (subtle), `surface` distinct (two-tone), `surface==primary` (bold single colour).
+
+`heading` is optional and controls only `.md-content h1`–`h6` colour. By default article headings render in `primary` (the accent also used for links, tabs, and accordions) — most themes want this, since a colour-matched headline reinforces the brand accent. Set `heading` (usually equal to `ink`) when the design calls for near-black/near-white headlines with the accent reserved for interactive elements only — e.g. editorial/newspaper themes, where real mastheads keep headlines in body ink and use colour sparingly for links.
 
 **Semantic colours:**
 

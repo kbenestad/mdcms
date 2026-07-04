@@ -13,12 +13,14 @@ palette:
     page: "#FFFFFF"
     ink: "#1A1A1A"
     ink-muted: "#6F6F6F"
+    heading: "#1A1A1A"
   dark:
     primary: "#E58C8A"
     surface: "#1D1D1D"
     page: "#131313"
     ink: "#EDEDED"
     ink-muted: "#9A9A9A"
+    heading: "#EDEDED"
 
 
 # ──────────────────────────────────
