@@ -17,13 +17,13 @@ Hearth & Bean is a coffee roastery and café on Marlow Street. We roast twice a 
 
 ## What's Here
 
-**[The Menu](menu.md)** — everything we pour, everything we bake, and what it costs.
+**[The Menu](pages/menu.md)** — everything we pour, everything we bake, and what it costs.
 
-**[The Nerdy Stuff](the-nerdy-stuff.md)** — extraction, water chemistry, roast curves, and the other things we think about more than is healthy.
+**[The Nerdy Stuff](pages/the-nerdy-stuff.md)** — extraction, water chemistry, roast curves, and the other things we think about more than is healthy.
 
-**[The Journal](journal-index.md)** — single-origin release notes, brewing guides, and dispatches from the roastery.
+**[The Journal](pages/journal-index.md)** — single-origin release notes, brewing guides, and dispatches from the roastery.
 
-**[Visit & Order](visit-and-order.md)** — hours, address, online ordering, subscriptions, and how to get a bag of beans to your door.
+**[Visit & Order](pages/visit-and-order.md)** — hours, address, online ordering, subscriptions, and how to get a bag of beans to your door.
 
 ## From the Journal
 

@@ -21,7 +21,7 @@ Step-by-step guides for the methods we use ourselves: V60, AeroPress, Chemex, an
 
 ## Coffee Science
 
-Longer explainers that didn't fit on [the nerdy stuff](the-nerdy-stuff.md) page — water chemistry deep dives, roast curve breakdowns, and the odd myth we felt like debunking.
+Longer explainers that didn't fit on [the nerdy stuff](pages/the-nerdy-stuff.md) page — water chemistry deep dives, roast curve breakdowns, and the odd myth we felt like debunking.
 
 ## Notes from the Roastery
 
