@@ -6,6 +6,22 @@ Changes merged into `development` that have not yet been released to `main`.
 
 ## Sample sites
 
+- **Added a new sample site, `hearth-and-bean`** — a coffee shop/roastery
+  (topbar nav), covering the shop story, full menu, a coffee-science page
+  ("The Nerdy Stuff": extraction/TDS, water chemistry, roast development,
+  processing methods, decaf, freshness), a journal of 14 posts (single-origin
+  releases, brewing guides, coffee-science deep dives, roastery notes) using
+  the `posts-created-reversechronological` tag, and a Visit & Order page.
+  Custom warm-coffee `theme.yml` palette. Added to the `sample-sites/index.html`
+  gallery and `sample-sites/README.md` table.
+  - While building it, found that 6 of the 7 pre-existing sample sites
+    (`techpulse`, `kitchen-table`, `neuraldb-docs`, `modern-philosophy`,
+    `velox-docs`, `wandering-algorithm`) are missing the `theme: theme.yml`
+    key in `config.yml`, so their custom theme.yml palettes are silently
+    inert and they all render with the renderer's default blue theme instead
+    of their intended look. Only `showcase` has it wired up. Not fixed here
+    (out of scope for this change) — flagged for a follow-up.
+
 - **Revised the `showcase` sample site** to demonstrate the full current tag
   surface and two features it previously didn't touch at all: nested
   (`parent`/`parent-sort`) sections and the category (language) switcher.

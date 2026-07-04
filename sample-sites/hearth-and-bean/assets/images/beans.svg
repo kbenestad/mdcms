@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-label="Scattered whole coffee beans on a cream background">
+  <rect width="800" height="400" fill="#FBF3E7"/>
+  <g>
+    <!-- a scattered field of beans, each an ellipse with a crack -->
+    <!-- generated with a repeating template rotated/positioned by hand -->
+    <g transform="translate(90,80) rotate(20)">
+      <ellipse rx="34" ry="22" fill="#5B3A22"/>
+      <path d="M0,-20 Q10,0 0,20" stroke="#3B2515" stroke-width="4" fill="none"/>
+    </g>
+    <g transform="translate(230,130) rotate(-15)">
+      <ellipse rx="30" ry="19" fill="#6B4526"/>
+      <path d="M0,-17 Q9,0 0,17" stroke="#3B2515" stroke-width="4" fill="none"/>
+    </g>
+    <g transform="translate(370,70) rotate(45)">
+      <ellipse rx="32" ry="21" fill="#4A2E1B"/>
+      <path d="M0,-18 Q10,0 0,18" stroke="#2A1810" stroke-width="4" fill="none"/>
+    </g>
+    <g transform="translate(520,140) rotate(-30)">
+      <ellipse rx="28" ry="18" fill="#6B4526"/>
+      <path d="M0,-16 Q8,0 0,16" stroke="#3B2515" stroke-width="4" fill="none"/>
+    </g>
+    <g transform="translate(650,90) rotate(10)">
+      <ellipse rx="33" ry="21" fill="#5B3A22"/>
+      <path d="M0,-19 Q10,0 0,19" stroke="#3B2515" stroke-width="4" fill="none"/>
+    </g>
+    <g transform="translate(140,250) rotate(60)">
+      <ellipse rx="31" ry="20" fill="#4A2E1B"/>
+      <path d="M0,-17 Q9,0 0,17" stroke="#2A1810" stroke-width="4" fill="none"/>
+    </g>
+    <g transform="translate(300,290) rotate(-50)">
+      <ellipse rx="29" ry="19" fill="#6B4526"/>
+      <path d="M0,-16 Q8,0 0,16" stroke="#3B2515" stroke-width="4" fill="none"/>
+    </g>
+    <g transform="translate(450,250) rotate(5)">
+      <ellipse rx="34" ry="22" fill="#5B3A22"/>
+      <path d="M0,-19 Q10,0 0,19" stroke="#3B2515" stroke-width="4" fill="none"/>
+    </g>
+    <g transform="translate(600,300) rotate(25)">
+      <ellipse rx="30" ry="19" fill="#4A2E1B"/>
+      <path d="M0,-17 Q9,0 0,17" stroke="#2A1810" stroke-width="4" fill="none"/>
+    </g>
+    <g transform="translate(720,230) rotate(-20)">
+      <ellipse rx="28" ry="18" fill="#6B4526"/>
+      <path d="M0,-16 Q8,0 0,16" stroke="#3B2515" stroke-width="4" fill="none"/>
+    </g>
+    <g transform="translate(40,350) rotate(35)">
+      <ellipse rx="27" ry="17" fill="#5B3A22"/>
+      <path d="M0,-15 Q7,0 0,15" stroke="#3B2515" stroke-width="4" fill="none"/>
+    </g>
+    <g transform="translate(200,20) rotate(-40)">
+      <ellipse rx="26" ry="17" fill="#4A2E1B"/>
+      <path d="M0,-15 Q7,0 0,15" stroke="#2A1810" stroke-width="4" fill="none"/>
+    </g>
+  </g>
+</svg>

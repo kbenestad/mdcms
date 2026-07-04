@@ -13,6 +13,7 @@ library before opening it.
 | `showcase/` | topbar | Feature tour — callouts, tabs, accordions, `toc`, paginated posts |
 | `techpulse/` | topbar | News site with a large paginated post archive |
 | `kitchen-table/` | topbar | Recipe/blog site with posts |
+| `hearth-and-bean/` | topbar | Coffee shop site — menu, brewing science, and a running journal |
 | `neuraldb-docs/` | topbar | Product documentation |
 | `modern-philosophy/` | sidebar | Long-form textbook with nested sidebar sections |
 | `velox-docs/` | sidebar | Developer documentation |

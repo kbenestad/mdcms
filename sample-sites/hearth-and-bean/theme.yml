@@ -1,0 +1,47 @@
+# mdcms theme — Hearth & Bean
+palette:
+  light:
+    primary: "#A9682B"
+    surface: "#FBF3E7"
+    page: "#FFFDF9"
+    ink: "#3B2A1E"
+    ink-muted: "#8C6E58"
+  dark:
+    primary: "#D9A566"
+    surface: "#241812"
+    page: "#19120C"
+    ink: "#F5E9DC"
+    ink-muted: "#C9AD91"
+
+
+colours-semantic:
+  info: "#2563EB"
+  warning: "#D97706"
+  success: "#16A34A"
+  error: "#DC2626"
+
+callouts:
+  info:
+    icon: info
+    primary-colour: "#2563EB"
+    background-colour: "#2563EB"
+  warning:
+    icon: warning
+    primary-colour: "#D97706"
+    background-colour: "#D97706"
+  success:
+    icon: success
+    primary-colour: "#16A34A"
+    background-colour: "#16A34A"
+  error:
+    icon: error
+    primary-colour: "#DC2626"
+    background-colour: "#DC2626"
+
+font-body: "bunny:Nunito Sans:400"
+font-heading: "bunny:Fraunces:600"
+font-size: 1.0
+line-height: 1.75
+
+main-width: 72em
+nav-width: 18em

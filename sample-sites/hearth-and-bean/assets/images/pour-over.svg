@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-label="A gooseneck kettle pouring water over a dripper cone">
+  <rect width="800" height="400" fill="#F3E4CE"/>
+
+  <!-- server / carafe -->
+  <path d="M370 260 L430 260 L420 330 Q400 345 380 330 Z" fill="#FBF3E7" stroke="#A9682B" stroke-width="3"/>
+  <ellipse cx="400" cy="260" rx="30" ry="8" fill="#C98A3E"/>
+  <rect x="390" y="200" width="20" height="15" fill="#8C6E58"/>
+
+  <!-- dripper cone -->
+  <path d="M355 200 L445 200 L410 250 L390 250 Z" fill="#A9682B"/>
+  <path d="M355 200 L445 200 L440 208 L360 208 Z" fill="#8C5A28"/>
+
+  <!-- coffee bed / bloom bubbles -->
+  <circle cx="385" cy="212" r="4" fill="#FBF3E7" opacity="0.6"/>
+  <circle cx="400" cy="216" r="5" fill="#FBF3E7" opacity="0.5"/>
+  <circle cx="415" cy="211" r="3" fill="#FBF3E7" opacity="0.6"/>
+
+  <!-- kettle body -->
+  <g transform="translate(500,60) rotate(18)">
+    <path d="M0,0 Q70,-10 90,40 L90,120 Q90,150 40,150 Q-10,150 -10,110 L-10,40 Q-10,10 0,0 Z" fill="#4A2E1B"/>
+    <!-- gooseneck spout -->
+    <path d="M-10,50 Q-90,50 -95,110 Q-98,140 -70,145" fill="none" stroke="#4A2E1B" stroke-width="14" stroke-linecap="round"/>
+    <!-- handle -->
+    <path d="M40,-8 Q95,-8 95,45" fill="none" stroke="#2A1810" stroke-width="10" stroke-linecap="round"/>
+    <!-- lid knob -->
+    <circle cx="35" cy="-8" r="8" fill="#2A1810"/>
+  </g>
+
+  <!-- water stream -->
+  <path d="M355 195 Q370 205 378 218" fill="none" stroke="#8FB8D6" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+
+  <!-- steam -->
+  <path d="M395 190 Q385 165 400 145" fill="none" stroke="#FBF3E7" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+  <path d="M415 190 Q405 168 418 148" fill="none" stroke="#FBF3E7" stroke-width="4" stroke-linecap="round" opacity="0.45"/>
+</svg>

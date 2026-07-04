@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 450" role="img" aria-label="A steaming cup of coffee on a warm amber background">
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3B2A1E"/>
+      <stop offset="55%" stop-color="#7A4A22"/>
+      <stop offset="100%" stop-color="#C98A3E"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#F3C989" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#F3C989" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="450" fill="url(#skyGrad)"/>
+  <rect width="1200" height="450" fill="url(#glow)"/>
+
+  <!-- scattered bokeh -->
+  <circle cx="140" cy="90" r="5" fill="#FBF3E7" opacity="0.35"/>
+  <circle cx="980" cy="60" r="7" fill="#FBF3E7" opacity="0.3"/>
+  <circle cx="1080" cy="150" r="4" fill="#FBF3E7" opacity="0.4"/>
+  <circle cx="220" cy="200" r="3" fill="#FBF3E7" opacity="0.3"/>
+  <circle cx="60" cy="320" r="6" fill="#FBF3E7" opacity="0.25"/>
+
+  <!-- table line -->
+  <rect x="0" y="360" width="1200" height="90" fill="#2A1D14"/>
+
+  <!-- saucer -->
+  <ellipse cx="600" cy="372" rx="150" ry="20" fill="#241812"/>
+  <ellipse cx="600" cy="366" rx="150" ry="20" fill="#FBF3E7"/>
+
+  <!-- cup -->
+  <path d="M480 260 Q480 340 500 366 L700 366 Q720 340 720 260 Z" fill="#FBF3E7"/>
+  <path d="M480 260 Q480 340 500 366 L700 366 Q720 340 720 260 Z" fill="none" stroke="#C98A3E" stroke-width="3" opacity="0.4"/>
+  <ellipse cx="600" cy="260" rx="120" ry="18" fill="#4A2E18"/>
+  <ellipse cx="600" cy="256" rx="112" ry="14" fill="#2A1810"/>
+
+  <!-- handle -->
+  <path d="M718 275 Q770 275 770 315 Q770 350 720 348" fill="none" stroke="#FBF3E7" stroke-width="16" stroke-linecap="round"/>
+
+  <!-- steam -->
+  <path d="M560 230 Q545 190 565 160 Q585 130 565 95" fill="none" stroke="#FBF3E7" stroke-width="6" stroke-linecap="round" opacity="0.55"/>
+  <path d="M610 230 Q595 185 615 150 Q635 115 612 75" fill="none" stroke="#FBF3E7" stroke-width="6" stroke-linecap="round" opacity="0.5"/>
+  <path d="M655 235 Q642 200 658 172 Q674 144 656 110" fill="none" stroke="#FBF3E7" stroke-width="6" stroke-linecap="round" opacity="0.45"/>
+</svg>
