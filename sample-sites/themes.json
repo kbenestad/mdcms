@@ -427,6 +427,60 @@
   },
   {
     "family": "Developer",
+    "file": "dev-kgx-adwaita.yaml",
+    "path": "themes/Developer/dev-kgx-adwaita.yaml",
+    "label": "kgx · adwaita"
+  },
+  {
+    "family": "Developer",
+    "file": "dev-kgx-atkinson.yaml",
+    "path": "themes/Developer/dev-kgx-atkinson.yaml",
+    "label": "kgx · atkinson hyperlegible next"
+  },
+  {
+    "family": "Developer",
+    "file": "dev-kgx-googlesans.yaml",
+    "path": "themes/Developer/dev-kgx-googlesans.yaml",
+    "label": "kgx · google sans"
+  },
+  {
+    "family": "Developer",
+    "file": "dev-kgx-ibmplex.yaml",
+    "path": "themes/Developer/dev-kgx-ibmplex.yaml",
+    "label": "kgx · ibm plex"
+  },
+  {
+    "family": "Developer",
+    "file": "dev-kgx-overpass.yaml",
+    "path": "themes/Developer/dev-kgx-overpass.yaml",
+    "label": "kgx · overpass"
+  },
+  {
+    "family": "Developer",
+    "file": "dev-kgx-redhat.yaml",
+    "path": "themes/Developer/dev-kgx-redhat.yaml",
+    "label": "kgx · red hat"
+  },
+  {
+    "family": "Developer",
+    "file": "dev-kgx-roboto.yaml",
+    "path": "themes/Developer/dev-kgx-roboto.yaml",
+    "label": "kgx · roboto"
+  },
+  {
+    "family": "Developer",
+    "file": "dev-kgx-space.yaml",
+    "path": "themes/Developer/dev-kgx-space.yaml",
+    "label": "kgx · space"
+  },
+  {
+    "family": "Developer",
+    "file": "dev-kgx-ubuntu.yaml",
+    "path": "themes/Developer/dev-kgx-ubuntu.yaml",
+    "label": "kgx · ubuntu"
+  },
+  {
+    "family": "Developer",
     "file": "dev-monokai.yaml",
     "path": "themes/Developer/dev-monokai.yaml",
     "label": "monokai"
@@ -688,6 +742,60 @@
     "file": "mono-press.yaml",
     "path": "themes/Modern/mono-press.yaml",
     "label": "mono · press"
+  },
+  {
+    "family": "Modern",
+    "file": "press-adwaita.yaml",
+    "path": "themes/Modern/press-adwaita.yaml",
+    "label": "press · adwaita"
+  },
+  {
+    "family": "Modern",
+    "file": "press-atkinson.yaml",
+    "path": "themes/Modern/press-atkinson.yaml",
+    "label": "press · atkinson hyperlegible next"
+  },
+  {
+    "family": "Modern",
+    "file": "press-googlesans.yaml",
+    "path": "themes/Modern/press-googlesans.yaml",
+    "label": "press · google sans"
+  },
+  {
+    "family": "Modern",
+    "file": "press-ibmplex.yaml",
+    "path": "themes/Modern/press-ibmplex.yaml",
+    "label": "press · ibm plex"
+  },
+  {
+    "family": "Modern",
+    "file": "press-overpass.yaml",
+    "path": "themes/Modern/press-overpass.yaml",
+    "label": "press · overpass"
+  },
+  {
+    "family": "Modern",
+    "file": "press-redhat.yaml",
+    "path": "themes/Modern/press-redhat.yaml",
+    "label": "press · red hat"
+  },
+  {
+    "family": "Modern",
+    "file": "press-roboto.yaml",
+    "path": "themes/Modern/press-roboto.yaml",
+    "label": "press · roboto"
+  },
+  {
+    "family": "Modern",
+    "file": "press-space.yaml",
+    "path": "themes/Modern/press-space.yaml",
+    "label": "press · space"
+  },
+  {
+    "family": "Modern",
+    "file": "press-ubuntu.yaml",
+    "path": "themes/Modern/press-ubuntu.yaml",
+    "label": "press · ubuntu"
   },
   {
     "family": "Modern",

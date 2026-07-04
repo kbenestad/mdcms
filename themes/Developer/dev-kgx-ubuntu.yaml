@@ -1,0 +1,75 @@
+# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms theme — kgx · ubuntu
+# GNOME Console (kgx) default palette — Adwaita text-field backgrounds, GNOME terminal blue accent. Set in Ubuntu. Ubuntu, Canonical's signature humanist sans.
+
+# ──────────────────────────────────
+# Colours
+# ──────────────────────────────────
+palette:
+  light:
+    primary: "#1E78E4"
+    surface: "#F6F5F4"
+    page: "#FFFFFF"
+    ink: "#000000"
+    ink-muted: "#5E5C64"
+  dark:
+    primary: "#51A1FF"
+    surface: "#241F31"
+    page: "#1C1C1F"
+    ink: "#F6F5F4"
+    ink-muted: "#C0BFBC"
+
+
+# ──────────────────────────────────
+# Semantic colours
+# colours-semantic applies to both modes.
+# colours-semantic-dark overrides for dark mode only.
+# ──────────────────────────────────
+colours-semantic:
+  info: "#1E78E4"
+  warning: "#F5C211"
+  success: "#2EC27E"
+  error: "#C01C28"
+
+colours-semantic-dark:
+  info: "#51A1FF"
+  warning: "#F8E45C"
+  success: "#57E389"
+  error: "#ED333B"
+
+# ──────────────────────────────────
+# Callout defaults
+# primary-colour matches colours-semantic (light mode).
+# ──────────────────────────────────
+callouts:
+  info:
+    icon: info
+    primary-colour: "#1E78E4"
+    background-colour: "#1E78E4"
+  warning:
+    icon: warning
+    primary-colour: "#F5C211"
+    background-colour: "#F5C211"
+  success:
+    icon: success
+    primary-colour: "#2EC27E"
+    background-colour: "#2EC27E"
+  error:
+    icon: error
+    primary-colour: "#C01C28"
+    background-colour: "#C01C28"
+
+# ──────────────────────────────────
+# Typography
+# Format: "provider:Font Name:weight"  (provider: bunny | google)
+# ──────────────────────────────────
+font-body: "bunny:Ubuntu:300"
+font-heading: "bunny:Ubuntu:700"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
+line-height: 1.70      # unitless multiplier
+
+# ──────────────────────────────────
+# Layout
+# ──────────────────────────────────
+main-width: 80em
+nav-width: 20em
