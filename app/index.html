@@ -1632,7 +1632,7 @@ body {
     if (bunnyFonts.length) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = `https://fonts.bunny.net/css?family=${bunnyFonts.map(f => `${f.name.replace(/ /g, '+')}:${f.weight}`).join('&family=')}`;
+      link.href = `https://fonts.bunny.net/css?family=${bunnyFonts.map(f => `${f.name.replace(/ /g, '+')}:${f.weight}`).join('|')}`;
       document.head.appendChild(link);
     }
     if (googleFonts.length) {

@@ -6,27 +6,24 @@ Changes merged into `development` that have not yet been released to `main`.
 
 ## Renderer (`app/index.html`)
 
-- **New optional `heading` palette token, decoupling headline colour from
-  the accent.** `.md-content h1`–`h6` were hardcoded to `var(--accent)`, so
-  every article heading rendered in whatever colour a theme used for links,
-  tabs, and accordions — e.g. the Newspaper-inspired themes' headlines came
-  out blue/red/teal instead of the near-black real mastheads use. Headings
-  now read `var(--heading-colour, var(--accent))`: themes that don't set
-  `heading` are pixel-identical to before (still fall back to `primary`),
-  and themes that do set it (typically equal to `ink`) get accent-free
-  headlines while tabs, accordions, and links keep the accent colour.
-
-## Themes
-
-- **All nine Newspaper-inspired themes now set `heading` to their own
-  `ink`**, so headlines render in body-ink black/near-black instead of the
-  theme's accent colour — matching how real newspaper mastheads keep
-  colour for links only. Affected: `broadsheet`, `chronicle`, `city`,
-  `folio`, `gazette`, `gotham`, `ledger`, `manhattan`, `tabloid`.
-- **`gotham`'s accent corrected to NYT's actual byline grey (`#727272`
-  light / `#9A9A9A` dark)**, not the newsprint blue — the blue was never a
-  prominent UI colour on the real site (it isn't the subscribe button or
-  any other visible affordance); the grey used for bylines is what's
-  actually pervasive. The `colours-semantic`/callout `info` colour keeps
-  the real NYT blue, since that's still an authentic accent worth keeping
-  for the info callout specifically.
+- **Fixed: Bunny Fonts only ever loaded one of a theme's fonts.** `loadFonts()`
+  built the Bunny stylesheet URL as `?family=Font1:weight&family=Font2:weight`
+  — the Google Fonts v2 convention — but Bunny Fonts requires multiple
+  families to be pipe-separated inside a single `family=` parameter
+  (`?family=Font1:weight|Font2:weight`). With the old syntax Bunny silently
+  served only the *first* family (always `font-body`, since `font-heading`
+  and `font-code` are appended after it) and dropped the rest, so any theme
+  with a distinct heading font — the vast majority of the library — silently
+  fell back to the system sans-serif for headings. Nobody noticed for
+  themes whose heading font happened to look close to the fallback; it
+  became obvious with the Newspaper-inspired themes' serif headlines.
+  Google Fonts requests are unaffected — that provider's v2 API genuinely
+  does use repeated `family=` params, which is what led the original code
+  to (incorrectly) assume Bunny worked the same way.
+- **Re-synced all seven sample sites' bundled `index.html`** with the
+  current `app/index.html`. They'd drifted since the last sync (missing
+  both the font-loading fix above and the `heading` palette token from the
+  previous change) — each sample site carries its own static copy of the
+  renderer rather than a live link to `app/index.html`, so this fix (and
+  the earlier heading-colour one) wouldn't have been visible in the
+  sample-site picker without it.
