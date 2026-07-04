@@ -202,7 +202,7 @@ npm run preview
 
 ## Next Steps
 
-- Read about [Project Structure](project-structure.md) to understand every directory and file
-- Explore [Routing](routing.md) for dynamic routes and catch-all patterns
-- Learn about [Data Fetching](data-fetching.md) for SSR, SSG, and ISR patterns
-- Check the [Configuration](configuration.md) reference for `velox.config.ts` options
+- Read about [Project Structure](pages/project-structure.md) to understand every directory and file
+- Explore [Routing](pages/routing.md) for dynamic routes and catch-all patterns
+- Learn about [Data Fetching](pages/data-fetching.md) for SSR, SSG, and ISR patterns
+- Check the [Configuration](pages/configuration.md) reference for `velox.config.ts` options

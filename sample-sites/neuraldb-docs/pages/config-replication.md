@@ -156,7 +156,7 @@ primary_conninfo = 'host=primary.us-east-1.example.com port=5432 user=replicator
 NeuralDB does not include automatic failover out of the box. Use one of:
 
 - **Patroni** — industry-standard HA manager for PostgreSQL-compatible databases
-- **NeuralDB HA Operator** — Kubernetes operator with automatic failover (see [Kubernetes docs](install-kubernetes.md))
+- **NeuralDB HA Operator** — Kubernetes operator with automatic failover (see [Kubernetes docs](pages/install-kubernetes.md))
 - **repmgr** — lightweight failover manager
 
 Manual failover:

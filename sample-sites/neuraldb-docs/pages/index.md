@@ -122,4 +122,4 @@ Connect with any PostgreSQL-compatible client:
 psql -h localhost -U neuraldb -d neuraldb
 ```
 
-Then read the [Core Concepts](concepts.md) to understand the NeuralDB data model, or jump to [NQL Basics](nql-basics.md) to start writing queries.
+Then read the [Core Concepts](pages/concepts.md) to understand the NeuralDB data model, or jump to [NQL Basics](pages/nql-basics.md) to start writing queries.

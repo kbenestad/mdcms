@@ -246,4 +246,4 @@ export default defineConfig({
 });
 ```
 
-For the complete type definitions, see the [Config API](api-config.md) reference.
+For the complete type definitions, see the [Config API](pages/api-config.md) reference.
