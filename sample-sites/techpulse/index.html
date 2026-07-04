@@ -1381,16 +1381,21 @@ body.scanlines-active::after {
     activeCategory = (fromUrl && categoriesByCode[fromUrl]) ? fromUrl : defaultCategoryCode;
   }
 
-  function setActiveCategory(code) {
+  function setActiveCategory(code, { history: historyMode = 'replace' } = {}) {
     if (!categoriesByCode[code]) return;
     activeCategory = code;
-    const url = new URL(window.location);
-    if (code === defaultCategoryCode) url.searchParams.delete('cat');
-    else url.searchParams.set('cat', code);
-    window.history.replaceState(null, '', url);
     maybeLoadCategoryFont(code).then(() => {
       renderNav();
-      if (currentPage) navigateTo(currentPage);
+      if (currentPage) {
+        // Let navigateTo own the history entry so switching category and
+        // re-rendering the page don't fight over window.history.
+        navigateTo(currentPage, { history: historyMode });
+      } else {
+        const url = new URL(window.location);
+        if (code === defaultCategoryCode) url.searchParams.delete('cat');
+        else url.searchParams.set('cat', code);
+        window.history.replaceState(null, '', url);
+      }
     });
   }
 
@@ -3357,7 +3362,15 @@ function fmtDatetime(dtStr) {
   }
 
   // ─── Page loading ─────────────────────────────────────────
-  async function navigateTo(file) {
+  // historyMode controls how this navigation affects browser history:
+  //   'push'    — user-initiated navigation; add a new entry so Back returns
+  //               to the previous page (the default).
+  //   'replace' — initial load, or a re-render of the page already showing;
+  //               update the current entry in place without stacking a new one.
+  //   'none'    — the navigation is itself the result of Back/Forward
+  //               (popstate/hashchange); the browser already moved through
+  //               history, so leave it untouched.
+  async function navigateTo(file, { history: historyMode = 'push' } = {}) {
     currentPage = file;
     const contentEl = document.getElementById('pageContent');
     highlightNav(file);
@@ -3374,7 +3387,7 @@ function fmtDatetime(dtStr) {
           || !(pageEntry.variants && pageEntry.variants.length)
           || pageEntry.variants.includes(activeCategory);
         if (!hasVariant) {
-          setActiveCategory(defaultCategoryCode);
+          setActiveCategory(defaultCategoryCode, { history: historyMode });
           return;
         }
       }
@@ -3397,7 +3410,20 @@ function fmtDatetime(dtStr) {
       u.pathname = basePath;
       u.hash = '#' + file;
     }
-    window.history.replaceState(null, '', u);
+    if (historyMode === 'push') {
+      // Re-navigating to the URL already showing (e.g. clicking the current
+      // nav link again) must not stack a duplicate entry that Back would land
+      // on with nothing visibly changing.
+      if (u.href === window.location.href) {
+        window.history.replaceState(null, '', u);
+      } else {
+        window.history.pushState(null, '', u);
+      }
+    } else if (historyMode === 'replace') {
+      window.history.replaceState(null, '', u);
+    }
+    // historyMode === 'none': triggered by Back/Forward — the browser already
+    // updated the URL and history position, so don't touch it here.
 
     contentEl.innerHTML = '<div class="loading-spinner"></div>';
 
@@ -3484,7 +3510,7 @@ function fmtDatetime(dtStr) {
   window.addEventListener('hashchange', () => {
     const page = getPageFromHash();
     if (isInPageAnchor(page)) return;
-    if (page && page !== currentPage) navigateTo(page);
+    if (page && page !== currentPage) navigateTo(page, { history: 'none' });
   });
 
   window.addEventListener('popstate', () => {
@@ -3492,7 +3518,7 @@ function fmtDatetime(dtStr) {
     const pathPage = slug ? resolveSlugToFile(slug) : null;
     const page = pathPage || getPageFromHash();
     if (!pathPage && isInPageAnchor(page)) return;
-    if (page && page !== currentPage) navigateTo(page);
+    if (page && page !== currentPage) navigateTo(page, { history: 'none' });
   });
 
   // ─── Scroll to top ───────────────────────────────────────
@@ -3603,7 +3629,9 @@ function fmtDatetime(dtStr) {
       }
 
       const hashPage = getPageFromHash();
-      await navigateTo(routeFromPath || hashPage || defaultPage());
+      // First paint replaces the initial entry rather than pushing, so the very
+      // first Back leaves the site instead of cycling on the landing page.
+      await navigateTo(routeFromPath || hashPage || defaultPage(), { history: 'replace' });
     } catch (err) {
       document.getElementById('app').innerHTML = `<div style="max-width:600px;margin:4rem auto;padding:2rem;text-align:center;font-family:system-ui;">
         <h1 style="color:#EF4444;font-size:1.5rem;">MD-CMS Error</h1>
