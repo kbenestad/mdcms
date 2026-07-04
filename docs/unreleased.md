@@ -35,3 +35,14 @@ Changes merged into `development` that have not yet been released to `main`.
     (`home`, `about`, and a new `pages/categories.md` guide) do. The guide
     page prints the site's actual `categories-*` config block verbatim, for
     readers who want to see the real thing rather than a generic example.
+
+## Release workflow
+
+- **Fixed `gh release create` hard-failing when a release for the tag already
+  exists** (e.g. a release drafted by hand on GitHub, which creates the tag
+  itself and triggers the run before the workflow gets a chance to create
+  it — this is what happened to v0.6.7, whose GitHub Release page ended up
+  with no binaries attached even though `latest/` on `main` was updated
+  correctly). The `Publish GitHub release` step in `.github/workflows/release.yml`
+  now checks `gh release view` first and falls back to `gh release upload
+  --clobber` on an existing release instead of erroring out.

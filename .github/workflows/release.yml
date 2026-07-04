@@ -256,11 +256,20 @@ jobs:
           case "${GITHUB_REF_NAME}" in
             *-*) PRERELEASE="--prerelease" ;;
           esac
-          gh release create "${GITHUB_REF_NAME}" \
-            --title "${GITHUB_REF_NAME}" \
-            --generate-notes \
-            $PRERELEASE \
-            artifacts/release/*
+          # A release for this tag can already exist (e.g. someone drafted it by
+          # hand on GitHub, which also creates the tag and triggers this run) —
+          # `gh release create` errors out in that case instead of updating it.
+          # Fall back to uploading the built assets onto the existing release.
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            echo "Release ${GITHUB_REF_NAME} already exists; uploading assets to it instead of creating a new one."
+            gh release upload "${GITHUB_REF_NAME}" artifacts/release/* --clobber
+          else
+            gh release create "${GITHUB_REF_NAME}" \
+              --title "${GITHUB_REF_NAME}" \
+              --generate-notes \
+              $PRERELEASE \
+              artifacts/release/*
+          fi
 
   # Runs after both build-intel and publish, so it lands on the main that
   # publish just pushed and (on tags) uploads into the release publish created.
