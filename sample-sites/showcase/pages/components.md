@@ -42,6 +42,25 @@ items:
       Two parts: `mdcms.py` (CLI) and `app/index.html` (browser renderer).
 ```
 
+## Tab — bare alias + `title-style`
+
+`tab` is an alias for `tab-underline`. `title-style` sets the heading level
+used for each tab's label for screen readers — it doesn't change how the
+label looks.
+
+```mdcms tab
+items:
+  - title: mdcms.py
+    default: selected
+    title-style: "###"
+    content: |
+      The CLI: registry, scanning, `nav.yml`/`search.json` generation.
+  - title: index.html
+    title-style: "###"
+    content: |
+      The renderer: reads markdown, config, and nav at runtime. No build step.
+```
+
 ## Accordion — Underline variant
 
 ```mdcms accordion-underline
@@ -72,9 +91,25 @@ items:
   - title: What markdown features are supported?
     content: |
       GFM (GitHub Flavored Markdown): tables, task lists, fenced code blocks,
-      strikethrough, and autolinks. Syntax highlighting via highlight.js.
+      strikethrough, and autolinks. See the *Markdown extras* page for a
+      full tour, including footnotes.
   - title: Can I nest categories?
     content: |
       Categories are flat (no nesting), but nav sections support a `parent:`
-      key for two-level sidebar grouping.
+      key for two-level grouping. See *Tutorials* for what that looks like
+      on a topbar site (this one) versus a sidebar site.
+```
+
+## Accordion — bare alias
+
+`accordion` is an alias for `accordion-underline`:
+
+```mdcms accordion
+items:
+  - title: Does this alias behave any differently?
+    default: open
+    content: |
+      No — `accordion` and `accordion-underline` render identically. The
+      bare names (`tab`, `accordion`) exist so a page can start simple and
+      you can add `-underline` or `-filled` later without renaming the tag.
 ```

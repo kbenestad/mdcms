@@ -3,6 +3,25 @@
 # pagesvisibility, categorynames) are preserved on rebuild.
 
 sections:
+  - code: tutorials
+    defaultname: Tutorials
+    sort: 90
+    pagesvisibility: visible
+
+  - code: tutorials-quickstart
+    defaultname: Quick start
+    sort: 91
+    parent: tutorials
+    parent-sort: 10
+    pagesvisibility: visible
+
+  - code: tutorials-theming
+    defaultname: Theming
+    sort: 92
+    parent: tutorials
+    parent-sort: 20
+    pagesvisibility: visible
+
   - code: guides
     defaultname: Guides
     sort: 100
@@ -17,41 +36,111 @@ pages:
   - file: pages/home.md
     title: Home
     sort: 100
+    variants: [en, nb]
+    titles:
+      en: Home
+      nb: Hjem
+
+  - file: pages/tutorial-quickstart.md
+    title: Quick start
+    section-id: tutorials-quickstart
+    sort: 100
+    variants: [en]
+    titles:
+      en: Quick start
+
+  - file: pages/tutorial-theming.md
+    title: Theming
+    section-id: tutorials-theming
+    sort: 100
+    variants: [en]
+    titles:
+      en: Theming
+
+  - file: pages/tutorials.md
+    title: Tutorials
+    section-id: tutorials
+    sort: 100
+    variants: [en]
+    titles:
+      en: Tutorials
 
   - file: pages/callouts.md
     title: Callouts
     section-id: guides
     sort: 200
+    variants: [en]
+    titles:
+      en: Callouts
 
   - file: pages/components.md
     title: Components
     section-id: guides
     sort: 210
+    variants: [en]
+    titles:
+      en: Components
 
   - file: pages/contents.md
     title: Contents
     section-id: guides
     sort: 220
+    variants: [en]
+    titles:
+      en: Contents
+
+  - file: pages/markdown.md
+    title: Markdown extras
+    section-id: guides
+    sort: 230
+    variants: [en]
+    titles:
+      en: Markdown extras
+
+  - file: pages/categories.md
+    title: Language switcher
+    section-id: guides
+    sort: 240
+    variants: [en, nb]
+    titles:
+      en: Language switcher
+      nb: Språkvelger
 
   - file: pages/blog.md
     title: Blog
     sort: 300
+    variants: [en]
+    titles:
+      en: Blog
 
   - file: pages/ref-config.md
     title: Config reference
     section-id: reference
     sort: 410
+    variants: [en]
+    titles:
+      en: Config reference
 
   - file: pages/ref-api.md
     title: API reference
     section-id: reference
     sort: 420
+    variants: [en]
+    titles:
+      en: API reference
 
   - file: pages/ref-cli.md
     title: CLI reference
     section-id: reference
     sort: 430
+    variants: [en]
+    titles:
+      en: CLI reference
 
   - file: pages/about.md
     title: About
     sort: 900
+    variants: [en, nb]
+    titles:
+      en: About
+      nb: Om
