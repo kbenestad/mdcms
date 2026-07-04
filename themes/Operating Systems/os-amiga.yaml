@@ -66,14 +66,17 @@ callouts:
 
 # ──────────────────────────────────
 # Typography
-# VT323 portable default for the pixel-screen feel.
-# Preferred for true Workbench-fidelity: "Topaz" or "Topaz New" (free
-# pixel font replicas of the Amiga system font, widely available as TTF).
-# For a more readable modern take, swap to "bunny:IBM Plex Mono:400".
+# Workbench (the Google font) for headings is a deliberate pun on
+# Workbench (the Amiga desktop) — its stencilled, hand-labelled-hardware
+# look reads as "system font on a beige box" without the illegibility of
+# a raw pixel font at paragraph size. IBM Plex Mono keeps body copy
+# readable. Preferred for true Workbench-fidelity: "Topaz" or "Topaz New"
+# (free pixel font replicas of the Amiga system font, widely available as
+# TTF) if you want to swap them in yourself.
 # ──────────────────────────────────
-font-body: "google:VT323:400"
-font-heading: "google:VT323:400"
-font-size: 1.15
+font-body: "bunny:IBM Plex Mono:400"
+font-heading: "google:Workbench:400"
+font-size: 1.00
 line-height: 1.45
 
 # ──────────────────────────────────

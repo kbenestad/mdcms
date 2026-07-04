@@ -199,6 +199,16 @@ nav-width: 20em     # Width of the sidebar. Any CSS length unit.
 
 ---
 
+## Effects
+
+```yaml
+scanlines: yes   # Overlay faint horizontal CRT scanlines across the whole viewport.
+```
+
+A fixed, `pointer-events: none` overlay drawn above all content — it doesn't affect layout or interaction, and is hidden automatically when printing. Suits CRT-terminal and retro-display themes; omit (or set to `no`) for everything else.
+
+---
+
 ## Full example
 
 ```yaml

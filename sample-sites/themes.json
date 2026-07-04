@@ -684,6 +684,18 @@
     "label": "ukraine · muted"
   },
   {
+    "family": "LCD Signage",
+    "file": "lcd-marquee.yaml",
+    "path": "themes/LCD Signage/lcd-marquee.yaml",
+    "label": "lcd · marquee"
+  },
+  {
+    "family": "LCD Signage",
+    "file": "lcd-ticker.yaml",
+    "path": "themes/LCD Signage/lcd-ticker.yaml",
+    "label": "lcd · ticker"
+  },
+  {
     "family": "Legal-formal",
     "file": "legal-bar.yaml",
     "path": "themes/Legal-formal/legal-bar.yaml",

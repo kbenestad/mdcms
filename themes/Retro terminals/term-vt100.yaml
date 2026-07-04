@@ -74,10 +74,12 @@ callouts:
 # ──────────────────────────────────
 # Typography
 # Format: "provider:Font Name:weight"  (provider: bunny | google)
+# Sixtyfour's built-in phosphor-bleed glyph shapes read as CRT glow at
+# heading size; IBM Plex Mono keeps paragraphs legible at length.
 # ──────────────────────────────────
-font-body: "google:VT323:400"
-font-heading: "google:VT323:400"
-font-size: 1.25        # unitless multiplier (1.0 = 16px base)
+font-body: "bunny:IBM Plex Mono:400"
+font-heading: "google:Sixtyfour:400"
+font-size: 1.00        # unitless multiplier (1.0 = 16px base)
 line-height: 1.60      # unitless multiplier
 
 # ──────────────────────────────────
@@ -85,3 +87,8 @@ line-height: 1.60      # unitless multiplier
 # ──────────────────────────────────
 main-width: 80em
 nav-width: 20em
+
+# ──────────────────────────────────
+# Effects
+# ──────────────────────────────────
+scanlines: yes
