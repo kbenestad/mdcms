@@ -1,30 +1,31 @@
 # mdcms v0.4 | DO NOT REMOVE THIS COMMENT
-# mdcms theme — terminal · pdp
-# 1960s green CRT phosphor. PDP-8, ASR-33, glowing on a basement floor.
+# mdcms theme — lcd · marquee
+# Broadway marquee bulbs after dark: golden-yellow headlines glowing over
+# crisp white body copy. Daylight mode swaps the bulbs for a sunlit
+# cream-and-gold ticket booth.
 
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
 palette:
   light:
-    primary: "#00691F"
-    surface: "#DDF1CC"
-    page: "#F0FBE8"
-    ink: "#0F2A10"
-    ink-muted: "#5A7058"
+    primary: "#B8860B"
+    surface: "#FFF6DC"
+    page: "#FFFDF6"
+    ink: "#1D1810"
+    ink-muted: "#7A6F58"
   dark:
-    primary: "#33FF66"
-    surface: "#002A0E"
-    page: "#001405"
-    ink: "#33FF66"
-    ink-muted: "#1FAA40"
-    on-surface: "#E2E2E2"
-    on-surface-active: "#33FF66"
+    primary: "#FFD400"
+    surface: "#151008"
+    page: "#0B0804"
+    ink: "#FFFFFF"
+    ink-muted: "#C7C2B8"
+    on-surface: "#F5F1E6"
+    on-surface-active: "#FFD400"
     on-surface-title: "#FFFFFF"
-    on-surface-heading: "#9A9A9A"
-    on-surface-note: "#9A9A9A"
-    on-surface-icon: "#9A9A9A"
-
+    on-surface-heading: "rgba(255,255,255,0.55)"
+    on-surface-note: "rgba(255,255,255,0.55)"
+    on-surface-icon: "rgba(255,255,255,0.55)"
 
 # ──────────────────────────────────
 # Semantic colours
@@ -32,57 +33,52 @@ palette:
 # colours-semantic-dark overrides for dark mode only.
 # ──────────────────────────────────
 colours-semantic:
-  info: "#33FF66"
-  warning: "#FFAA00"
-  success: "#33FF66"
-  error: "#FF4040"
+  info: "#3B82F6"
+  warning: "#F59E0B"
+  success: "#22C55E"
+  error: "#EF4444"
 
 colours-semantic-dark:
-  info: "#33FF66"
-  warning: "#FFAA00"
-  success: "#33FF66"
-  error: "#FF5C5C"
+  info: "#60A5FA"
+  warning: "#FBBF24"
+  success: "#4ADE80"
+  error: "#F87171"
 
 # ──────────────────────────────────
 # Callout defaults
-# primary-colour matches colours-semantic (light mode).
 # ──────────────────────────────────
 callouts:
   info:
     icon: info
-    primary-colour: "#33FF66"
-    background-colour: "#33FF66"
+    primary-colour: "#3B82F6"
+    background-colour: "#3B82F6"
   warning:
     icon: warning
-    primary-colour: "#FFAA00"
-    background-colour: "#FFAA00"
+    primary-colour: "#F59E0B"
+    background-colour: "#F59E0B"
   success:
     icon: success
-    primary-colour: "#33FF66"
-    background-colour: "#33FF66"
+    primary-colour: "#22C55E"
+    background-colour: "#22C55E"
   error:
     icon: error
-    primary-colour: "#FF4040"
-    background-colour: "#FF4040"
+    primary-colour: "#EF4444"
+    background-colour: "#EF4444"
 
 # ──────────────────────────────────
 # Typography
 # Format: "provider:Font Name:weight"  (provider: bunny | google)
-# Sixtyfour's built-in phosphor-bleed glyph shapes read as CRT glow at
-# heading size; IBM Plex Mono keeps paragraphs legible at length.
+# Bitcount Grid Double gives headings a segmented LCD-digit look; IBM
+# Plex Mono keeps body copy readable at paragraph length. `heading` is
+# left unset — headings inherit `primary` (the marquee yellow) by design.
 # ──────────────────────────────────
 font-body: "bunny:IBM Plex Mono:400"
-font-heading: "google:Sixtyfour:400"
-font-size: 1.00        # unitless multiplier (1.0 = 16px base)
-line-height: 1.60      # unitless multiplier
+font-heading: "google:Bitcount Grid Double:400"
+font-size: 1.05        # unitless multiplier (1.0 = 16px base)
+line-height: 1.65      # unitless multiplier
 
 # ──────────────────────────────────
 # Layout
 # ──────────────────────────────────
-main-width: 80em
+main-width: 78em
 nav-width: 20em
-
-# ──────────────────────────────────
-# Effects
-# ──────────────────────────────────
-scanlines: yes

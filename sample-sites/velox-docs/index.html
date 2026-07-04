@@ -1097,11 +1097,31 @@ body {
   color: var(--font-colour-muted);
 }
 
+/* ═══════════════════════════════════════════
+   THEME: CRT SCANLINES OVERLAY
+   ═══════════════════════════════════════════ */
+body.scanlines-active::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.14) 0px,
+    rgba(0, 0, 0, 0.14) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: multiply;
+}
+
 @media print {
   .sidebar, .topbar, .scroll-top, .hamburger,
   .mobile-header, .theme-toggle, .search-container { display: none !important; }
   .main-area { margin: 0 !important; }
   .main-content { max-width: 100%; padding: 0; }
+  body.scanlines-active::after { display: none; }
 }
 </style>
 </head>
@@ -1549,6 +1569,7 @@ body {
     if (tc['nav-width'])  root.style.setProperty('--nav-width',  tc['nav-width']);
     if (tc['line-height']) root.style.setProperty('--line-height-body', String(tc['line-height']));
     if (tc['font-size'])   document.documentElement.style.fontSize = `${tc['font-size'] * 16}px`;
+    document.body.classList.toggle('scanlines-active', !!tc.scanlines);
   }
 
   function applyConfigTheme() {
