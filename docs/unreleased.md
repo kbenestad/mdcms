@@ -6,6 +6,7 @@ Changes merged into `development` that have not yet been released to `main`.
 
 ## Added
 
+- Section pagination: setting `pagination: on` on a section in `nav.yml` adds Previous/Next controls to that section's pages — at the bottom of the page, and again in the upper right beneath the category selector (on its own if categories are disabled). Order follows the same sort used elsewhere for nav (page `sort`, then filename). `mdcms.py` now preserves and re-emits the `pagination` field on rebuild alongside the other manually-edited section metadata. Renderer-only + CLI round-trip change (`app/index.html`, `mdcms.py`); re-synced into all sample sites.
 - `toc-section` and `toc-page` table-of-contents tags (renderer, `app/index.html`). `toc-section` renders only one section — the current page's section by default, or `toc-section <section-id>` for a named section. `toc-page` renders an in-page table of contents: an indented, anchor-linked list of the current page's own headings (`h2`–`h6`). The existing site-wide `toc` is unchanged. Re-synced into all sample sites.
 
 ## Fixed

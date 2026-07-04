@@ -700,6 +700,47 @@ body {
   margin-top: 0.15rem;
 }
 
+/* ═══════════════════════════════════════════
+   PAGINATION (section feature: pagination: on)
+   ═══════════════════════════════════════════ */
+.pagination-widget {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+.pagination-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--font-colour-muted);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+a.pagination-link:hover { background: var(--nav-hover-bg); color: var(--font-colour); }
+.pagination-link.disabled { opacity: 0.35; }
+.pagination-link .mdcms-icon { font-size: 0.9rem; }
+.pagination-arrow-prev { transform: scaleX(-1); }
+.pagination-sep { color: var(--divider); }
+
+.pagination-top {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.25rem 0 1rem;
+}
+.pagination-top[dir="rtl"] { justify-content: flex-start; }
+.pagination-top:empty { display: none; padding: 0; }
+
+.pagination-bottom {
+  justify-content: space-between;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--divider);
+}
+
 /* Font-loading banner */
 .font-loading-banner {
   background: rgba(var(--accent-rgb), 0.08);
@@ -1527,6 +1568,54 @@ body.scanlines-active::after {
     if (variants.includes(activeCategory)) return true;
     const cat = categoriesByCode[activeCategory];
     return !!(cat && (cat.notfoundmessage || cat.visibilityifnocontent === 'visible'));
+  }
+
+  // ─── Pagination (section feature: pagination: on) ─────────
+  function sectionPaginationEnabled(sectionCode) {
+    if (!sectionCode) return false;
+    const section = navSections.find(s => s.code === sectionCode);
+    const v = section && section.pagination;
+    return v === true || v === 'on' || v === 'yes';
+  }
+
+  function getPaginationNeighbors(file) {
+    const page = navData.find(p => p.file === file);
+    if (!page) return null;
+    const sid = page['section-id'];
+    if (!sectionPaginationEnabled(sid)) return null;
+    const siblings = navData.filter(p => p['section-id'] === sid && pageShouldDisplay(p));
+    siblings.sort((a, b) => ((a.sort ?? 999) - (b.sort ?? 999)) || a.file.localeCompare(b.file));
+    const idx = siblings.findIndex(p => p.file === file);
+    if (idx === -1) return null;
+    const prev = idx > 0 ? siblings[idx - 1] : null;
+    const next = idx < siblings.length - 1 ? siblings[idx + 1] : null;
+    if (!prev && !next) return null;
+    return { prev, next };
+  }
+
+  function buildPaginationWidget(neighbors, extraClass) {
+    const bar = el('div', { className: 'pagination-widget' + (extraClass ? ' ' + extraClass : '') });
+    const { prev, next } = neighbors;
+
+    const prevLink = prev
+      ? el('a', { className: 'pagination-link pagination-prev', href: '#' + prev.file, title: pageDisplayTitle(prev) })
+      : el('span', { className: 'pagination-link pagination-prev disabled' });
+    prevLink.appendChild(iconEl('keyboard_arrow_right', 'pagination-arrow pagination-arrow-prev'));
+    prevLink.appendChild(document.createTextNode('Previous'));
+    if (prev) prevLink.addEventListener('click', e => { e.preventDefault(); navigateTo(prev.file); });
+    bar.appendChild(prevLink);
+
+    bar.appendChild(el('span', { className: 'pagination-sep', textContent: '|' }));
+
+    const nextLink = next
+      ? el('a', { className: 'pagination-link pagination-next', href: '#' + next.file, title: pageDisplayTitle(next) })
+      : el('span', { className: 'pagination-link pagination-next disabled' });
+    nextLink.appendChild(document.createTextNode('Next'));
+    nextLink.appendChild(iconEl('keyboard_arrow_right', 'pagination-arrow pagination-arrow-next'));
+    if (next) nextLink.addEventListener('click', e => { e.preventDefault(); navigateTo(next.file); });
+    bar.appendChild(nextLink);
+
+    return bar;
   }
 
   // ─── Theme ────────────────────────────────────────────────
@@ -2749,6 +2838,7 @@ function fmtDatetime(dtStr) {
     const mainContent = el('div', { className: 'main-content' });
     const catBar = buildCategoryBar();
     if (catBar) mainContent.appendChild(catBar);
+    mainContent.appendChild(el('div', { className: 'pagination-top', id: 'paginationTopBar' }));
     mainContent.appendChild(el('div', { id: 'pageContent' }));
     mainArea.appendChild(mainContent);
 
@@ -2821,6 +2911,7 @@ function fmtDatetime(dtStr) {
     const mainContent = el('div', { className: 'main-content' });
     const catBar = buildCategoryBar();
     if (catBar) mainContent.appendChild(catBar);
+    mainContent.appendChild(el('div', { className: 'pagination-top', id: 'paginationTopBar' }));
     mainContent.appendChild(el('div', { id: 'pageContent' }));
     mainArea.appendChild(mainContent);
     if (config.footer) {
@@ -2980,7 +3071,7 @@ function fmtDatetime(dtStr) {
     // Apply RTL to page content + category bar based on active direction
     const direction = (cat && cat.direction === 'rtl') ? 'rtl' : 'ltr';
     document.querySelectorAll('.category-bar').forEach(b => b.setAttribute('dir', direction));
-    document.querySelectorAll('.md-content, .title-bar').forEach(el => el.setAttribute('dir', direction));
+    document.querySelectorAll('.md-content, .title-bar, .pagination-top, .pagination-bottom').forEach(el => el.setAttribute('dir', direction));
     document.querySelectorAll('.sidebar').forEach(el => el.setAttribute('dir', direction));
     // Apply per-category line-height override, or restore theme default
     const lh = cat && cat['line-height'];
@@ -3435,6 +3526,8 @@ function fmtDatetime(dtStr) {
         : `<p>${pageNotFoundMessage()}</p>`;
       contentEl.innerHTML = `<div class="error-message"><h2>Page not available</h2>${bodyMsg}</div>`;
       document.title = (config.sitename || 'MD-CMS');
+      const topBarEl = document.getElementById('paginationTopBar');
+      if (topBarEl) topBarEl.innerHTML = '';
       refreshCategoryBar();
       if (categoriesUse) populateCategoryOptions('');
       return;
@@ -3452,6 +3545,19 @@ function fmtDatetime(dtStr) {
 
     // Hydrate any mdcms tag blocks (post listings)
     hydrateMdcmsTags();
+
+    // Pagination: section feature (`pagination: on` in nav.yml). Shown at the
+    // bottom of the page, and again in the upper right below the category
+    // selector (or on its own if categories are disabled).
+    const paginationNeighbors = getPaginationNeighbors(file);
+    const topBarEl = document.getElementById('paginationTopBar');
+    if (topBarEl) {
+      topBarEl.innerHTML = '';
+      if (paginationNeighbors) topBarEl.appendChild(buildPaginationWidget(paginationNeighbors));
+    }
+    if (paginationNeighbors) {
+      contentEl.appendChild(buildPaginationWidget(paginationNeighbors, 'pagination-bottom'));
+    }
 
     const firstH = contentEl.querySelector('.md-content h1, .md-content h2');
     if (firstH && (meta.author || meta.created)) {
