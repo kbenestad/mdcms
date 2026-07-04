@@ -1,7 +1,7 @@
-# mdcms v0.4 | DO NOT REMOVE THIS COMMENT
+# mdcms v0.6.6 | DO NOT REMOVE THIS COMMENT
 # mdcms theme — os-adwaita
 # GNOME / Adwaita feel. Warm near-white paper, soft window-bg chrome,
-# the familiar Adwaita blue accent. Cantarell typeface throughout.
+# the familiar Adwaita blue accent. Inter typeface throughout.
 
 # ──────────────────────────────────
 # Colours — based on published libadwaita tokens
@@ -12,14 +12,14 @@
 palette:
   light:
     primary: "#1C71D8"
-    surface: "#FAFAFA"
+    surface: "#ebebed"
     page: "#FFFFFF"
-    ink: "#202020"
+    ink: "rgba(0, 0, 6, 0.8)"
     ink-muted: "#5E5C64"
   dark:
     primary: "#78AEED"
-    surface: "#242424"
-    page: "#1E1E1E"
+    surface: "#2e2e32"
+    page: "#1d1d20"
     ink: "#FFFFFF"
     ink-muted: "#C0BFBC"
 
