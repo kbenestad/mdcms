@@ -379,7 +379,7 @@ body {
   background: var(--bg-nav);
   border-bottom: 1px solid var(--divider);
   display: flex;
-  align-items: center;
+  align-items: stretch;
   padding: 0 1.5rem;
   z-index: 100;
   transition: background-color 0.2s ease;
@@ -395,39 +395,50 @@ body {
   color: var(--nav-sitename-colour);
 }
 
-.topbar-nav { display: flex; align-items: center; gap: 0.25rem; flex: 1; overflow-x: auto; }
+.topbar-nav { display: flex; align-items: stretch; gap: 0.25rem; flex: 1; overflow-x: auto; }
 .topbar-nav .nav-item {
-  padding: 0.35rem 0.75rem;
-  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  border-radius: 0;
   border-left: none;
+  border-bottom: 3px solid transparent;
   white-space: nowrap;
   font-size: 0.85rem;
+}
+.topbar-nav .nav-item:hover {
+  background: var(--nav-hover-bg);
+  border-bottom-color: var(--nav-link-active-colour, var(--accent));
 }
 .topbar-nav .nav-item.active {
   border-left: none;
   background: var(--nav-active-bg);
   color: var(--nav-link-active-colour, var(--accent));
   font-weight: 600;
-  box-shadow: inset 0 -2px 0 var(--nav-link-active-colour, var(--accent));
+  border-bottom-color: var(--nav-link-active-colour, var(--accent));
 }
 
 /* ─── Topbar grouped navigation (dropdowns) ─── */
 .topbar-nav .nav-group { position: relative; }
 .topbar-nav .nav-trigger {
   display: flex; align-items: center; gap: 0.25rem;
-  padding: 0.35rem 0.75rem; border-radius: 5px;
-  background: none; border: none; cursor: pointer;
+  height: 100%;
+  padding: 0 0.75rem; border-radius: 0;
+  background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer;
   color: var(--nav-link-colour, var(--font-colour)); font-size: 0.85rem;
   font-weight: 500;
   font-family: inherit; white-space: nowrap; text-decoration: none; line-height: inherit;
 }
 .topbar-nav .nav-trigger:hover,
-.topbar-nav .nav-group.open > .nav-trigger { background: var(--nav-hover-bg); }
+.topbar-nav .nav-group.open > .nav-trigger {
+  background: var(--nav-hover-bg);
+  border-bottom-color: var(--nav-link-active-colour, var(--accent));
+}
 .topbar-nav .nav-group.has-active > .nav-trigger {
   background: var(--nav-active-bg);
   color: var(--nav-link-active-colour, var(--accent));
   font-weight: 600;
-  box-shadow: inset 0 -2px 0 var(--nav-link-active-colour, var(--accent));
+  border-bottom-color: var(--nav-link-active-colour, var(--accent));
 }
 .topbar-nav .nav-caret { font-size: 0.6rem; color: var(--nav-toggle-colour); opacity: 0.55; line-height: 1; }
 .topbar-nav .nav-dropdown {
@@ -448,7 +459,7 @@ body {
 .topbar-nav .nav-group.open > .nav-dropdown { display: block; }
 .topbar-nav .nav-dropdown .nav-item {
   display: block; padding: 0.45rem 1rem;
-  border-left: 3px solid transparent; border-radius: 0; white-space: nowrap;
+  border-left: 3px solid transparent; border-bottom: none; border-radius: 0; white-space: nowrap;
 }
 .topbar-nav .nav-dropdown .nav-item:hover { background: var(--nav-hover-bg); }
 .topbar-nav .nav-dropdown .nav-item.active {
