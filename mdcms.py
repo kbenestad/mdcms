@@ -5,7 +5,7 @@
 #
 # Licensed under Apache 2.0 licence.
 #
-# CURRENT VERSION: 0.6.6 - 3 July 2026
+# CURRENT VERSION: 0.6.7 - 4 July 2026
 #
 # Copyright 2026 Kristian Benestad
 #
@@ -37,8 +37,8 @@ import certifi
 import click
 import yaml
 
-CLI_VERSION = "0.6.6"
-CLI_RELEASE_DATE = "3 July 2026"
+CLI_VERSION = "0.6.7"
+CLI_RELEASE_DATE = "4 July 2026"
 MIN_SUPPORTED_VERSION = "0.3"
 
 # Version detection in a site's config.yml. The current header carries the
