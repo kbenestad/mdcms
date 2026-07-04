@@ -1,25 +1,28 @@
 # mdcms v0.4 | DO NOT REMOVE THIS COMMENT
 # mdcms theme — gotham
 # Black-on-white broadsheet styled after The New York Times: small, bold
-# serif headlines (Cheltenham-style) over a Georgia-style serif body, in
-# the paper's actual near-black ink and newsprint-blue link colour.
+# serif headlines (Cheltenham-style) over a Georgia-style serif body. Links,
+# tabs and accordions pick up the paper's muted byline grey; the newsprint
+# blue is reserved for the info callout only.
 
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
 palette:
   light:
-    primary: "#326891"
+    primary: "#727272"
     surface: "#F2F2F2"
     page: "#FFFFFF"
     ink: "#121212"
     ink-muted: "#727272"
+    heading: "#121212"
   dark:
-    primary: "#7CA7C8"
+    primary: "#9A9A9A"
     surface: "#1A1A1A"
     page: "#121212"
     ink: "#F2F2F2"
     ink-muted: "#9A9A9A"
+    heading: "#F2F2F2"
 
 
 # ──────────────────────────────────
@@ -34,7 +37,7 @@ colours-semantic:
   error: "#B3001B"
 
 colours-semantic-dark:
-  info: "#7EB2D9"
+  info: "#7CA7C8"
   warning: "#E8B15E"
   success: "#89D299"
   error: "#FF5C74"
