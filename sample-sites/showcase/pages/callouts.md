@@ -33,8 +33,41 @@ title: Something broke
 Use error callouts for destructive or blocking conditions the reader must not miss.
 ```
 
-## Reusable messages
+## Custom icon
 
-A callout can pull its title and body from the `callouts:` block in `config.yml`
-with `message: <key>`, which keeps repeated notices (translation notices,
-disclaimers) consistent across pages.
+Any callout can override its default icon with `icon: <name>`, using an SVG
+name from `assets/icons/`:
+
+```mdcms callout-info
+title: Custom icon
+icon: history
+This callout uses `icon: history` instead of the default info icon.
+```
+
+## Reusable, config-sourced messages
+
+A callout can pull its title and body from the `callouts:` block in
+`config.yml` with `message: <key>`, which keeps repeated notices (translation
+notices, disclaimers) consistent across pages. `message:` overrides any
+inline `title:` — the body below is ignored once a matching key is found.
+
+```mdcms callout-warning
+message: beta
+```
+
+That block resolves to this in `config.yml`:
+
+```yaml
+callouts:
+  beta:
+    type: warning
+    en:
+      title: "Config-sourced message"
+      text: This callout's title and body came from the `callouts.beta`
+        block in `config.yml`, not from the markdown you're reading.
+```
+
+The Home page uses the same mechanism with a `preview` key. Switch to the
+Norsk category (top bar, right side) and come back — this callout's title
+and body stay in English because `beta` has no `nb:` entry, but the site's
+own `translation` message (used on the Norwegian pages) does.

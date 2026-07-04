@@ -28,3 +28,11 @@ showcase/
 
 Run `mdcms build --path sample-sites/showcase` to rebuild `nav.yml`,
 `search.json`, and the site manifest after editing content.
+
+## Category variants
+
+A handful of pages also have a `.nb.md` sibling (`home.nb.md`,
+`about.nb.md`, `categories.nb.md`) — Norwegian variants, picked up
+automatically by the category switcher because `nb` is declared in
+`config.yml`. Most pages deliberately have no variant, to demonstrate what
+happens when one is missing. See *Language switcher* for the full story.
