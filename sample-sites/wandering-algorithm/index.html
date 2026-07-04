@@ -2406,12 +2406,69 @@ function fmtDatetime(dtStr) {
     root.style.setProperty('--mdcms-strip-border',   hexToRgba(textHex, stripAlpha));
   }
 
-  function renderTocTag(container) {
+  // In-page table of contents: lists the headings (h2–h6) of the current
+  // page as anchor links. The heading IDs are emitted by renderer.heading.
+  function renderTocPageTag(container) {
+    const content = container.closest('.md-content') || document.querySelector('.md-content');
+    const div = el('div', { className: 'mdcms-toc mdcms-toc-page' });
+
+    const headings = content
+      ? Array.from(content.querySelectorAll('h2, h3, h4, h5, h6'))
+      : [];
+
+    if (!headings.length) {
+      div.textContent = 'No headings found.';
+      container.replaceWith(div);
+      return;
+    }
+
+    const minLevel = Math.min.apply(null, headings.map(h => parseInt(h.tagName.slice(1), 10)));
+
+    const ul = document.createElement('ul');
+    ul.className = 'mdcms-toc-list';
+    headings.forEach(h => {
+      const id = h.id;
+      if (!id) return;
+      const level = parseInt(h.tagName.slice(1), 10);
+      const a = el('a', { href: '#' + id, textContent: h.textContent });
+      const li = el('li', {}, a);
+      li.style.paddingLeft = ((level - minLevel) * 1.1) + 'rem';
+      ul.appendChild(li);
+    });
+
+    div.appendChild(ul);
+    container.replaceWith(div);
+  }
+
+  // Site/section table of contents. `variant` is 'all' (every section),
+  // 'section' (a single section — the current page's section, or the one
+  // named in `sectionArg`).
+  function renderTocTag(container, cfg) {
+    const raw = (cfg && cfg.tagName ? cfg.tagName : 'toc').trim();
+    const parts = raw.split(/\s+/);
+    const base = parts[0];
+
+    if (base === 'toc-page') {
+      renderTocPageTag(container);
+      return;
+    }
+
+    const variant = base === 'toc-section' ? 'section' : 'all';
+    const sectionArg = variant === 'section' ? (parts[1] || null) : null;
+
     const byCode = {};
     navSections.forEach(s => { byCode[s.code] = s; });
 
+    // For toc-section without an explicit id, use the current page's section.
+    let targetSid = sectionArg;
+    if (variant === 'section' && !targetSid) {
+      const currentRec = navData.find(p => p.file === currentPage);
+      targetSid = currentRec ? (currentRec['section-id'] || null) : null;
+    }
+
     const sortedSections = navSections
       .filter(s => !isDraftSection(s.code, byCode))
+      .filter(s => variant !== 'section' || s.code === targetSid)
       .sort((a, b) => ((a.sort ?? 999) - (b.sort ?? 999)) || (a.code || '').localeCompare(b.code || ''));
 
     const visiblePages = navData.filter(p => {
@@ -2419,6 +2476,8 @@ function fmtDatetime(dtStr) {
       if (!pageShouldDisplay(p)) return false;
       const sid = p['section-id'];
       if (sid && isDraftSection(sid, byCode)) return false;
+      // In section mode, only keep pages belonging to the target section.
+      if (variant === 'section' && (sid || null) !== targetSid) return false;
       return true;
     });
 
@@ -2448,7 +2507,11 @@ function fmtDatetime(dtStr) {
 
     const div = el('div', { className: 'mdcms-toc' });
 
-    if (unsectioned.length) div.appendChild(makeList(sortPages(unsectioned)));
+    // Unsectioned pages only surface in the site-wide view, or in section
+    // mode when the current page itself is unsectioned (targetSid == null).
+    if (unsectioned.length && (variant !== 'section' || !targetSid)) {
+      div.appendChild(makeList(sortPages(unsectioned)));
+    }
 
     sortedSections.forEach(section => {
       const pages = bySection[section.code];
@@ -2605,8 +2668,8 @@ function fmtDatetime(dtStr) {
         var cfg = JSON.parse(tagEl.getAttribute('data-config'));
         if (/^callout-(info|warning|success|error)$/.test(cfg.tagName)) {
           renderCalloutTag(tagEl, cfg);
-        } else if (cfg.tagName === 'toc') {
-          renderTocTag(tagEl);
+        } else if (/^toc(-section|-page)?(\s|$)/.test(cfg.tagName)) {
+          renderTocTag(tagEl, cfg);
         } else if (/^tab(-underline|-filled)?$/.test(cfg.tagName)) {
           renderTabsTag(tagEl, cfg);
         } else if (/^accordion(-underline|-filled)?$/.test(cfg.tagName)) {

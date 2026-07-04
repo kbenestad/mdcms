@@ -100,7 +100,7 @@
     "created": "",
     "modified": "",
     "language": "en",
-    "body": "# Table of contents\n\nThe `toc` tag renders every visible, non-draft page grouped by nav section. It\nupdates automatically as pages are added — no manual list to maintain.\n\n```mdcms\ntoc\n```\n",
+    "body": "# Table of contents\n\nThe `toc` tag renders every visible, non-draft page grouped by nav section. It\nupdates automatically as pages are added — no manual list to maintain.\n\n```mdcms\ntoc\n```\n\n## One section only\n\n`toc-section` lists just one section. With no argument it uses the section of\nthe page it sits on; this page is in **Guides**, so the block below shows the\nGuides pages. Add a section id (`toc-section reference`) to target another one.\n\n```mdcms\ntoc-section\n```\n\n## This page's headings\n\n`toc-page` builds an in-page table of contents from the current page's own\nheadings, with anchor links that jump straight to each one.\n\n```mdcms\ntoc-page\n```\n",
     "category": "en"
   },
   {
