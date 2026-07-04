@@ -65,8 +65,8 @@ callouts:
 # Cantarell is GNOME's UI typeface — humanist sans, slightly tall x-height.
 # Available on Google Fonts.
 # ──────────────────────────────────
-font-body: "google:Cantarell:400"
-font-heading: "google:Cantarell:700"
+font-body: "bunny:Inter:400"
+font-heading: "bunny:Inter:700"
 font-size: 1.00
 line-height: 1.65
 
