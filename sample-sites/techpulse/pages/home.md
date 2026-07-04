@@ -36,7 +36,7 @@ Maya Osei leads TechPulse as editor-in-chief, bringing ten years of technology j
 ## Latest Articles
 
 ```mdcms
-posts-datetime-reversechronological
+posts-created-reversechronological
 limit: 10
 paginate: yes
 ```

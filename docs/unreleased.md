@@ -16,11 +16,20 @@ Changes merged into `development` that have not yet been released to `main`.
   gallery and `sample-sites/README.md` table.
   - While building it, found that 6 of the 7 pre-existing sample sites
     (`techpulse`, `kitchen-table`, `neuraldb-docs`, `modern-philosophy`,
-    `velox-docs`, `wandering-algorithm`) are missing the `theme: theme.yml`
-    key in `config.yml`, so their custom theme.yml palettes are silently
-    inert and they all render with the renderer's default blue theme instead
-    of their intended look. Only `showcase` has it wired up. Not fixed here
-    (out of scope for this change) — flagged for a follow-up.
+    `velox-docs`, `wandering-algorithm`) were missing the `theme: theme.yml`
+    key in `config.yml`, so their custom theme.yml palettes were silently
+    inert and all rendered with the renderer's default blue theme instead
+    of their intended look. Only `showcase` had it wired up.
+
+- **Fixed the above two bugs.** Added `theme: theme.yml` to the six sites'
+  `config.yml` so their custom palettes actually load (verified in-browser:
+  kitchen-table's warm terracotta, modern-philosophy's sepia, etc. now
+  render). Also fixed the broken `posts-datetime-reversechronological` tag
+  (renamed to `posts-created-*` when the tag family was renamed, per
+  `CLAUDE.md`) still in live use in `kitchen-table` (`home.md`,
+  `recipe-index.md`) and `techpulse` (`home.md`, `archive.md`) — these were
+  silently rendering "Unknown tag" instead of a post feed. Rebuilt all six
+  sites afterward to refresh `nav.yml`/`search.json`/`mdcms.json`.
 
 - **Revised the `showcase` sample site** to demonstrate the full current tag
   surface and two features it previously didn't touch at all: nested

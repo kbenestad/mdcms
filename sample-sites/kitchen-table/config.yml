@@ -2,5 +2,6 @@
 sitename: The Kitchen Table
 sitedescription: Recipes, techniques, and stories from Amelia Fontaine
 navigation: topbar
+theme: theme.yml
 search: true
 footer: "© 2026 Amelia Fontaine · The Kitchen Table"

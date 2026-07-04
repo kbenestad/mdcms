@@ -14,7 +14,7 @@ The complete TechPulse archive, updated with every new publication. Use the sear
 Articles are listed in reverse chronological order. Our most recent coverage appears first.
 
 ```mdcms
-posts-datetime-reversechronological
+posts-created-reversechronological
 limit: 10
 paginate: yes
 ```

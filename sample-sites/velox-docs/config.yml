@@ -2,6 +2,7 @@
 sitename: Velox Framework
 sitedescription: The high-performance TypeScript web framework
 navigation: sidebar
+theme: theme.yml
 homepage: pages/index.md
 nav-position: left
 search: true
