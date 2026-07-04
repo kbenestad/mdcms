@@ -67,7 +67,7 @@ Add read replicas to distribute query load.
 
 ### Setting Up Read Replicas
 
-Follow the [Replication guide](config-replication.md) to add replicas. Each replica can independently serve `SELECT` queries, including vector similarity searches.
+Follow the [Replication guide](pages/config-replication.md) to add replicas. Each replica can independently serve `SELECT` queries, including vector similarity searches.
 
 ### Client-Side Read Splitting
 

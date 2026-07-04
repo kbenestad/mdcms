@@ -14,7 +14,7 @@ theme.
 ```mdcms callout-info
 title: Heads up
 Callouts support **full markdown** in the body — including lists, `code`, and
-[links](home.md).
+[links](pages/home.md).
 ```
 
 ```mdcms callout-success

@@ -191,4 +191,4 @@ npm install velox@latest --velox-binary-variant=musl
 **Windows Defender flags the Velocitor binary**
 This is a false positive. Add an exclusion for your project's `node_modules/.velox-bin/` directory.
 
-Next, follow the [Quick Start](quick-start.md) guide to build your first Velox application.
+Next, follow the [Quick Start](pages/quick-start.md) guide to build your first Velox application.

@@ -90,4 +90,4 @@ npm run dev
 
 Your new project will be running at `http://localhost:3700` in under ten seconds.
 
-Read on to the [Installation](installation.md) guide for full setup instructions, or jump directly to the [Quick Start](quick-start.md) if you prefer to learn by doing.
+Read on to the [Installation](pages/installation.md) guide for full setup instructions, or jump directly to the [Quick Start](pages/quick-start.md) if you prefer to learn by doing.

@@ -197,7 +197,7 @@ if (!user) {
 // user: { id: string, email: string, role: string }
 ```
 
-The `useAuth` hook is not provided by Velox itself — you define it in your project using `useSession` and your own user model. The [Authentication guide](guide-auth.md) shows a complete implementation.
+The `useAuth` hook is not provided by Velox itself — you define it in your project using `useSession` and your own user model. The [Authentication guide](pages/guide-auth.md) shows a complete implementation.
 
 ## `useCache()`
 

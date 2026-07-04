@@ -250,4 +250,4 @@ npm install @velox/ui
 import { Button, Input, Dialog } from '@velox/ui';
 ```
 
-See the [Component API](api-components.md) reference for the full `defineComponent` API and advanced component patterns.
+See the [Component API](pages/api-components.md) reference for the full `defineComponent` API and advanced component patterns.
