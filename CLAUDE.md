@@ -179,11 +179,13 @@ language: en
 
 ## nav.yml structure
 
-Sections and pages are separate lists. `mdcms.py` preserves manual edits to section fields (`defaultname`, `sort`, `parent`, `parent-sort`, `pagesvisibility`, `categorynames`) on each rebuild. New sections are auto-created from `section-id` values found in frontmatter.
+Sections and pages are separate lists. `mdcms.py` preserves manual edits to section fields (`defaultname`, `sort`, `parent`, `parent-sort`, `pagesvisibility`, `categorynames`, `pagination`) on each rebuild. New sections are auto-created from `section-id` values found in frontmatter.
 
 `pagesvisibility` can be `visible`, `hidden`, or `draft` (draft excludes pages from `search.json`).
 
 For nested navigation, set `parent: <parent-section-code>` and `parent-sort` on a section.
+
+`pagination: on` on a section adds Previous/Next controls to that section's pages: at the bottom of the page, and again in the upper right beneath the category selector (on its own if categories are disabled). Order follows the same sort used for nav (page `sort`, then filename). Set manually in `nav.yml` — there is no frontmatter or `config.yml` key for it.
 
 ## Category system
 

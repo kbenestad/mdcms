@@ -4,7 +4,7 @@
 
   Licensed under Apache 2.0 licence.
 
-  CURRENT VERSION: 0.6.7 - 4 July 2026
+  CURRENT VERSION: 0.6.8 - 4 July 2026
 -->
 <!--
   MD-CMS — Renderer
@@ -222,6 +222,16 @@ body {
 /* Search */
 .search-container { padding: 0.75rem 1.25rem; flex-shrink: 0; }
 
+/* Sidebar search row: search bar with dark-mode toggle to its right */
+.sidebar-search-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  flex-shrink: 0;
+}
+.sidebar-search-row .search-container { flex: 1; min-width: 0; padding: 0; }
+
 .search-box {
   width: 100%;
   padding: 0.5rem 0.75rem 0.5rem 2.25rem;
@@ -368,6 +378,10 @@ body {
 }
 .theme-toggle:hover { color: var(--nav-link-colour, var(--font-colour)); border-color: var(--nav-toggle-colour); }
 .theme-toggle svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* Compact, icon-only toggle used beside the sidebar search bar */
+.theme-toggle-compact { width: auto; flex-shrink: 0; padding: 0.4rem 0.55rem; gap: 0; }
+.theme-toggle-compact span:not(.mdcms-icon) { display: none; }
 
 /* ═══════════════════════════════════════════
    LAYOUT: TOPBAR MODE
@@ -2392,12 +2406,69 @@ function fmtDatetime(dtStr) {
     root.style.setProperty('--mdcms-strip-border',   hexToRgba(textHex, stripAlpha));
   }
 
-  function renderTocTag(container) {
+  // In-page table of contents: lists the headings (h2–h6) of the current
+  // page as anchor links. The heading IDs are emitted by renderer.heading.
+  function renderTocPageTag(container) {
+    const content = container.closest('.md-content') || document.querySelector('.md-content');
+    const div = el('div', { className: 'mdcms-toc mdcms-toc-page' });
+
+    const headings = content
+      ? Array.from(content.querySelectorAll('h2, h3, h4, h5, h6'))
+      : [];
+
+    if (!headings.length) {
+      div.textContent = 'No headings found.';
+      container.replaceWith(div);
+      return;
+    }
+
+    const minLevel = Math.min.apply(null, headings.map(h => parseInt(h.tagName.slice(1), 10)));
+
+    const ul = document.createElement('ul');
+    ul.className = 'mdcms-toc-list';
+    headings.forEach(h => {
+      const id = h.id;
+      if (!id) return;
+      const level = parseInt(h.tagName.slice(1), 10);
+      const a = el('a', { href: '#' + id, textContent: h.textContent });
+      const li = el('li', {}, a);
+      li.style.paddingLeft = ((level - minLevel) * 1.1) + 'rem';
+      ul.appendChild(li);
+    });
+
+    div.appendChild(ul);
+    container.replaceWith(div);
+  }
+
+  // Site/section table of contents. `variant` is 'all' (every section),
+  // 'section' (a single section — the current page's section, or the one
+  // named in `sectionArg`).
+  function renderTocTag(container, cfg) {
+    const raw = (cfg && cfg.tagName ? cfg.tagName : 'toc').trim();
+    const parts = raw.split(/\s+/);
+    const base = parts[0];
+
+    if (base === 'toc-page') {
+      renderTocPageTag(container);
+      return;
+    }
+
+    const variant = base === 'toc-section' ? 'section' : 'all';
+    const sectionArg = variant === 'section' ? (parts[1] || null) : null;
+
     const byCode = {};
     navSections.forEach(s => { byCode[s.code] = s; });
 
+    // For toc-section without an explicit id, use the current page's section.
+    let targetSid = sectionArg;
+    if (variant === 'section' && !targetSid) {
+      const currentRec = navData.find(p => p.file === currentPage);
+      targetSid = currentRec ? (currentRec['section-id'] || null) : null;
+    }
+
     const sortedSections = navSections
       .filter(s => !isDraftSection(s.code, byCode))
+      .filter(s => variant !== 'section' || s.code === targetSid)
       .sort((a, b) => ((a.sort ?? 999) - (b.sort ?? 999)) || (a.code || '').localeCompare(b.code || ''));
 
     const visiblePages = navData.filter(p => {
@@ -2405,6 +2476,8 @@ function fmtDatetime(dtStr) {
       if (!pageShouldDisplay(p)) return false;
       const sid = p['section-id'];
       if (sid && isDraftSection(sid, byCode)) return false;
+      // In section mode, only keep pages belonging to the target section.
+      if (variant === 'section' && (sid || null) !== targetSid) return false;
       return true;
     });
 
@@ -2434,7 +2507,11 @@ function fmtDatetime(dtStr) {
 
     const div = el('div', { className: 'mdcms-toc' });
 
-    if (unsectioned.length) div.appendChild(makeList(sortPages(unsectioned)));
+    // Unsectioned pages only surface in the site-wide view, or in section
+    // mode when the current page itself is unsectioned (targetSid == null).
+    if (unsectioned.length && (variant !== 'section' || !targetSid)) {
+      div.appendChild(makeList(sortPages(unsectioned)));
+    }
 
     sortedSections.forEach(section => {
       const pages = bySection[section.code];
@@ -2591,8 +2668,8 @@ function fmtDatetime(dtStr) {
         var cfg = JSON.parse(tagEl.getAttribute('data-config'));
         if (/^callout-(info|warning|success|error)$/.test(cfg.tagName)) {
           renderCalloutTag(tagEl, cfg);
-        } else if (cfg.tagName === 'toc') {
-          renderTocTag(tagEl);
+        } else if (/^toc(-section|-page)?(\s|$)/.test(cfg.tagName)) {
+          renderTocTag(tagEl, cfg);
         } else if (/^tab(-underline|-filled)?$/.test(cfg.tagName)) {
           renderTabsTag(tagEl, cfg);
         } else if (/^accordion(-underline|-filled)?$/.test(cfg.tagName)) {
@@ -2642,16 +2719,25 @@ function fmtDatetime(dtStr) {
     }
     sidebar.appendChild(header);
 
-    if (config.search !== false) sidebar.appendChild(buildSearchWidget());
+    if (config.search !== false) {
+      const searchRow = el('div', { className: 'sidebar-search-row' });
+      searchRow.appendChild(buildSearchWidget());
+      const rowToggle = el('button', { className: 'theme-toggle theme-toggle-compact', 'aria-label': 'Toggle theme' });
+      rowToggle.addEventListener('click', toggleTheme);
+      searchRow.appendChild(rowToggle);
+      sidebar.appendChild(searchRow);
+    }
 
     const navLinksEl = el('div', { className: 'nav-links', id: 'navLinks' });
     sidebar.appendChild(navLinksEl);
 
-    const sidebarFooter = el('div', { className: 'sidebar-footer' });
-    const toggleBtn = el('button', { className: 'theme-toggle', 'aria-label': 'Toggle theme' });
-    toggleBtn.addEventListener('click', toggleTheme);
-    sidebarFooter.appendChild(toggleBtn);
-    sidebar.appendChild(sidebarFooter);
+    if (config.search === false) {
+      const sidebarFooter = el('div', { className: 'sidebar-footer' });
+      const toggleBtn = el('button', { className: 'theme-toggle', 'aria-label': 'Toggle theme' });
+      toggleBtn.addEventListener('click', toggleTheme);
+      sidebarFooter.appendChild(toggleBtn);
+      sidebar.appendChild(sidebarFooter);
+    }
 
     const mainArea = el('div', { className: 'main-area' });
     mainArea.appendChild(mobileHeader);

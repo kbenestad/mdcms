@@ -113,9 +113,11 @@ Body text supports **full markdown** — bold, *italics*, `code`,
 
 ---
 
-### Table of contents — `toc`
+### Table of contents — `toc`, `toc-section`, `toc-page`
 
-Renders a section-grouped, sorted list of all visible non-draft pages in the active category. The page containing the tag is excluded.
+Three related tags render a table of contents. All exclude the page containing the tag from any page list and only list visible, non-draft pages in the active category.
+
+**`toc`** — every section, grouped and sorted.
 
 ````markdown
 ```mdcms
@@ -123,7 +125,33 @@ toc
 ```
 ````
 
-No options. Output is grouped by nav section in section sort order; pages within each section follow their own `sort:`.
+Output is grouped by nav section in section sort order; pages within each section follow their own `sort:`.
+
+**`toc-section`** — a single section only.
+
+````markdown
+```mdcms
+toc-section
+```
+````
+
+With no argument, it lists the pages of the section the current page belongs to (or the unsectioned pages, if the current page has no `section-id`). Pass a section id to list a specific section regardless of the current page:
+
+````markdown
+```mdcms
+toc-section reference
+```
+````
+
+**`toc-page`** — an in-page table of contents: a linked, indented list of the current page's own headings (`h2`–`h6`). Each entry is an anchor that jumps to that heading; deeper headings are indented under their parents.
+
+````markdown
+```mdcms
+toc-page
+```
+````
+
+None of these take options.
 
 ---
 
