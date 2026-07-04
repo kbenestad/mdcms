@@ -967,6 +967,55 @@ def set_config_keys(site_path: Path, updates: dict) -> list:
     return skipped
 
 
+def _top_level_key_lines(text: str) -> dict:
+    """Map each top-level config key (active or commented-out example) to its line index."""
+    keys: dict = {}
+    for i, line in enumerate(text.split("\n")):
+        m = _CONFIG_KEY_RE.match(line)
+        if m:
+            keys.setdefault(m.group(2), i)
+    return keys
+
+
+def sync_config_keys(site_path: Path, template_text: str) -> list:
+    """Append config.yml keys the latest template declares (active or commented-out)
+    that the site's config.yml doesn't mention at all yet — new features introduced
+    since the site was last updated.
+
+    Every key, value, and comment already in the site's config.yml is left exactly
+    as-is; only wholly new top-level keys are appended, copied verbatim (including
+    whether the template leaves them commented-out) at the end of the file. Returns
+    the list of key names added, in the order the template declares them.
+    """
+    config_file = site_path / "config.yml"
+    site_text = config_file.read_text(encoding="utf-8")
+    site_keys = _top_level_key_lines(site_text)
+
+    template_lines = template_text.split("\n")
+    template_keys = _top_level_key_lines(template_text)
+
+    missing = [k for k in template_keys if k not in site_keys]
+    if not missing:
+        return []
+
+    new_lines: list = []
+    for key in missing:
+        start = template_keys[key]
+        new_lines.append(template_lines[start])
+        j = start + 1
+        while j < len(template_lines) and re.match(r"^\s+\S", template_lines[j]):
+            new_lines.append(template_lines[j])
+            j += 1
+
+    out = site_text.rstrip("\n").split("\n")
+    out.append("")
+    out.append(f"# ── New since v{CLI_VERSION}, added by `mdcms update` — review and uncomment as needed ──")
+    out.extend(new_lines)
+    out.append("")
+    config_file.write_text("\n".join(out), encoding="utf-8")
+    return missing
+
+
 def _validate_updates(updates: dict):
     choices = {
         "navigation": _NAV_CHOICES,
@@ -1588,12 +1637,15 @@ def build(name, path_override):
 )
 @click.option("--force", is_flag=True, help="Re-download index.html even if the site is already current.")
 def update(name, path_override, force):
-    """Update a site's renderer (index.html) to the version this CLI ships.
+    """Update a site's renderer (index.html) and config.yml to the version this CLI ships.
 
-    Downloads the current app/index.html, overwrites the site's copy (keeping
-    its existing <title>), and bumps the CURRENT VERSION marker in config.yml.
-    Site content — pages, posts, nav.yml, theme.yml, and the rest of config.yml
-    — is left untouched.
+    Downloads the current app/index.html and overwrites the site's copy (keeping
+    its existing <title>). Then appends any config.yml keys the template has
+    gained since the site was last updated — new optional features, added
+    verbatim (active or commented-out, exactly as the template declares them) —
+    without touching a single key, value, or comment the site already has.
+    Finally bumps the CURRENT VERSION marker in config.yml. Site content —
+    pages, posts, nav.yml, theme.yml — is left untouched.
 
     \b
     Examples:
@@ -1640,6 +1692,16 @@ def update(name, path_override, force):
     cfg = read_config(site_path)
     if cfg.get("sitename"):
         _patch_html_title(site_path, cfg["sitename"])
+
+    if root:
+        template_config_text = (root / "app" / "config.yml").read_text(encoding="utf-8")
+    else:
+        template_config_text = _http_get(f"{TEMPLATE_BASE_URL}/config.yml").decode("utf-8")
+    added_keys = sync_config_keys(site_path, template_config_text)
+    if added_keys:
+        click.echo(f"  config.yml — added new key(s): {', '.join(added_keys)}")
+    else:
+        click.echo("  config.yml — no new keys to add")
 
     if _bump_config_version_marker(site_path):
         click.echo(f"  config.yml version marker -> {CLI_VERSION}")
