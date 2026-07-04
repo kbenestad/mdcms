@@ -1,18 +1,19 @@
 # mdcms v0.4 | DO NOT REMOVE THIS COMMENT
 # mdcms theme — city
-# The Financial Times' signature salmon paper: a display serif for
-# headlines over a clean sans body, teal accent.
+# The Financial Times' signature salmon paper (#fff1e5) with the darker
+# FT-pink (#fcd0b1) they use behind labels for the nav surface: a light
+# display serif for headlines over a clean sans body, teal link accent.
 
 # ──────────────────────────────────
 # Colours
 # ──────────────────────────────────
 palette:
   light:
-    primary: "#0F5B78"
-    surface: "#F2E4D8"
+    primary: "#0D7680"
+    surface: "#FCD0B1"
     page: "#FFF1E5"
     ink: "#33302E"
-    ink-muted: "#726658"
+    ink-muted: "#66605C"
   dark:
     primary: "#7FC4DB"
     surface: "#241C17"
@@ -27,7 +28,7 @@ palette:
 # colours-semantic-dark overrides for dark mode only.
 # ──────────────────────────────────
 colours-semantic:
-  info: "#0F5B78"
+  info: "#0D7680"
   warning: "#9C6B12"
   success: "#2F6B3C"
   error: "#9B1B1B"
@@ -45,8 +46,8 @@ colours-semantic-dark:
 callouts:
   info:
     icon: info
-    primary-colour: "#0F5B78"
-    background-colour: "#0F5B78"
+    primary-colour: "#0D7680"
+    background-colour: "#0D7680"
   warning:
     icon: warning
     primary-colour: "#9C6B12"
@@ -64,10 +65,10 @@ callouts:
 # Typography
 # Format: "provider:Font Name:weight"  (provider: bunny | google)
 # ──────────────────────────────────
-font-body: "bunny:IBM Plex Sans:400"
-font-heading: "bunny:Frank Ruhl Libre:700"
+font-body: "bunny:Public Sans:400"
+font-heading: "bunny:Fraunces:300"
 font-size: 1.00        # unitless multiplier (1.0 = 16px base)
-line-height: 1.65      # unitless multiplier
+line-height: 1.60      # unitless multiplier
 
 # ──────────────────────────────────
 # Layout
