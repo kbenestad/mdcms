@@ -46,7 +46,7 @@ Our filter list rotates weekly and always names the farm. Ask the counter what's
 
 ## Decaf
 
-All espresso and filter drinks are available decaf at no extra charge, using our house Swiss Water Process decaf (see [the nerdy stuff](the-nerdy-stuff.md) for why we bother).
+All espresso and filter drinks are available decaf at no extra charge, using our house Swiss Water Process decaf (see [the nerdy stuff](pages/the-nerdy-stuff.md) for why we bother).
 
 ## Food
 
@@ -60,4 +60,4 @@ All espresso and filter drinks are available decaf at no extra charge, using our
 
 ## Beans to Take Home
 
-We sell 250g bags of everything we roast, ground to order or whole bean. Current lineup and pricing is always on the chalkboard by the register, and the same information lives in [the Journal](journal-index.md) as each new lot arrives. A weekly or fortnightly subscription is available — see [Visit & Order](visit-and-order.md).
+We sell 250g bags of everything we roast, ground to order or whole bean. Current lineup and pricing is always on the chalkboard by the register, and the same information lives in [the Journal](pages/journal-index.md) as each new lot arrives. A weekly or fortnightly subscription is available — see [Visit & Order](pages/visit-and-order.md).
