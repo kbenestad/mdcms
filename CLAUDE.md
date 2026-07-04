@@ -65,7 +65,7 @@ docs/
   install.md
   release.md
 .github/workflows/release.yml   ← cross-platform release builds
-sample-sites/                   ← reference sites + theme-picker index (not deployed)
+sample-sites/                   ← reference sites + theme-picker index (deployed to Pages)
 themes/                         ← theme library (grouped by family)
 ```
 
@@ -307,4 +307,19 @@ All UI icons served as local SVGs from `app/assets/icons/`. No Google Fonts or e
 - Category code validation uses `CATEGORY_CODE_RE = re.compile(r"^[a-zA-Z0-9\-]+$")` — codes must match this.
 - `scan_and_categorize()` takes both `directory` and `site_root` — paths in records are always relative to `site_root`.
 - The `sample-sites/` directory holds several reference sites (sidebar and topbar, docs / blog / book / news styles) plus `index.html`, a self-contained gallery that previews any site under any theme from `themes/` via the renderer's `?theme=` override. `sample-sites/themes.json` is the generated theme manifest it reads. Deployed to GitHub Pages from `main` only (`.github/workflows/pages.yml`) — there is no branch switcher (one was added to preview `development` via jsDelivr, but jsDelivr's CDN cache lags fresh pushes by minutes to hours and didn't reliably show new themes, so it was removed). This is why theme changes are pushed straight to `main` — see the Branching convention section. Rebuild any sample site with `mdcms build --path sample-sites/<name>`, and regenerate the theme manifest if you add themes.
+- **⚠️ Each of the seven sample sites carries its own static copy of `index.html` — not a live link to `app/index.html`.** Every time `app/index.html` changes (any renderer fix, new theme token, CSS/JS change), re-copy it into all seven `sample-sites/<name>/index.html` in the same commit, preserving each site's own `<title>`. Skipping this means the fix is invisible in the deployed picker even after merging to `main` — this has already caused two renderer fixes (the `heading` palette token and the Bunny Fonts multi-family bug) to silently not show up until caught and re-synced separately. Quick re-sync for all seven at once:
+  ```bash
+  canonical_title=$(grep -o '<title>.*</title>' app/index.html)
+  for d in showcase techpulse kitchen-table neuraldb-docs modern-philosophy velox-docs wandering-algorithm; do
+    title=$(grep -o '<title>.*</title>' "sample-sites/$d/index.html")
+    cp app/index.html "sample-sites/$d/index.html"
+    python3 - "$d" "$title" "$canonical_title" <<'PYEOF'
+  import sys
+  d, title, canon = sys.argv[1], sys.argv[2], sys.argv[3]
+  path = f"sample-sites/{d}/index.html"
+  content = open(path).read().replace(canon, title, 1)
+  open(path, "w").write(content)
+  PYEOF
+  done
+  ```
 - Template download uses `urllib` (stdlib) with `certifi` for SSL certificate verification — required for PyInstaller binaries on Linux/macOS where the bundled Python cannot find system CA certificates.
