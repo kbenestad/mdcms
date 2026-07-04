@@ -58,7 +58,9 @@ language: en                   # BCP 47 code. Sets the <html lang=""> attribute 
 ---
 ```
 
-**Category variants** are not a frontmatter field — they are encoded in the filename. `about.nb.md` is the Norwegian variant of `about.md`, provided `nb` is declared in `config.yml` under `categories:`.
+**Category variants** are not a frontmatter field — they are encoded in the filename. `about.nb.md` is the Norwegian variant of `about.md`, provided `nb` is declared in `config.yml` under `categories:`. Alternatively, `about.20260704.md` is a *date* category — no declaration needed, just `categories-dates: yes`; see `reference-config.md`'s Categories section.
+
+Pages and posts can also be created, edited, and deleted interactively via `mdcms config` → *Manage pages*, instead of hand-writing files.
 
 ---
 
