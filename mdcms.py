@@ -5,7 +5,7 @@
 #
 # Licensed under Apache 2.0 licence.
 #
-# CURRENT VERSION: 0.6.7 - 4 July 2026
+# CURRENT VERSION: 0.6.8 - 4 July 2026
 #
 # Copyright 2026 Kristian Benestad
 #
@@ -23,10 +23,15 @@
 
 """MD-CMS — CLI tool for managing and building MD-CMS sites."""
 
+import datetime
 import json
 import os
+import platform
 import re
+import shutil
 import ssl
+import subprocess
+import sys
 import time
 import urllib.error
 import urllib.request
@@ -37,7 +42,7 @@ import certifi
 import click
 import yaml
 
-CLI_VERSION = "0.6.7"
+CLI_VERSION = "0.6.8"
 CLI_RELEASE_DATE = "4 July 2026"
 MIN_SUPPORTED_VERSION = "0.3"
 
@@ -465,6 +470,27 @@ def _patch_html_title(site_path: Path, sitename: str) -> None:
     new_html = _TITLE_RE.sub(f"<title>{sitename}</title>", html, count=1)
     if new_html != html:
         index.write_text(new_html, encoding="utf-8")
+
+
+_SITE_VERSION_BANNER_RE = re.compile(r"CURRENT VERSION:\s*\d+\.\d+(?:\.\d+)?\s*-\s*.*")
+
+
+def _bump_config_version_marker(site_path: Path) -> bool:
+    """Rewrite the CURRENT VERSION banner in a site's config.yml to the running CLI's version.
+
+    Returns True if a banner was found and updated. Returns False if the site
+    only carries the legacy first-line marker (predates the banner format) —
+    the caller should tell the user to update it by hand.
+    """
+    config_file = site_path / "config.yml"
+    text = config_file.read_text(encoding="utf-8")
+    today = datetime.date.today()
+    banner = f"CURRENT VERSION: {CLI_VERSION} - {today.day} {today:%B %Y}"
+    new_text, n = _SITE_VERSION_BANNER_RE.subn(banner, text, count=1)
+    if n == 0:
+        return False
+    config_file.write_text(new_text, encoding="utf-8")
+    return True
 
 
 def run_build(site_path: Path):
@@ -941,6 +967,55 @@ def set_config_keys(site_path: Path, updates: dict) -> list:
     return skipped
 
 
+def _top_level_key_lines(text: str) -> dict:
+    """Map each top-level config key (active or commented-out example) to its line index."""
+    keys: dict = {}
+    for i, line in enumerate(text.split("\n")):
+        m = _CONFIG_KEY_RE.match(line)
+        if m:
+            keys.setdefault(m.group(2), i)
+    return keys
+
+
+def sync_config_keys(site_path: Path, template_text: str) -> list:
+    """Append config.yml keys the latest template declares (active or commented-out)
+    that the site's config.yml doesn't mention at all yet — new features introduced
+    since the site was last updated.
+
+    Every key, value, and comment already in the site's config.yml is left exactly
+    as-is; only wholly new top-level keys are appended, copied verbatim (including
+    whether the template leaves them commented-out) at the end of the file. Returns
+    the list of key names added, in the order the template declares them.
+    """
+    config_file = site_path / "config.yml"
+    site_text = config_file.read_text(encoding="utf-8")
+    site_keys = _top_level_key_lines(site_text)
+
+    template_lines = template_text.split("\n")
+    template_keys = _top_level_key_lines(template_text)
+
+    missing = [k for k in template_keys if k not in site_keys]
+    if not missing:
+        return []
+
+    new_lines: list = []
+    for key in missing:
+        start = template_keys[key]
+        new_lines.append(template_lines[start])
+        j = start + 1
+        while j < len(template_lines) and re.match(r"^\s+\S", template_lines[j]):
+            new_lines.append(template_lines[j])
+            j += 1
+
+    out = site_text.rstrip("\n").split("\n")
+    out.append("")
+    out.append(f"# ── New since v{CLI_VERSION}, added by `mdcms update` — review and uncomment as needed ──")
+    out.extend(new_lines)
+    out.append("")
+    config_file.write_text("\n".join(out), encoding="utf-8")
+    return missing
+
+
 def _validate_updates(updates: dict):
     choices = {
         "navigation": _NAV_CHOICES,
@@ -1204,6 +1279,124 @@ def _version_callback(ctx, param, value):
     ctx.exit()
 
 
+_REMOTE_VERSION_RE = re.compile(r'CLI_VERSION = "([^"]+)"')
+
+
+def _fetch_latest_version() -> str:
+    text = _http_get(f"{REPO_RAW_BASE}/mdcms.py").decode("utf-8")
+    m = _REMOTE_VERSION_RE.search(text)
+    if not m:
+        raise click.ClickException("Could not determine the latest mdcms version from GitHub.")
+    return m.group(1)
+
+
+def _install_kind() -> str:
+    """Return 'frozen' (standalone binary), 'pipx', or 'pip' for the running mdcms."""
+    if getattr(sys, "frozen", False):
+        return "frozen"
+    if "pipx" in sys.prefix.replace("\\", "/").lower():
+        return "pipx"
+    return "pip"
+
+
+def _binary_release_asset() -> str:
+    """Return this platform's binary path under the repo's latest/ directory."""
+    system = platform.system()
+    machine = platform.machine().lower()
+    if system == "Linux":
+        arch = "arm64" if machine in ("aarch64", "arm64") else "amd64"
+        return f"linux/{arch}/mdcms"
+    if system == "Darwin":
+        variant = "silicon" if machine in ("arm64", "aarch64") else "intel"
+        return f"macos/{variant}/mdcms"
+    if system == "Windows":
+        return "windows/mdcms.exe"
+    raise click.ClickException(f"No standalone binary is published for this platform: {system}")
+
+
+def _dpkg_owner_of(path: Path) -> "str | None":
+    """Return the dpkg package name owning `path`, or None (not Linux / not dpkg-managed)."""
+    if platform.system() != "Linux" or not shutil.which("dpkg"):
+        return None
+    try:
+        result = subprocess.run(
+            ["dpkg", "-S", str(path)], capture_output=True, timeout=5, text=True
+        )
+    except OSError:
+        return None
+    if result.returncode != 0:
+        return None
+    return result.stdout.split(":", 1)[0].strip() or None
+
+
+def _upgrade_package(kind: str) -> None:
+    cmd = (
+        ["pipx", "upgrade", "mdcms"] if kind == "pipx"
+        else [sys.executable, "-m", "pip", "install", "--upgrade", "mdcms"]
+    )
+    click.echo(f"Running: {' '.join(cmd)}")
+    try:
+        result = subprocess.run(cmd)
+    except OSError as e:
+        raise click.ClickException(f"Could not run {cmd[0]}: {e}")
+    if result.returncode != 0:
+        raise click.ClickException("Upgrade command failed — see output above.")
+
+
+def _upgrade_binary(latest: str) -> None:
+    exe_path = Path(sys.executable).resolve()
+
+    pkg = _dpkg_owner_of(exe_path)
+    if pkg:
+        raise click.ClickException(
+            f"{exe_path} is managed by dpkg (package '{pkg}'). Re-run the .deb install instead "
+            "of a direct binary swap, so the package database stays in sync:\n"
+            "  curl -fsSLO https://raw.githubusercontent.com/kbenestad/mdcms/main/latest/"
+            f"{_binary_release_asset().rsplit('/', 1)[0]}/mdcms.deb && sudo dpkg -i mdcms.deb"
+        )
+
+    asset = _binary_release_asset()
+    click.echo(f"Downloading v{latest} binary for this platform ...")
+    data = _http_get(f"{REPO_RAW_BASE}/latest/{asset}")
+    if not data:
+        raise click.ClickException("Downloaded binary was empty — aborting.")
+
+    tmp_path = exe_path.with_name(exe_path.name + ".new")
+    tmp_path.write_bytes(data)
+
+    if platform.system() == "Windows":
+        # The running .exe is locked, so hand the swap off to a detached helper
+        # script that waits for this process to exit before replacing it.
+        bat_path = exe_path.with_name("mdcms_upgrade.bat")
+        bat_path.write_text(
+            "@echo off\r\n"
+            "ping -n 3 127.0.0.1 >nul\r\n"
+            f'move /y "{tmp_path}" "{exe_path}"\r\n'
+            f'del "{bat_path}"\r\n',
+            encoding="utf-8",
+        )
+        subprocess.Popen(
+            ["cmd", "/c", "start", "/min", "", str(bat_path)],
+            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS,
+        )
+        click.echo(click.style(
+            f"Downloaded v{latest}. It will replace {exe_path.name} in a couple of seconds — "
+            "re-run mdcms once this process has exited.", fg="green"
+        ))
+        return
+
+    try:
+        tmp_path.chmod(0o755)
+        os.replace(tmp_path, exe_path)
+    except PermissionError:
+        tmp_path.unlink(missing_ok=True)
+        raise click.ClickException(
+            f"Permission denied writing to {exe_path}. Re-run with elevated permissions, "
+            f"e.g.: sudo mdcms upgrade"
+        )
+    click.echo(click.style(f"Upgraded to v{latest}.", fg="green"))
+
+
 @click.group()
 @click.option("--version", is_flag=True, is_eager=True, expose_value=False,
               callback=_version_callback, help="Show version and exit.")
@@ -1212,6 +1405,39 @@ def cli():
 
     Manage and build MD-CMS sites locally or in CI/CD pipelines.
     """
+
+
+@cli.command()
+@click.option("--force", is_flag=True, help="Reinstall even if already on the latest version.")
+def upgrade(force):
+    """Upgrade the mdcms CLI itself to the latest released version.
+
+    Detects how this copy of mdcms was installed — pip, pipx, or a standalone
+    binary — and upgrades it the matching way: `pip install --upgrade` /
+    `pipx upgrade` for package installs, or downloading and swapping the
+    executable for a standalone binary install. A dpkg-managed Linux install
+    is left alone with instructions to re-run the .deb install instead, so the
+    package database doesn't fall out of sync with the file on disk.
+    """
+    click.echo(f"Current version: v{CLI_VERSION}")
+    try:
+        latest = _fetch_latest_version()
+    except urllib.error.URLError as e:
+        raise click.ClickException(f"Could not check for updates: {e}")
+
+    if not force and _parse_ver(latest) <= _parse_ver(CLI_VERSION):
+        click.echo(click.style(f"Already up to date (latest is v{latest}).", fg="green"))
+        return
+
+    click.echo(f"Latest version:  v{latest}")
+
+    kind = _install_kind()
+    if kind in ("pip", "pipx"):
+        _upgrade_package(kind)
+        click.echo(click.style(f"Upgraded to v{latest}.", fg="green"))
+        return
+
+    _upgrade_binary(latest)
 
 
 @cli.command()
@@ -1399,6 +1625,93 @@ def build(name, path_override):
     click.echo(f"Building: {site_path}")
     run_build(site_path)
     click.echo(click.style("Build complete.", fg="green"))
+
+
+@cli.command()
+@click.argument("name", required=False)
+@click.option(
+    "--path", "path_override",
+    type=click.Path(),
+    default=None,
+    help="Explicit site path (no registry lookup).",
+)
+@click.option("--force", is_flag=True, help="Re-download index.html even if the site is already current.")
+def update(name, path_override, force):
+    """Update a site's renderer (index.html) and config.yml to the version this CLI ships.
+
+    Downloads the current app/index.html and overwrites the site's copy (keeping
+    its existing <title>). Then appends any config.yml keys the template has
+    gained since the site was last updated — new optional features, added
+    verbatim (active or commented-out, exactly as the template declares them) —
+    without touching a single key, value, or comment the site already has.
+    Finally bumps the CURRENT VERSION marker in config.yml. Site content —
+    pages, posts, nav.yml, theme.yml — is left untouched.
+
+    \b
+    Examples:
+      mdcms update mysite
+      mdcms update --path ./site
+    """
+    site_path = resolve_site_path(name, path_override)
+    index_file = site_path / "index.html"
+    if not index_file.exists():
+        raise click.ClickException(f"No index.html found at {site_path}")
+
+    site_version = read_site_version(site_path)
+    if site_version is None:
+        raise click.ClickException(
+            "No mdcms version marker found in config.yml. Is this an mdcms site?"
+        )
+
+    status, msg = version_status(site_version)
+    if status == "newer":
+        click.echo(click.style(
+            f"{msg}. Nothing to update — upgrade the mdcms CLI itself instead.", fg="yellow"
+        ))
+        return
+    if status == "ok" and not force:
+        click.echo(f"Already up to date ({msg}). Use --force to re-download anyway.")
+        return
+    if status == "unsupported":
+        click.echo(click.style(
+            f"Warning: {msg}. config.yml may need manual review after this update — "
+            "its format may have changed significantly since that version.",
+            fg="yellow",
+        ))
+
+    click.echo(f"Updating renderer: v{site_version} -> v{CLI_VERSION}")
+
+    root = _local_repo_root()
+    if root:
+        new_html = (root / "app" / "index.html").read_text(encoding="utf-8")
+    else:
+        new_html = _http_get(f"{TEMPLATE_BASE_URL}/index.html").decode("utf-8")
+    index_file.write_text(new_html, encoding="utf-8")
+    click.echo("  index.html")
+
+    cfg = read_config(site_path)
+    if cfg.get("sitename"):
+        _patch_html_title(site_path, cfg["sitename"])
+
+    if root:
+        template_config_text = (root / "app" / "config.yml").read_text(encoding="utf-8")
+    else:
+        template_config_text = _http_get(f"{TEMPLATE_BASE_URL}/config.yml").decode("utf-8")
+    added_keys = sync_config_keys(site_path, template_config_text)
+    if added_keys:
+        click.echo(f"  config.yml — added new key(s): {', '.join(added_keys)}")
+    else:
+        click.echo("  config.yml — no new keys to add")
+
+    if _bump_config_version_marker(site_path):
+        click.echo(f"  config.yml version marker -> {CLI_VERSION}")
+    else:
+        click.echo(click.style(
+            "  Could not find a CURRENT VERSION banner in config.yml — update it by hand.",
+            fg="yellow",
+        ))
+
+    click.echo(click.style("Renderer updated.", fg="green"))
 
 
 @cli.command("fetch-deps")

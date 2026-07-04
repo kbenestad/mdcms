@@ -89,6 +89,8 @@ During development, run directly: `python3 mdcms.py <command>`
 | `mdcms config [name] --theme NAME` | Download a theme (by label or filename) into `assets/themes/` and set `theme:` in `config.yml`. `--list-themes` prints the whole library. |
 | `mdcms fetch-deps [name]` | Download all external JS/CSS deps to `assets/required/vendors/` and Bunny Fonts to `assets/fonts/`. Patches `index.html` to use local paths — no CDN requests after this. |
 | `mdcms fetch-deps --path <path>` | Same, using an explicit path. |
+| `mdcms update [name]` | Update a site's renderer and config: overwrites `index.html` with the version this CLI ships (preserving the site's `<title>`), appends any config.yml keys the template has gained since the site was last updated (verbatim, active or commented-out, without touching any existing key/value/comment), then bumps the `CURRENT VERSION` marker in `config.yml`. Accepts `--path`; `--force` re-downloads even if already current. Pages, posts, nav.yml, and theme.yml are untouched. |
+| `mdcms upgrade` | Upgrade the `mdcms` CLI itself to the latest release. Detects pip, pipx, or standalone-binary installs and upgrades accordingly (binary installs are downloaded and swapped in place; a dpkg-managed install is left alone with instructions to re-run the `.deb` install instead). `--force` reinstalls even if already current. |
 
 ## PWA config keys
 
