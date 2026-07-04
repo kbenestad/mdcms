@@ -379,7 +379,7 @@ body {
   background: var(--bg-nav);
   border-bottom: 1px solid var(--divider);
   display: flex;
-  align-items: center;
+  align-items: stretch;
   padding: 0 1.5rem;
   z-index: 100;
   transition: background-color 0.2s ease;
@@ -395,39 +395,50 @@ body {
   color: var(--nav-sitename-colour);
 }
 
-.topbar-nav { display: flex; align-items: center; gap: 0.25rem; flex: 1; overflow-x: auto; }
+.topbar-nav { display: flex; align-items: stretch; gap: 0.25rem; flex: 1; overflow-x: auto; }
 .topbar-nav .nav-item {
-  padding: 0.35rem 0.75rem;
-  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  border-radius: 0;
   border-left: none;
+  border-bottom: 3px solid transparent;
   white-space: nowrap;
   font-size: 0.85rem;
+}
+.topbar-nav .nav-item:hover {
+  background: var(--nav-hover-bg);
+  border-bottom-color: var(--nav-link-active-colour, var(--accent));
 }
 .topbar-nav .nav-item.active {
   border-left: none;
   background: var(--nav-active-bg);
   color: var(--nav-link-active-colour, var(--accent));
   font-weight: 600;
-  box-shadow: inset 0 -2px 0 var(--nav-link-active-colour, var(--accent));
+  border-bottom-color: var(--nav-link-active-colour, var(--accent));
 }
 
 /* ─── Topbar grouped navigation (dropdowns) ─── */
 .topbar-nav .nav-group { position: relative; }
 .topbar-nav .nav-trigger {
   display: flex; align-items: center; gap: 0.25rem;
-  padding: 0.35rem 0.75rem; border-radius: 5px;
-  background: none; border: none; cursor: pointer;
+  height: 100%;
+  padding: 0 0.75rem; border-radius: 0;
+  background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer;
   color: var(--nav-link-colour, var(--font-colour)); font-size: 0.85rem;
   font-weight: 500;
   font-family: inherit; white-space: nowrap; text-decoration: none; line-height: inherit;
 }
 .topbar-nav .nav-trigger:hover,
-.topbar-nav .nav-group.open > .nav-trigger { background: var(--nav-hover-bg); }
+.topbar-nav .nav-group.open > .nav-trigger {
+  background: var(--nav-hover-bg);
+  border-bottom-color: var(--nav-link-active-colour, var(--accent));
+}
 .topbar-nav .nav-group.has-active > .nav-trigger {
   background: var(--nav-active-bg);
   color: var(--nav-link-active-colour, var(--accent));
   font-weight: 600;
-  box-shadow: inset 0 -2px 0 var(--nav-link-active-colour, var(--accent));
+  border-bottom-color: var(--nav-link-active-colour, var(--accent));
 }
 .topbar-nav .nav-caret { font-size: 0.6rem; color: var(--nav-toggle-colour); opacity: 0.55; line-height: 1; }
 .topbar-nav .nav-dropdown {
@@ -448,7 +459,7 @@ body {
 .topbar-nav .nav-group.open > .nav-dropdown { display: block; }
 .topbar-nav .nav-dropdown .nav-item {
   display: block; padding: 0.45rem 1rem;
-  border-left: 3px solid transparent; border-radius: 0; white-space: nowrap;
+  border-left: 3px solid transparent; border-bottom: none; border-radius: 0; white-space: nowrap;
 }
 .topbar-nav .nav-dropdown .nav-item:hover { background: var(--nav-hover-bg); }
 .topbar-nav .nav-dropdown .nav-item.active {
@@ -1059,7 +1070,6 @@ body {
   padding: 8px 2px 9px;
   border-bottom: 2px solid var(--mdcms-bar, var(--accent));
   font-weight: 600;
-  font-size: 0.75rem;
   color: var(--font-colour);
 }
 .mdcms-accordion-underline .mdcms-accordion-chevron { color: var(--mdcms-bar, var(--accent)); }
@@ -1095,6 +1105,40 @@ body {
   background: var(--mdcms-bg, var(--bg-main));
   padding: 8px 11px 9px;
   color: var(--font-colour-muted);
+}
+
+/* ═══════════════════════════════════════════
+   FOOTNOTES
+   ═══════════════════════════════════════════ */
+.mdcms-footnote-ref {
+  text-decoration: none;
+  color: var(--link-colour);
+  font-weight: 600;
+  padding: 0 1px;
+}
+.mdcms-footnotes {
+  margin-top: 2.5rem;
+}
+.mdcms-footnotes-divider {
+  border: none;
+  border-top: 1px solid var(--divider);
+  margin: 0 0 1rem;
+}
+.mdcms-footnotes-list {
+  font-size: 0.875rem;
+  color: var(--font-colour-muted);
+  padding-left: 1.25rem;
+}
+.mdcms-footnotes-list li {
+  margin-bottom: 0.5rem;
+}
+.mdcms-footnotes-list li:last-child {
+  margin-bottom: 0;
+}
+.mdcms-footnote-backref {
+  color: var(--link-colour);
+  text-decoration: none;
+  margin-left: 0.15rem;
 }
 
 @media print {
@@ -1657,6 +1701,42 @@ body {
   }
 
   // ─── Markdown ─────────────────────────────────────────────
+
+  // Extracts Pandoc-style inline footnotes ( ^[text] ) from markdown, leaving
+  // fenced code blocks untouched, and replaces each with a superscript ref link.
+  function extractFootnotes(mdBody) {
+    const footnotes = [];
+    const parts = String(mdBody).split(/(```[\s\S]*?```|~~~[\s\S]*?~~~)/);
+    const text = parts.map((part, i) => {
+      if (i % 2 === 1) return part; // fenced code block — leave as-is
+      let out = '';
+      let idx = 0;
+      while (idx < part.length) {
+        const start = part.indexOf('^[', idx);
+        if (start === -1) { out += part.slice(idx); break; }
+        out += part.slice(idx, start);
+        let depth = 1;
+        let pos = start + 2;
+        while (pos < part.length && depth > 0) {
+          if (part[pos] === '[') depth++;
+          else if (part[pos] === ']') depth--;
+          pos++;
+        }
+        if (depth !== 0) {
+          out += part.slice(start, start + 2);
+          idx = start + 2;
+          continue;
+        }
+        footnotes.push(part.slice(start + 2, pos - 1));
+        const n = footnotes.length;
+        out += `<sup id="fnref-${n}"><a href="#fn-${n}" class="mdcms-footnote-ref">${n}</a></sup>`;
+        idx = pos;
+      }
+      return out;
+    }).join('');
+    return { text, footnotes };
+  }
+
   function renderMarkdown(mdBody) {
     marked.setOptions({ gfm: true, breaks: false, headerIds: true, mangle: false });
     const renderer = new marked.Renderer();
@@ -1711,7 +1791,18 @@ body {
     };
 
     marked.use({ renderer });
-    return marked.parse(mdBody);
+
+    const { text, footnotes } = extractFootnotes(mdBody);
+    let html = marked.parse(text);
+    if (footnotes.length) {
+      const items = footnotes.map((fn, i) => {
+        const n = i + 1;
+        return `<li id="fn-${n}">${marked.parseInline(fn)} <a href="#fnref-${n}" class="mdcms-footnote-backref" aria-label="Back to content">↩</a></li>`;
+      }).join('');
+      html += `<div class="mdcms-footnotes"><hr class="mdcms-footnotes-divider">`
+        + `<ol class="mdcms-footnotes-list">${items}</ol></div>`;
+    }
+    return html;
   }
 
   // ─── Tag system ─────────────────────────────────────────
@@ -3274,8 +3365,18 @@ function fmtDatetime(dtStr) {
     return hash || null;
   }
 
+  // An in-page anchor (e.g. a footnote reference) shares the hash namespace with
+  // page routes — if the hash targets an element already on the page, it's a
+  // same-page jump, not a navigation, so leave it to native browser scrolling.
+  // Same-document fragment navigation fires popstate *before* hashchange, so
+  // both listeners need this guard.
+  function isInPageAnchor(page) {
+    return !!(page && document.getElementById(page));
+  }
+
   window.addEventListener('hashchange', () => {
     const page = getPageFromHash();
+    if (isInPageAnchor(page)) return;
     if (page && page !== currentPage) navigateTo(page);
   });
 
@@ -3283,6 +3384,7 @@ function fmtDatetime(dtStr) {
     const slug = window.location.pathname.replace(basePath, '').replace(/^\//, '').replace(/\/$/, '');
     const pathPage = slug ? resolveSlugToFile(slug) : null;
     const page = pathPage || getPageFromHash();
+    if (!pathPage && isInPageAnchor(page)) return;
     if (page && page !== currentPage) navigateTo(page);
   });
 

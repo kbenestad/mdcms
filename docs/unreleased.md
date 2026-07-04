@@ -4,26 +4,26 @@ Changes merged into `development` that have not yet been released to `main`.
 
 ---
 
-## Renderer (`app/index.html`)
-
-- **Fixed: Bunny Fonts only ever loaded one of a theme's fonts.** `loadFonts()`
-  built the Bunny stylesheet URL as `?family=Font1:weight&family=Font2:weight`
-  — the Google Fonts v2 convention — but Bunny Fonts requires multiple
-  families to be pipe-separated inside a single `family=` parameter
-  (`?family=Font1:weight|Font2:weight`). With the old syntax Bunny silently
-  served only the *first* family (always `font-body`, since `font-heading`
-  and `font-code` are appended after it) and dropped the rest, so any theme
-  with a distinct heading font — the vast majority of the library — silently
-  fell back to the system sans-serif for headings. Nobody noticed for
-  themes whose heading font happened to look close to the fallback; it
-  became obvious with the Newspaper-inspired themes' serif headlines.
-  Google Fonts requests are unaffected — that provider's v2 API genuinely
-  does use repeated `family=` params, which is what led the original code
-  to (incorrectly) assume Bunny worked the same way.
-- **Re-synced all seven sample sites' bundled `index.html`** with the
-  current `app/index.html`. They'd drifted since the last sync (missing
-  both the font-loading fix above and the `heading` palette token from the
-  previous change) — each sample site carries its own static copy of the
-  renderer rather than a live link to `app/index.html`, so this fix (and
-  the earlier heading-colour one) wouldn't have been visible in the
-  sample-site picker without it.
+- Topbar navigation: the active/hover tab highlight now fills the full height of
+  the navigation bar (edge to edge, bottom to top) with a straight, thick
+  bottom border, replacing the previous shallow pill with a curved
+  `box-shadow` border-bottom. Applies to both leaf nav items and dropdown
+  group triggers. All seven `sample-sites/*/index.html` copies re-synced with
+  `app/index.html`.
+- Fixed Pandoc-style inline footnotes (`^[...]`) not rendering at all — the
+  renderer previously had no footnote support, so the raw `^[...]` markup
+  appeared verbatim in the article body (visible on the Modern Philosophy
+  sample site's `meta-01-existence.md`). Footnotes are now extracted before
+  markdown parsing (fenced code blocks are left untouched), rendered as
+  superscript reference links, and collected into a numbered "Footnotes" list
+  at the end of the article with back-links. Also fixed same-document
+  fragment navigation (used by the new footnote links) being swallowed by the
+  hash-based page router — clicking a footnote reference or back-link
+  previously triggered a page navigation to a nonexistent page (e.g. `#fn-1`)
+  and blanked the article, because `popstate` fires before `hashchange` on
+  same-page anchor jumps and had no guard against this. Both listeners now
+  recognise in-page anchors and let the browser handle the scroll natively.
+- Fixed the underline accordion variant's header text rendering smaller
+  (0.75rem) than the filled variant's header (inherited body size) — both now
+  share the same font size. All seven `sample-sites/*/index.html` copies
+  re-synced with `app/index.html`.
