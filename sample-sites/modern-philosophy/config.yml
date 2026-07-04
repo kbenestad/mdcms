@@ -2,6 +2,7 @@
 sitename: Foundations of Modern Philosophy
 sitedescription: A Systematic Introduction by Prof. James Okafor
 navigation: sidebar
+theme: theme.yml
 homepage: pages/preface.md
 nav-position: left
 search: true

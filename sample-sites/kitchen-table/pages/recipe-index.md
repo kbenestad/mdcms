@@ -52,7 +52,7 @@ Key recipes: hollandaise (with the science and the fixes), chicken and veal stoc
 ## Latest Recipes
 
 ```mdcms
-posts-datetime-reversechronological
+posts-created-reversechronological
 limit: 10
 paginate: yes
 ```

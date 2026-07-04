@@ -1,0 +1,7 @@
+# mdcms v0.6.0 | DO NOT REMOVE THIS COMMENT
+sitename: Hearth & Bean
+sitedescription: A neighbourhood coffee roastery — menu, brewing science, and how to visit
+navigation: topbar
+theme: theme.yml
+search: true
+footer: "© 2026 Hearth & Bean Coffee Roasters"

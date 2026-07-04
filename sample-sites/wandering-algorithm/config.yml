@@ -2,6 +2,7 @@
 sitename: The Wandering Algorithm
 sitedescription: A novel by Elena Marchetti
 navigation: sidebar
+theme: theme.yml
 homepage: pages/about.md
 nav-position: left
 search: true

@@ -2,5 +2,6 @@
 sitename: TechPulse
 sitedescription: Independent technology news and analysis
 navigation: topbar
+theme: theme.yml
 search: true
 footer: "© 2026 TechPulse Media. All rights reserved."

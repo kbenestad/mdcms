@@ -30,7 +30,7 @@ I started writing this blog because I wanted a place to share what I have learne
 ## Recent Posts
 
 ```mdcms
-posts-datetime-reversechronological
+posts-created-reversechronological
 limit: 10
 paginate: yes
 ```
