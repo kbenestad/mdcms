@@ -8,7 +8,23 @@ python3 mdcms.py build --path app/
 
 **What is preserved on rebuild:** All manual edits to section metadata fields (`defaultname`, `sort`, `parent`, `parent-sort`, `pagesvisibility`, `categorynames`, `pagination`) survive a rebuild. Page entries are re-generated from frontmatter each time.
 
-**What is overwritten on rebuild:** Page `title`, `sort`, `section-id` — these are always taken from frontmatter.
+**What is overwritten on rebuild:** Page `title`, `sort`, `section-id` — these are always taken from frontmatter. `date-categories` (see below) is also fully regenerated on every build.
+
+Sections can also be added, renamed, reordered, reparented, and have their `pagesvisibility`/`pagination` toggled interactively via `mdcms config` → *Manage sections*, instead of hand-editing this file.
+
+---
+
+## date-categories (generated, do not hand-edit)
+
+Present only when `categories-dates: yes` is set in `config.yml` and at least one `<base>.YYYYMMDD.md` page/post variant exists on disk (see `reference-config.md`'s Categories section). `mdcms build` collects every such date suffix found during the scan and writes them here, newest first:
+
+```yaml
+date-categories:
+  - "20260704"
+  - "20260101"
+```
+
+Codes are always quoted — an unquoted all-digit scalar like `20260704` would parse back as a YAML integer instead of a string on the next read, breaking comparisons against the `?cat=` URL param and the `variants:`/`titles:` entries below. The renderer reads this list to populate the category dropdown with entries it doesn't otherwise know about (they're never declared in `config.yml`), formatted as `d Mmmm YYYY`, and to switch the whole site's nav to follow `default-category` rather than whichever date is currently being viewed.
 
 ---
 

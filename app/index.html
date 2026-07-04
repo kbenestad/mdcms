@@ -1272,6 +1272,11 @@ body.scanlines-active::after {
   let defaultCategoryCode = null;
   let activeCategory = null;      // current code
   let sectionnamesMode = 'same';  // 'same' | 'per-category'
+  // When any date categories exist (categories-dates: yes), the nav and search
+  // always reflect default-category's content — even while viewing an older
+  // dated category — since a dated variant is a historical record of one page,
+  // not a snapshot of the whole site. Set once nav.yml's date-categories load.
+  let categoriesNavFollowsDefault = false;
   let loadedFonts = new Set();    // track which font files have been loaded
   let defaultLineHeight = null;   // theme/CSS default, captured after theme is applied
 
@@ -1422,6 +1427,37 @@ body.scanlines-active::after {
     activeCategory = (fromUrl && categoriesByCode[fromUrl]) ? fromUrl : defaultCategoryCode;
   }
 
+  const _MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+
+  // Renders a YYYYMMDD code as "d Mmmm YYYY", e.g. "4 July 2026".
+  function formatDateCategoryLabel(code) {
+    const year = code.slice(0, 4), month = parseInt(code.slice(4, 6), 10), day = parseInt(code.slice(6, 8), 10);
+    if (!year || !month || !day || month < 1 || month > 12) return code;
+    return `${day} ${_MONTH_NAMES[month - 1]} ${year}`;
+  }
+
+  // Merges the date categories mdcms build auto-detected (nav.yml's
+  // date-categories, newest first) into categoriesList/categoriesByCode.
+  // Called once nav.yml is parsed — after initCategories(), which only knows
+  // about the categories declared in config.yml.
+  function mergeDateCategories(dateCodes) {
+    if (!categoriesUse || !Array.isArray(dateCodes) || !dateCodes.length) return;
+    dateCodes.forEach(code => {
+      if (categoriesByCode[code]) return; // already declared (e.g. as the default) — don't clobber it
+      const entry = { code, name: formatDateCategoryLabel(code), _isDate: true };
+      categoriesList.push(entry);
+      categoriesByCode[code] = entry;
+    });
+    categoriesNavFollowsDefault = true;
+
+    // The URL's ?cat= may reference a date code that wasn't known yet when
+    // initCategories() first resolved activeCategory.
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get('cat');
+    if (fromUrl && categoriesByCode[fromUrl]) activeCategory = fromUrl;
+  }
+
   function setActiveCategory(code, { history: historyMode = 'replace' } = {}) {
     if (!categoriesByCode[code]) return;
     activeCategory = code;
@@ -1547,26 +1583,38 @@ body.scanlines-active::after {
   }
 
   function pageDisplayTitle(page) {
-    if (categoriesUse && page.titles && activeCategory && page.titles[activeCategory]) {
-      return page.titles[activeCategory];
+    // Used for nav items, TOC listings, and pagination labels — never for the
+    // content pane itself, which always renders the actually-fetched variant's
+    // own title. When date categories exist, nav labels stay pinned to
+    // default-category so browsing the site doesn't inherit whatever historical
+    // date happens to be active for the page currently open.
+    const navCode = categoriesNavFollowsDefault ? defaultCategoryCode : activeCategory;
+    if (categoriesUse && page.titles && navCode && page.titles[navCode]) {
+      return page.titles[navCode];
     }
     return page.title;
   }
 
   function pageShouldDisplay(page) {
-    // Nav filter. Returns true if the page should appear in nav for the active category.
+    // Nav filter. Returns true if the page should appear in nav for the nav-basis category.
     //   - Non-category sites: always show
     //   - Home page: always show (per config.homepage or default 'pages/home.md')
-    //   - Variant exists for active category: show
-    //   - Active category has notfoundmessage: show (renderer falls back to default language)
-    //   - Active category has visibilityifnocontent: visible: show (renderer shows pagenotfoundmessage)
+    //   - Variant exists for the nav-basis category: show
+    //   - Nav-basis category has notfoundmessage: show (renderer falls back to default language)
+    //   - Nav-basis category has visibilityifnocontent: visible: show (renderer shows pagenotfoundmessage)
     //   - Otherwise: hide
+    //
+    // The nav-basis category is normally activeCategory. But once any date
+    // category exists (categories-dates: yes), a dated category is a historical
+    // record of one page, not a snapshot of the whole site — so nav visibility
+    // always follows default-category instead, even while viewing an older date.
     if (!categoriesUse) return true;
     if (page.file === defaultPage()) return true;
     if (page.uncategorized) return true;
+    const navCode = categoriesNavFollowsDefault ? defaultCategoryCode : activeCategory;
     const variants = page.variants || [];
-    if (variants.includes(activeCategory)) return true;
-    const cat = categoriesByCode[activeCategory];
+    if (variants.includes(navCode)) return true;
+    const cat = categoriesByCode[navCode];
     return !!(cat && (cat.notfoundmessage || cat.visibilityifnocontent === 'visible'));
   }
 
@@ -3086,7 +3134,8 @@ function fmtDatetime(dtStr) {
     }
     let results = fuseInstance.search(query, { limit: 16 });
     if (categoriesUse && activeCategory) {
-      results = results.filter(r => !r.item.category || r.item.category === activeCategory);
+      const navCode = categoriesNavFollowsDefault ? defaultCategoryCode : activeCategory;
+      results = results.filter(r => !r.item.category || r.item.category === navCode);
     }
     results = results.slice(0, 8);
     if (!results.length) {
@@ -3703,6 +3752,7 @@ function fmtDatetime(dtStr) {
         } else {
           navData = parsed.pages || [];
           navSections = parsed.sections || [];
+          mergeDateCategories(parsed['date-categories']);
         }
         renderNav();
       }

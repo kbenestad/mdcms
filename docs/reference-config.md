@@ -198,7 +198,18 @@ categories-sectionnames: same  # How section names are shown per category.
 
 categories-selecticon: globe   # Icon shown in the category selector bar. SVG name from assets/icons/.
 categories-selecttext: "Language"  # Label shown next to the icon in the category selector bar.
+
+categories-dates: yes          # Auto-detect page.YYYYMMDD.md filename suffixes as categories —
+                               # no need to declare each date in categories: above. Default: no.
 ```
+
+### Date categories (`categories-dates`)
+
+An alternative (or addition) to declared categories: suffix a page with a literal calendar date instead of a language code — `report.20260704.md` is the "4 July 2026" snapshot of `report.md`. `mdcms build` detects every such suffix on disk, validates it's a real date, and writes them into `nav.yml` as a generated `date-categories:` list (newest first) — the renderer reads this to populate the dropdown with entries labelled `d Mmmm YYYY`, no `categories:` entry needed.
+
+Because a dated variant is a historical record of one page rather than a snapshot of the whole site, the nav (sidebar/topbar tree, TOC tags, pagination labels) always reflects `default-category` once any date category exists — even while a page's dated variant is the one actually being viewed. Only the content pane shows the dated content. This holds whether `default-category` itself is a date or a declared code, and whether the categories are all dates, all declared codes, or a mix.
+
+Manage all of this — `categories-use`, `categories-dates`, `default-category`, and the `categories:` list — interactively via `mdcms config` → *Manage categories*, or hand-edit `config.yml` directly.
 
 ### Per-category keys summary
 

@@ -84,7 +84,7 @@ During development, run directly: `python3 mdcms.py <command>`
 | `mdcms build <name>` | Build `nav.yml` and `search.json` for a registered site. |
 | `mdcms build --path <path>` | Build using an explicit path — no registry needed. Intended for CI/CD. |
 | `mdcms build` | Build using current working directory. Simplest form for GitHub Actions. |
-| `mdcms config [name]` | Interactively configure a site's `config.yml` (sitename, navigation, theme, homepage, footer, PWA, etc.) and browse/install a theme from the theme library into `assets/themes/`. Accepts `--path`. |
+| `mdcms config [name]` | Interactively configure a site's `config.yml` (sitename, navigation, theme, homepage, footer, PWA, etc.), browse/install a theme from the theme library into `assets/themes/`, and manage pages (create/edit/delete markdown files), sections (`nav.yml`), and categories (`categories:`/`default-category:` in `config.yml`) from dedicated submenus. Accepts `--path`. |
 | `mdcms config [name] --set KEY=VALUE` | Set config keys non-interactively (repeatable). Edits are surgical — comments are preserved and structured blocks are skipped. |
 | `mdcms config [name] --theme NAME` | Download a theme (by label or filename) into `assets/themes/` and set `theme:` in `config.yml`. `--list-themes` prints the whole library. |
 | `mdcms fetch-deps [name]` | Download all external JS/CSS deps to `assets/required/vendors/` and Bunny Fonts to `assets/fonts/`. Patches `index.html` to use local paths — no CDN requests after this. |
@@ -195,6 +195,14 @@ For nested navigation, set `parent: <parent-section-code>` and `parent-sort` on 
 - `categories-sectionnames: per-category` requires each section in `nav.yml` to have a `categorynames` block with an entry per category code
 - RTL is set per category via `direction: rtl`
 - Line height is set per category via `line-height: 2.8` (useful for scripts like Nastaliq that need extra vertical space). Restores to theme default when switching to a category without this key.
+
+### Date categories (`categories-dates: yes`)
+
+Instead of (or alongside) declared category codes, a page variant suffix can be a literal date: `<base>.YYYYMMDD.md`, e.g. `report.20260704.md`. Set `categories-dates: yes` in `config.yml` to have `mdcms build` auto-detect these — no need to declare each date in `categories:`. `mdcms.py` validates the suffix is a real calendar date (`is_date_category_code`); anything else (`report.20261345.md`, a genuinely bad date) is left as an ordinary, separately-titled page rather than crashing the build.
+
+Detected date codes are written to `nav.yml` as a generated `date-categories:` list, newest first — this is how the renderer's category dropdown learns about them (they're never declared in `config.yml`) and always lists them in reverse chronological order. Each is displayed as `d Mmmm YYYY` (e.g. `4 July 2026`), computed by the renderer from the code — not stored anywhere.
+
+**Whenever any date category exists, the nav always reflects `default-category`, never the active date.** A dated variant is a historical record of one page, not a snapshot of the whole site, so switching to an older date must not add/remove pages from the sidebar or relabel them to their dated titles — only the content pane (and the page's own title-bar breadcrumb) shows the dated variant actually being viewed. This applies regardless of whether `default-category` itself happens to be a date code or a declared one, and regardless of whether the site mixes both kinds of category. No extra config key controls this — it activates automatically the moment `nav.yml`'s generated `date-categories` list is non-empty.
 
 ## Dynamic post tags (mdcms code blocks)
 

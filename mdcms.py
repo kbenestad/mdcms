@@ -159,6 +159,29 @@ def get_category_info(cfg: dict) -> dict:
     return {"use": use, "default_code": default_code, "codes": codes}
 
 
+def read_nav_yml(site_path: Path) -> dict:
+    """Read nav.yml, tolerating a missing or unparseable file.
+
+    Returns {"sections": [...], "pages": [...], "date_categories": [...], "warning": str|None}.
+    Callers that need to surface the warning (e.g. `mdcms build`) can echo it themselves.
+    """
+    empty = {"sections": [], "pages": [], "date_categories": [], "warning": None}
+    nav_file = site_path / "nav.yml"
+    if not nav_file.exists():
+        return empty
+    try:
+        nav_data = yaml.safe_load(nav_file.read_text(encoding="utf-8")) or {}
+    except (OSError, yaml.YAMLError) as e:
+        empty["warning"] = f"could not parse nav.yml ({e})"
+        return empty
+    return {
+        "sections": [s for s in (nav_data.get("sections") or []) if isinstance(s, dict)],
+        "pages": [p for p in (nav_data.get("pages") or []) if isinstance(p, dict)],
+        "date_categories": [c for c in (nav_data.get("date-categories") or []) if c is not None],
+        "warning": None,
+    }
+
+
 # ─── Frontmatter parsing ─────────────────────────────────────
 
 def parse_frontmatter(filepath: Path) -> "tuple[dict, str]":
@@ -176,21 +199,105 @@ def parse_frontmatter(filepath: Path) -> "tuple[dict, str]":
     return meta, content[match.end():]
 
 
+_FRONTMATTER_KEY_ORDER = [
+    "title", "section-id", "sort", "draft", "author", "created", "modified",
+    "description", "keywords", "language",
+]
+
+
+def _emit_frontmatter_value(v) -> str:
+    if v is None:
+        return "null"
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    if isinstance(v, (int, float)):
+        return str(v)
+    s = str(v)
+    if s == "" or any(c in s for c in ':"\'#') or s.lower() in ("true", "false", "null", "yes", "no", "on", "off"):
+        return '"' + s.replace('"', '\\"') + '"'
+    return s
+
+
+def write_page_file(filepath: Path, meta: dict, body: str) -> None:
+    """Write a markdown file with a YAML frontmatter block, preserving `body` verbatim."""
+    ordered_keys = [k for k in _FRONTMATTER_KEY_ORDER if k in meta] + \
+                   [k for k in meta if k not in _FRONTMATTER_KEY_ORDER]
+    lines = ["---"]
+    for k in ordered_keys:
+        if meta[k] is None:
+            continue
+        lines.append(f"{k}: {_emit_frontmatter_value(meta[k])}")
+    lines.append("---")
+    lines.append("")
+    text = "\n".join(lines) + body.lstrip("\n")
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    filepath.write_text(text, encoding="utf-8")
+
+
+def list_markdown_files(site_path: Path) -> list:
+    """List every .md file under pages/ and posts/ with its key frontmatter fields."""
+    out = []
+    for folder in ("pages", "posts"):
+        d = site_path / folder
+        if not d.is_dir():
+            continue
+        for f in sorted(d.rglob("*.md")):
+            rel = str(f.relative_to(site_path)).replace("\\", "/")
+            meta, _ = parse_frontmatter(f)
+            out.append({
+                "file": rel,
+                "title": meta.get("title") or Path(rel).stem.replace("_", " ").replace("-", " ").title(),
+                "section-id": meta.get("section-id"),
+                "sort": meta.get("sort"),
+                "draft": bool(meta.get("draft", False)),
+            })
+    return out
+
+
 # ─── Scanner ─────────────────────────────────────────────────
 
-def identify_variant(rel: str, known_codes: set) -> "tuple[str | None, str | None]":
+# A category code auto-detected from a page filename suffix like
+# `pagename.20260704.md`. Enabled per-site via `categories-dates: yes`.
+DATE_SUFFIX_RE = re.compile(r"^\d{8}$")
+
+_MONTH_NAMES = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+]
+
+
+def is_date_category_code(suffix: "str | None") -> bool:
+    """True if `suffix` is a real calendar date in YYYYMMDD form."""
+    if not suffix or not DATE_SUFFIX_RE.match(suffix):
+        return False
+    try:
+        datetime.datetime.strptime(suffix, "%Y%m%d")
+        return True
+    except ValueError:
+        return False
+
+
+def format_date_category(code: str) -> str:
+    """Render a YYYYMMDD code as 'd Mmmm YYYY', e.g. '4 July 2026'."""
+    year, month, day = int(code[:4]), int(code[4:6]), int(code[6:8])
+    return f"{day} {_MONTH_NAMES[month - 1]} {year}"
+
+
+def identify_variant(rel: str, known_codes: set, dates_enabled: bool = False) -> "tuple[str | None, str | None]":
     if not rel.endswith(".md"):
         return None, None
     stem = rel[:-3]
     base_name = os.path.basename(stem)
     if "." in base_name:
         head, _, suffix = stem.rpartition(".")
-        if suffix in known_codes:
+        if suffix in known_codes or (dates_enabled and is_date_category_code(suffix)):
             return head, suffix
     return stem, None
 
 
-def scan_and_categorize(directory: Path, site_root: Path, known_codes: set) -> list:
+def scan_and_categorize(
+    directory: Path, site_root: Path, known_codes: set, dates_enabled: bool = False
+) -> list:
     records = []
     if not directory.is_dir():
         return records
@@ -201,7 +308,7 @@ def scan_and_categorize(directory: Path, site_root: Path, known_codes: set) -> l
                 continue
             full = Path(root) / name
             rel = str(full.relative_to(site_root)).replace("\\", "/")
-            base, code = identify_variant(rel, known_codes)
+            base, code = identify_variant(rel, known_codes, dates_enabled)
             if base is None:
                 continue
             meta, body = parse_frontmatter(full)
@@ -252,6 +359,14 @@ def _emit_value(v) -> str:
     if s == "" or any(c in s for c in ':"\'#') or s.lower() in ("true", "false", "null"):
         return '"' + s.replace('"', '\\"') + '"'
     return s
+
+
+def _emit_code(code) -> str:
+    """Quote a category code for YAML if left bare it would round-trip as a
+    different type — all-digit date codes (e.g. "20260704") parse back as
+    integers otherwise, breaking string joins/comparisons on rebuild."""
+    s = str(code)
+    return f'"{s}"' if s.isdigit() else s
 
 
 def merge_sections(page_entries: list, existing_sections: list) -> "tuple[list, list]":
@@ -316,23 +431,32 @@ def build_page_nav(
     return out
 
 
-def generate_nav_yml(sections: list, pages: list, categories_use: bool = False) -> str:
+def generate_nav_yml(
+    sections: list, pages: list, categories_use: bool = False, date_categories: "list | None" = None
+) -> str:
     lines = [
         "# nav.yml — generated by mdcms",
         "# Manual edits to section metadata (defaultname, sort, parent, parent-sort,",
         "# pagesvisibility, categorynames, pagination) are preserved on rebuild.",
         "",
-        "sections:",
     ]
+    if date_categories:
+        lines.append("# date-categories is generated — do not edit by hand. It lists every")
+        lines.append("# YYYYMMDD category code found on disk, newest first (categories-dates: yes).")
+        lines.append("date-categories:")
+        for code in date_categories:
+            lines.append(f"  - \"{code}\"")
+        lines.append("")
+    lines.append("sections:")
     if not sections:
         lines.append("  # (none yet — add section-id to page frontmatter to auto-create)")
     else:
         for s in sections:
-            lines.append(f"  - code: {s['code']}")
+            lines.append(f"  - code: {_emit_code(s['code'])}")
             lines.append(f"    defaultname: {_emit_value(s.get('defaultname', s['code']))}")
             lines.append(f"    sort: {s.get('sort', 100)}")
             if s.get("parent"):
-                lines.append(f"    parent: {s['parent']}")
+                lines.append(f"    parent: {_emit_code(s['parent'])}")
                 lines.append(f"    parent-sort: {s.get('parent-sort', 100)}")
             lines.append(f"    pagesvisibility: {s.get('pagesvisibility', 'visible')}")
             if s.get("pagination") in (True, "on", "yes"):
@@ -352,18 +476,28 @@ def generate_nav_yml(sections: list, pages: list, categories_use: bool = False) 
             lines.append(f"  - file: {p['file']}")
             lines.append(f"    title: {_emit_value(p['title'])}")
             if p.get("section-id"):
-                lines.append(f"    section-id: {p['section-id']}")
+                lines.append(f"    section-id: {_emit_code(p['section-id'])}")
             lines.append(f"    sort: {p.get('sort', 100)}")
             if categories_use and p.get("uncategorized"):
                 lines.append("    uncategorized: true")
             if categories_use and p.get("variants"):
-                lines.append(f"    variants: [{', '.join(p['variants'])}]")
+                lines.append(f"    variants: [{', '.join(_emit_code(v) for v in p['variants'])}]")
             if categories_use and p.get("titles"):
                 lines.append("    titles:")
                 for code, title in p["titles"].items():
-                    lines.append(f"      {code}: {_emit_value(title)}")
+                    lines.append(f"      {_emit_code(code)}: {_emit_value(title)}")
             lines.append("")
     return "\n".join(lines)
+
+
+def write_nav_yml(
+    site_path: Path, sections: list, pages: list,
+    categories_use: bool = False, date_categories: "list | None" = None,
+) -> None:
+    (site_path / "nav.yml").write_text(
+        generate_nav_yml(sections, pages, categories_use=categories_use, date_categories=date_categories),
+        encoding="utf-8",
+    )
 
 
 def generate_search_json(
@@ -527,24 +661,27 @@ def run_build(site_path: Path):
         raise click.ClickException("categories-use: yes but no default-category.code defined.")
 
     known_codes = set(all_codes) if cat["use"] else set()
+    dates_enabled = cat["use"] and str(cfg.get("categories-dates", "no")).lower() in ("yes", "true")
 
-    page_records = scan_and_categorize(site_path / "pages", site_path, known_codes)
-    post_records = scan_and_categorize(site_path / "posts", site_path, known_codes)
+    page_records = scan_and_categorize(site_path / "pages", site_path, known_codes, dates_enabled)
+    post_records = scan_and_categorize(site_path / "posts", site_path, known_codes, dates_enabled)
     click.echo(f"  pages/  {len(page_records)} file(s)")
     click.echo(f"  posts/  {len(post_records)} file(s)")
 
+    date_categories: list = []
+    if dates_enabled:
+        date_categories = sorted(
+            {r["code"] for r in page_records + post_records if is_date_category_code(r.get("code"))},
+            reverse=True,
+        )
+
     page_groups = group_by_base(page_records)
 
-    existing_sections: list = []
-    existing_pages: list = []
-    nav_file = site_path / "nav.yml"
-    if nav_file.exists():
-        try:
-            nav_data = yaml.safe_load(nav_file.read_text(encoding="utf-8")) or {}
-            existing_sections = [s for s in (nav_data.get("sections") or []) if isinstance(s, dict)]
-            existing_pages = [p for p in (nav_data.get("pages") or []) if isinstance(p, dict)]
-        except (OSError, yaml.YAMLError) as e:
-            click.echo(click.style(f"Warning: could not parse nav.yml ({e}); starting fresh.", fg="yellow"))
+    existing_nav = read_nav_yml(site_path)
+    if existing_nav["warning"]:
+        click.echo(click.style(f"Warning: {existing_nav['warning']}; starting fresh.", fg="yellow"))
+    existing_sections = existing_nav["sections"]
+    existing_pages = existing_nav["pages"]
 
     primary_entries = [select_primary(v, cat["default_code"]) for v in page_groups.values()]
     sections, auto_created = merge_sections(primary_entries, existing_sections)
@@ -555,11 +692,15 @@ def run_build(site_path: Path):
         default_code=cat["default_code"],
     )
 
-    nav_file.write_text(
-        generate_nav_yml(sections, page_nav, categories_use=cat["use"]),
-        encoding="utf-8",
-    )
+    write_nav_yml(site_path, sections, page_nav, categories_use=cat["use"], date_categories=date_categories)
     click.echo("  Wrote nav.yml")
+    if date_categories:
+        newest = format_date_category(date_categories[0])
+        click.echo(click.style(
+            f"  {len(date_categories)} date categor{'y' if len(date_categories) == 1 else 'ies'} detected "
+            f"(newest: {newest}) — nav will follow default-category regardless of the active date.",
+            fg="cyan",
+        ))
 
     draft_codes = {s["code"] for s in sections if s.get("pagesvisibility") == "draft"}
     live_pages = [r for r in page_records if r.get("section-id") not in draft_codes]
@@ -895,6 +1036,7 @@ EDITABLE_KEYS = [
     "sitename", "navigation", "theme", "homepage", "sitedescription",
     "logo", "favicon", "footer", "nav-position", "search", "default-theme",
     "pwa", "pwa-name", "pwa-shortname", "pwa-colour", "offline-message",
+    "categories-use", "categories-dates", "categories-sectionnames",
 ]
 
 _NAV_CHOICES = ["sidebar", "topbar"]
@@ -969,6 +1111,42 @@ def set_config_keys(site_path: Path, updates: dict) -> list:
     return skipped
 
 
+def set_config_block(site_path: Path, key: str, block_lines: list) -> None:
+    """Replace (or append) a top-level structured block in config.yml.
+
+    `block_lines` is the full replacement for the block, starting with the
+    `key:` line itself and including all of its indented children. Any
+    existing occurrence of the key — active or commented-out — and its
+    indented body are dropped first. Used for blocks `set_config_keys`
+    intentionally won't touch (`default-category`, `categories`).
+    """
+    config_file = site_path / "config.yml"
+    lines = config_file.read_text(encoding="utf-8").split("\n")
+    out: list = []
+    i = 0
+    replaced = False
+    while i < len(lines):
+        line = lines[i]
+        m = _CONFIG_KEY_RE.match(line)
+        if m and m.group(2) == key:
+            i += 1
+            while i < len(lines) and re.match(r"^\s+\S", lines[i]):
+                i += 1
+            if not replaced:
+                out.extend(block_lines)
+                replaced = True
+            continue
+        out.append(line)
+        i += 1
+
+    if not replaced:
+        if out and out[-1].strip() != "":
+            out.append("")
+        out.extend(block_lines)
+
+    config_file.write_text("\n".join(out), encoding="utf-8")
+
+
 def _top_level_key_lines(text: str) -> dict:
     """Map each top-level config key (active or commented-out example) to its line index."""
     keys: dict = {}
@@ -1023,14 +1201,75 @@ def _validate_updates(updates: dict):
         "navigation": _NAV_CHOICES,
         "default-theme": _THEME_MODE_CHOICES,
         "nav-position": _NAV_POS_CHOICES,
+        "categories-sectionnames": ["same", "per-category"],
     }
     for key, allowed in choices.items():
         if key in updates and str(updates[key]) not in allowed:
             raise click.ClickException(
                 f"Invalid value for {key}: '{updates[key]}'. Allowed: {', '.join(allowed)}"
             )
-    if "pwa" in updates and str(updates["pwa"]).lower() not in ("yes", "no", "true", "false"):
-        raise click.ClickException("pwa must be 'yes' or 'no'.")
+    for key in ("pwa", "categories-use", "categories-dates"):
+        if key in updates and str(updates[key]).lower() not in ("yes", "no", "true", "false"):
+            raise click.ClickException(f"{key} must be 'yes' or 'no'.")
+
+
+# ─── Category editing ──────────────────────────────────────────
+
+# Preferred key order when re-emitting a category entry. Any keys beyond
+# these (set by hand — font, line-height, etc.) are kept, just appended after.
+_CATEGORY_FIELD_ORDER = [
+    "code", "name", "message", "name-latin", "direction",
+    "notfoundmessage", "visibilityifnocontent", "pagenotfoundmessage",
+    "font", "line-height",
+]
+
+
+def _ordered_category_keys(cat: dict) -> list:
+    return [k for k in _CATEGORY_FIELD_ORDER if k in cat] + \
+           [k for k in cat if k not in _CATEGORY_FIELD_ORDER]
+
+
+def _emit_default_category_block(cat: dict) -> list:
+    lines = ["default-category:"]
+    for k in _ordered_category_keys(cat):
+        lines.append(f"  {k}: {_emit_value(cat[k])}")
+    return lines
+
+
+def _emit_categories_list_block(categories: list) -> list:
+    lines = ["categories:"]
+    for cat in categories:
+        first = True
+        for k in _ordered_category_keys(cat):
+            bullet = "  - " if first else "    "
+            lines.append(f"{bullet}{k}: {_emit_value(cat[k])}")
+            first = False
+    return lines
+
+
+def write_default_category(site_path: Path, cat: dict) -> None:
+    set_config_block(site_path, "default-category", _emit_default_category_block(cat))
+
+
+def write_categories_list(site_path: Path, categories: list) -> None:
+    set_config_block(site_path, "categories", _emit_categories_list_block(categories))
+
+
+def validate_category_code(code: str, existing_codes: "set | None" = None) -> None:
+    """Raise ClickException if `code` isn't usable as a manually-declared category code."""
+    if not code:
+        raise click.ClickException("Category code cannot be blank.")
+    if not CATEGORY_CODE_RE.match(code):
+        raise click.ClickException(
+            f"Invalid category code '{code}'. Use only letters, numbers, and hyphens."
+        )
+    if is_date_category_code(code):
+        raise click.ClickException(
+            f"'{code}' looks like a YYYYMMDD date and is reserved for auto-detected date "
+            "categories (categories-dates: yes) — pick a non-numeric code."
+        )
+    if existing_codes and code in existing_codes:
+        raise click.ClickException(f"Category code '{code}' already exists.")
 
 
 # ─── Theme library ────────────────────────────────────────────
@@ -1213,6 +1452,569 @@ def _edit_pwa(site_path: Path, cfg: dict):
         ))
 
 
+def _prompt_category_fields(existing: dict) -> dict:
+    """Prompt for the common category fields, merged onto `existing` so any
+    hand-set fields this prompt doesn't cover (font, line-height, ...) survive."""
+    entry = dict(existing)
+    name = click.prompt("Display name", default=existing.get("name", "")).strip()
+    if not name:
+        raise click.ClickException("Display name cannot be blank.")
+    entry["name"] = name
+    name_latin = click.prompt(
+        "Latin-script name (blank = none)", default=existing.get("name-latin", ""), show_default=False
+    ).strip()
+    if name_latin:
+        entry["name-latin"] = name_latin
+    else:
+        entry.pop("name-latin", None)
+    entry["direction"] = click.prompt(
+        "Text direction", type=click.Choice(["ltr", "rtl"]), default=existing.get("direction", "ltr")
+    )
+    return entry
+
+
+def _pick_category(categories: list, prompt_label: str) -> "dict | None":
+    if not categories:
+        click.echo("No categories to pick from.")
+        return None
+    for idx, c in enumerate(categories, 1):
+        click.echo(f"  {idx}. {c.get('code')} — {c.get('name', '')}")
+    pick = click.prompt(prompt_label, type=int, default=0)
+    if not (1 <= pick <= len(categories)):
+        click.echo("Cancelled.")
+        return None
+    return categories[pick - 1]
+
+
+def _toggle_categories_use(site_path: Path):
+    cfg = read_config(site_path)
+    currently_on = str(cfg.get("categories-use", "no")).lower() in ("yes", "true")
+    new_on = click.confirm("Enable the category system (categories-use)?", default=currently_on)
+    if new_on and not currently_on and not (cfg.get("default-category") or {}).get("code"):
+        click.echo("No default-category is set yet — let's set one now.")
+        _set_default_category(site_path)
+    set_config_keys(site_path, {"categories-use": "yes" if new_on else "no"})
+    click.echo(click.style(f"  categories-use = {'yes' if new_on else 'no'}", fg="green"))
+
+
+def _toggle_categories_dates(site_path: Path):
+    cfg = read_config(site_path)
+    currently_on = str(cfg.get("categories-dates", "no")).lower() in ("yes", "true")
+    new_on = click.confirm(
+        "Auto-detect page.YYYYMMDD.md filename suffixes as date categories?", default=currently_on
+    )
+    set_config_keys(site_path, {"categories-dates": "yes" if new_on else "no"})
+    click.echo(click.style(f"  categories-dates = {'yes' if new_on else 'no'}", fg="green"))
+    if new_on and not currently_on:
+        click.echo("  Run 'mdcms build' to detect existing date-suffixed pages.")
+
+
+def _set_default_category(site_path: Path):
+    cfg = read_config(site_path)
+    default_cat = cfg.get("default-category") or {}
+    categories = [c for c in (cfg.get("categories") or []) if isinstance(c, dict)]
+    old_code = default_cat.get("code")
+
+    code = click.prompt("Default category code", default=old_code or "").strip()
+    validate_category_code(code)
+
+    entry = _prompt_category_fields(default_cat if old_code == code else {})
+    entry["code"] = code
+
+    if old_code and old_code != code and not any(c.get("code") == old_code for c in categories):
+        click.echo(click.style(
+            f"  Note: '{old_code}' was the previous default and isn't in the categories list — "
+            f"keeping it as a regular category so existing *.{old_code}.md pages stay recognised.",
+            fg="yellow",
+        ))
+        write_categories_list(site_path, categories + [dict(default_cat)])
+
+    write_default_category(site_path, entry)
+    click.echo(click.style(f"  default-category = {code} ({entry['name']})", fg="green"))
+
+
+def _add_category(site_path: Path):
+    cfg = read_config(site_path)
+    default_cat = cfg.get("default-category") or {}
+    categories = [c for c in (cfg.get("categories") or []) if isinstance(c, dict)]
+    existing_codes = {default_cat.get("code")} | {c.get("code") for c in categories}
+
+    code = click.prompt("New category code").strip()
+    validate_category_code(code, existing_codes)
+
+    entry = _prompt_category_fields({"code": code})
+    entry["code"] = code
+    write_categories_list(site_path, categories + [entry])
+    click.echo(click.style(f"  Added category '{code}' ({entry['name']}).", fg="green"))
+
+
+def _edit_category(site_path: Path):
+    cfg = read_config(site_path)
+    categories = [c for c in (cfg.get("categories") or []) if isinstance(c, dict)]
+    target = _pick_category(categories, "Category number to edit (0 = cancel)")
+    if target is None:
+        return
+    updated = _prompt_category_fields(target)
+    new_list = [updated if c.get("code") == target.get("code") else c for c in categories]
+    write_categories_list(site_path, new_list)
+    click.echo(click.style(f"  Updated category '{target['code']}'.", fg="green"))
+
+
+def _remove_category(site_path: Path):
+    cfg = read_config(site_path)
+    categories = [c for c in (cfg.get("categories") or []) if isinstance(c, dict)]
+    target = _pick_category(categories, "Category number to remove (0 = cancel)")
+    if target is None:
+        return
+    click.confirm(
+        f"Remove category '{target['code']}'? Existing .{target['code']}.md page files "
+        "are left on disk untouched.",
+        abort=True,
+    )
+    new_list = [c for c in categories if c.get("code") != target.get("code")]
+    write_categories_list(site_path, new_list)
+    click.echo(click.style(f"  Removed category '{target['code']}'.", fg="green"))
+
+
+def _manage_categories(site_path: Path):
+    click.echo(click.style(f"\nCategories — {site_path}", bold=True))
+    while True:
+        cfg = read_config(site_path)
+        use = str(cfg.get("categories-use", "no")).lower() in ("yes", "true")
+        dates = str(cfg.get("categories-dates", "no")).lower() in ("yes", "true")
+        default_cat = cfg.get("default-category") or {}
+        categories = [c for c in (cfg.get("categories") or []) if isinstance(c, dict)]
+
+        click.echo("\nCurrent settings:")
+        click.echo(f"   categories-use   : {'yes' if use else 'no'}")
+        click.echo(f"   categories-dates : {'yes' if dates else 'no'} (auto-detect page.YYYYMMDD.md as categories)")
+        if use:
+            click.echo(f"   default          : {default_cat.get('code', '(not set)')} — {default_cat.get('name', '')}")
+            if categories:
+                click.echo("   categories       :")
+                for c in categories:
+                    click.echo(f"       {c.get('code', '?'):<10} {c.get('name', '')}")
+            else:
+                click.echo("   categories       : (none besides the default)")
+
+        menu = [
+            ("Enable/disable categories", lambda: _toggle_categories_use(site_path)),
+            ("Enable/disable date categories", lambda: _toggle_categories_dates(site_path)),
+            ("Set default category", lambda: _set_default_category(site_path)),
+            ("Add a category", lambda: _add_category(site_path)),
+            ("Edit a category", lambda: _edit_category(site_path)),
+            ("Remove a category", lambda: _remove_category(site_path)),
+        ]
+        click.echo("\nWhat would you like to change?")
+        for idx, (label, _) in enumerate(menu, 1):
+            click.echo(f"  {idx}. {label}")
+        click.echo("  0. Back")
+
+        choice = click.prompt("Select", type=int, default=0)
+        if choice == 0:
+            break
+        if 1 <= choice <= len(menu):
+            try:
+                menu[choice - 1][1]()
+            except click.Abort:
+                click.echo("\nCancelled.")
+            except click.ClickException as e:
+                click.echo(click.style(f"  Error: {e.format_message()}", fg="red"))
+        else:
+            click.echo("Invalid selection.")
+
+
+# ─── Section editing (nav.yml) ─────────────────────────────────
+
+def _sorted_sections(sections: list) -> list:
+    return sorted(sections, key=lambda s: (s.get("sort") or 999, s.get("code", "")))
+
+
+def _pick_section(sections: list, prompt_label: str) -> "dict | None":
+    if not sections:
+        click.echo("No sections yet.")
+        return None
+    ordered = _sorted_sections(sections)
+    for idx, s in enumerate(ordered, 1):
+        parent = f" (child of {s['parent']})" if s.get("parent") else ""
+        click.echo(f"  {idx}. {s.get('code')} — {s.get('defaultname', s.get('code'))}{parent}")
+    pick = click.prompt(prompt_label, type=int, default=0)
+    if not (1 <= pick <= len(ordered)):
+        click.echo("Cancelled.")
+        return None
+    return ordered[pick - 1]
+
+
+def _next_section_sort(sections: list) -> int:
+    used = {s.get("sort") for s in sections if isinstance(s.get("sort"), int)}
+    sort = 100
+    while sort in used:
+        sort += 10
+    return sort
+
+
+def _save_sections(site_path: Path, sections: list, nav: dict) -> None:
+    cat = get_category_info(read_config(site_path))
+    write_nav_yml(
+        site_path, sections, nav["pages"],
+        categories_use=cat["use"], date_categories=nav["date_categories"],
+    )
+
+
+def _add_section(site_path: Path):
+    nav = read_nav_yml(site_path)
+    sections = nav["sections"]
+    code = click.prompt("New section code (letters, numbers, hyphens)").strip()
+    if not code:
+        raise click.ClickException("Section code cannot be blank.")
+    if not CATEGORY_CODE_RE.match(code):
+        raise click.ClickException(f"Invalid section code '{code}'. Use only letters, numbers, and hyphens.")
+    if any(s.get("code") == code for s in sections):
+        raise click.ClickException(f"Section '{code}' already exists.")
+    default_name = code.replace("-", " ").replace("_", " ").title()
+    name = click.prompt("Display name", default=default_name).strip() or default_name
+    sort = click.prompt("Sort order (lower = higher)", type=int, default=_next_section_sort(sections))
+    new_section = {"code": code, "defaultname": name, "sort": sort, "pagesvisibility": "visible"}
+    _save_sections(site_path, sections + [new_section], nav)
+    click.echo(click.style(f"  Added section '{code}' ({name}).", fg="green"))
+
+
+def _rename_section(site_path: Path):
+    nav = read_nav_yml(site_path)
+    sections = nav["sections"]
+    target = _pick_section(sections, "Section number to rename (0 = cancel)")
+    if target is None:
+        return
+    name = click.prompt("New display name", default=target.get("defaultname", target["code"])).strip()
+    if not name:
+        raise click.ClickException("Display name cannot be blank.")
+    target["defaultname"] = name
+    _save_sections(site_path, sections, nav)
+    click.echo(click.style(f"  Renamed to '{name}'.", fg="green"))
+
+
+def _resort_section(site_path: Path):
+    nav = read_nav_yml(site_path)
+    sections = nav["sections"]
+    target = _pick_section(sections, "Section number to reorder (0 = cancel)")
+    if target is None:
+        return
+    sort = click.prompt("New sort value (lower = higher)", type=int, default=target.get("sort", 100))
+    target["sort"] = sort
+    _save_sections(site_path, sections, nav)
+    click.echo(click.style(f"  Sort set to {sort}.", fg="green"))
+
+
+def _set_section_visibility(site_path: Path):
+    nav = read_nav_yml(site_path)
+    sections = nav["sections"]
+    target = _pick_section(sections, "Section number (0 = cancel)")
+    if target is None:
+        return
+    vis = click.prompt(
+        "Visibility", type=click.Choice(["visible", "hidden", "draft"]),
+        default=target.get("pagesvisibility", "visible"),
+    )
+    target["pagesvisibility"] = vis
+    _save_sections(site_path, sections, nav)
+    click.echo(click.style(f"  pagesvisibility = {vis}.", fg="green"))
+
+
+def _toggle_section_pagination(site_path: Path):
+    nav = read_nav_yml(site_path)
+    sections = nav["sections"]
+    target = _pick_section(sections, "Section number (0 = cancel)")
+    if target is None:
+        return
+    current = target.get("pagination") in (True, "on", "yes")
+    new_on = click.confirm(
+        f"Enable Previous/Next pagination for '{target['code']}'?", default=current
+    )
+    if new_on:
+        target["pagination"] = "on"
+    else:
+        target.pop("pagination", None)
+    _save_sections(site_path, sections, nav)
+    click.echo(click.style(f"  pagination = {'on' if new_on else 'off'}.", fg="green"))
+
+
+def _set_section_parent(site_path: Path):
+    nav = read_nav_yml(site_path)
+    sections = nav["sections"]
+    target = _pick_section(sections, "Section number (0 = cancel)")
+    if target is None:
+        return
+    click.echo("  (blank = no parent / top-level)")
+    parent_code = click.prompt(
+        "Parent section code", default=target.get("parent", ""), show_default=bool(target.get("parent"))
+    ).strip()
+    if not parent_code:
+        target.pop("parent", None)
+        target.pop("parent-sort", None)
+    else:
+        if parent_code == target.get("code"):
+            raise click.ClickException("A section cannot be its own parent.")
+        by_code = {s["code"]: s for s in sections if s.get("code")}
+        if parent_code not in by_code:
+            raise click.ClickException(f"No section with code '{parent_code}'.")
+        seen: set = set()
+        cursor = parent_code
+        while cursor:
+            if cursor == target.get("code"):
+                raise click.ClickException(
+                    f"'{parent_code}' is a descendant of '{target['code']}' — this would create a cycle."
+                )
+            if cursor in seen:
+                break
+            seen.add(cursor)
+            cursor = by_code.get(cursor, {}).get("parent")
+        target["parent"] = parent_code
+        target["parent-sort"] = click.prompt(
+            "Sort within parent", type=int, default=target.get("parent-sort", 100)
+        )
+    _save_sections(site_path, sections, nav)
+    click.echo(click.style("  Parent updated.", fg="green"))
+
+
+def _delete_section(site_path: Path):
+    nav = read_nav_yml(site_path)
+    sections = nav["sections"]
+    target = _pick_section(sections, "Section number to delete (0 = cancel)")
+    if target is None:
+        return
+    code = target["code"]
+    children = [s for s in sections if s.get("parent") == code]
+    referencing_pages = [p for p in nav["pages"] if p.get("section-id") == code]
+    notes = []
+    if children:
+        notes.append(f"{len(children)} child section(s) ({', '.join(c['code'] for c in children)}) will become top-level")
+    if referencing_pages:
+        notes.append(
+            f"{len(referencing_pages)} page(s) still reference this section-id in frontmatter — "
+            "mdcms build will recreate the section automatically unless you also update those pages"
+        )
+    if notes:
+        click.echo(click.style("  Note: " + "; ".join(notes) + ".", fg="yellow"))
+    click.confirm(f"Delete section '{code}'?", abort=True)
+    new_sections = [s for s in sections if s.get("code") != code]
+    for s in new_sections:
+        if s.get("parent") == code:
+            s.pop("parent", None)
+            s.pop("parent-sort", None)
+    _save_sections(site_path, new_sections, nav)
+    click.echo(click.style(f"  Deleted section '{code}'.", fg="green"))
+
+
+def _manage_sections(site_path: Path):
+    click.echo(click.style(f"\nSections — {site_path}", bold=True))
+    while True:
+        nav = read_nav_yml(site_path)
+        sections = nav["sections"]
+        click.echo("\nCurrent sections:")
+        if not sections:
+            click.echo("   (none yet — sections are also auto-created from section-id in page frontmatter)")
+        else:
+            for s in _sorted_sections(sections):
+                bits = [f"sort={s.get('sort', 100)}"]
+                if s.get("parent"):
+                    bits.append(f"parent={s['parent']}")
+                bits.append(f"visibility={s.get('pagesvisibility', 'visible')}")
+                if s.get("pagination") in (True, "on", "yes"):
+                    bits.append("pagination=on")
+                click.echo(f"   {s['code']:<16} {s.get('defaultname', s['code']):<24} ({', '.join(bits)})")
+
+        menu = [
+            ("Add a section", lambda: _add_section(site_path)),
+            ("Rename a section", lambda: _rename_section(site_path)),
+            ("Change sort order", lambda: _resort_section(site_path)),
+            ("Set parent section", lambda: _set_section_parent(site_path)),
+            ("Set visibility (visible/hidden/draft)", lambda: _set_section_visibility(site_path)),
+            ("Enable/disable pagination", lambda: _toggle_section_pagination(site_path)),
+            ("Delete a section", lambda: _delete_section(site_path)),
+        ]
+        click.echo("\nWhat would you like to change?")
+        for idx, (label, _) in enumerate(menu, 1):
+            click.echo(f"  {idx}. {label}")
+        click.echo("  0. Back")
+
+        choice = click.prompt("Select", type=int, default=0)
+        if choice == 0:
+            break
+        if 1 <= choice <= len(menu):
+            try:
+                menu[choice - 1][1]()
+            except click.Abort:
+                click.echo("\nCancelled.")
+            except click.ClickException as e:
+                click.echo(click.style(f"  Error: {e.format_message()}", fg="red"))
+        else:
+            click.echo("Invalid selection.")
+
+
+# ─── Page editing (markdown files) ─────────────────────────────
+
+def _pick_page(pages: list, prompt_label: str) -> "dict | None":
+    if not pages:
+        click.echo("No pages found.")
+        return None
+    for idx, p in enumerate(pages, 1):
+        flags = []
+        if p.get("draft"):
+            flags.append("draft")
+        if p.get("section-id"):
+            flags.append(f"section={p['section-id']}")
+        suffix = f" ({', '.join(flags)})" if flags else ""
+        click.echo(f"  {idx}. {p['file']:<40} {p.get('title', '')}{suffix}")
+    pick = click.prompt(prompt_label, type=int, default=0)
+    if not (1 <= pick <= len(pages)):
+        click.echo("Cancelled.")
+        return None
+    return pages[pick - 1]
+
+
+def _confirm_new_section_id(section_id: str, section_codes: set) -> None:
+    if section_codes and section_id not in section_codes:
+        click.confirm(
+            f"'{section_id}' isn't an existing section — it will be auto-created on the next "
+            "build. Continue?",
+            abort=True,
+        )
+
+
+def _new_page(site_path: Path):
+    nav = read_nav_yml(site_path)
+    folder = click.prompt("Folder", type=click.Choice(["pages", "posts"]), default="pages")
+    slug = click.prompt(f"Filename (without .md, under {folder}/)").strip()
+    if not slug:
+        raise click.ClickException("Filename cannot be blank.")
+    filepath = _safe_dest(site_path, f"{folder}/{slug}.md")
+    if filepath.exists():
+        raise click.ClickException(f"{folder}/{slug}.md already exists.")
+
+    title = click.prompt("Title").strip()
+    if not title:
+        raise click.ClickException("Title cannot be blank.")
+    meta: dict = {"title": title}
+
+    section_codes = {s["code"] for s in nav["sections"] if s.get("code")}
+    section_id = click.prompt("Section-id (blank = unsectioned)", default="", show_default=False).strip()
+    if section_id:
+        _confirm_new_section_id(section_id, section_codes)
+        meta["section-id"] = section_id
+
+    meta["sort"] = click.prompt("Sort order (lower = higher)", type=int, default=100)
+
+    if folder == "posts":
+        created = click.prompt(
+            "Created (YYYY-MM-DD HH:MM, blank = now)", default="", show_default=False
+        ).strip()
+        meta["created"] = created or datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    if click.confirm("Mark as draft?", default=False):
+        meta["draft"] = True
+
+    try:
+        write_page_file(filepath, meta, f"\n# {title}\n\nContent goes here.\n")
+    except OSError as e:
+        raise click.ClickException(f"Could not write {folder}/{slug}.md: {e}")
+    click.echo(click.style(f"  Created {folder}/{slug}.md.", fg="green"))
+    click.echo("  Run 'mdcms build' to add it to nav.yml and search.json.")
+
+
+def _edit_page(site_path: Path):
+    pages = list_markdown_files(site_path)
+    target = _pick_page(pages, "Page number to edit (0 = cancel)")
+    if target is None:
+        return
+    filepath = site_path / target["file"]
+    meta, body = parse_frontmatter(filepath)
+    nav = read_nav_yml(site_path)
+    section_codes = {s["code"] for s in nav["sections"] if s.get("code")}
+
+    title = click.prompt("Title", default=meta.get("title", "")).strip()
+    if not title:
+        raise click.ClickException("Title cannot be blank.")
+    meta["title"] = title
+
+    section_id = click.prompt(
+        "Section-id (blank = unsectioned)", default=meta.get("section-id") or "", show_default=False
+    ).strip()
+    if section_id:
+        _confirm_new_section_id(section_id, section_codes)
+        meta["section-id"] = section_id
+    else:
+        meta.pop("section-id", None)
+
+    meta["sort"] = click.prompt("Sort order", type=int, default=meta.get("sort", 100))
+
+    if click.confirm("Mark as draft?", default=bool(meta.get("draft", False))):
+        meta["draft"] = True
+    else:
+        meta.pop("draft", None)
+
+    try:
+        write_page_file(filepath, meta, body)
+    except OSError as e:
+        raise click.ClickException(f"Could not write {target['file']}: {e}")
+    click.echo(click.style(f"  Updated {target['file']}.", fg="green"))
+    click.echo("  Run 'mdcms build' to refresh nav.yml and search.json.")
+
+
+def _delete_page(site_path: Path):
+    pages = list_markdown_files(site_path)
+    target = _pick_page(pages, "Page number to delete (0 = cancel)")
+    if target is None:
+        return
+    click.confirm(f"Delete {target['file']}? This cannot be undone.", abort=True)
+    try:
+        (site_path / target["file"]).unlink()
+    except OSError as e:
+        raise click.ClickException(f"Could not delete {target['file']}: {e}")
+    click.echo(click.style(f"  Deleted {target['file']}.", fg="green"))
+    click.echo("  Run 'mdcms build' to update nav.yml and search.json.")
+
+
+def _manage_pages(site_path: Path):
+    click.echo(click.style(f"\nPages — {site_path}", bold=True))
+    while True:
+        pages = list_markdown_files(site_path)
+        click.echo(f"\n{len(pages)} page(s)/post(s):")
+        if pages:
+            for p in pages:
+                flags = []
+                if p.get("draft"):
+                    flags.append("draft")
+                if p.get("section-id"):
+                    flags.append(f"section={p['section-id']}")
+                suffix = f" ({', '.join(flags)})" if flags else ""
+                click.echo(f"   {p['file']:<40} {p.get('title', '')}{suffix}")
+        else:
+            click.echo("   (none yet)")
+
+        menu = [
+            ("New page", lambda: _new_page(site_path)),
+            ("Edit a page", lambda: _edit_page(site_path)),
+            ("Delete a page", lambda: _delete_page(site_path)),
+        ]
+        click.echo("\nWhat would you like to do?")
+        for idx, (label, _) in enumerate(menu, 1):
+            click.echo(f"  {idx}. {label}")
+        click.echo("  0. Back")
+
+        choice = click.prompt("Select", type=int, default=0)
+        if choice == 0:
+            break
+        if 1 <= choice <= len(menu):
+            try:
+                menu[choice - 1][1]()
+            except click.Abort:
+                click.echo("\nCancelled.")
+            except click.ClickException as e:
+                click.echo(click.style(f"  Error: {e.format_message()}", fg="red"))
+        else:
+            click.echo("Invalid selection.")
+
+
 def _interactive_config(site_path: Path):
     click.echo(click.style(f"\nmdcms config — {site_path}", bold=True))
     while True:
@@ -1226,6 +2028,13 @@ def _interactive_config(site_path: Path):
         click.echo(f"   footer          : {cfg.get('footer', '(not set)')}")
         click.echo(f"   default-theme   : {cfg.get('default-theme', '(system)')}")
         click.echo(f"   pwa             : {cfg.get('pwa', 'no')}")
+        cat_info = get_category_info(cfg)
+        pages_count = len(list_markdown_files(site_path))
+        sections_count = len(read_nav_yml(site_path)["sections"])
+        click.echo(f"   categories      : {'yes' if cat_info['use'] else 'no'} "
+                   f"({len(cat_info['codes'])} declared, {'default: ' + cat_info['default_code'] if cat_info['default_code'] else 'no default'})")
+        click.echo(f"   pages/posts     : {pages_count} file(s)")
+        click.echo(f"   sections        : {sections_count}")
 
         menu = [
             ("Site name", lambda c: _prompt_scalar(site_path, c, "sitename", "Site name")),
@@ -1240,6 +2049,9 @@ def _interactive_config(site_path: Path):
             ("Navigation position (left/right)",
              lambda c: _prompt_scalar(site_path, c, "nav-position", "Nav position", choices=_NAV_POS_CHOICES)),
             ("PWA settings", lambda c: _edit_pwa(site_path, c)),
+            ("Manage pages", lambda c: _manage_pages(site_path)),
+            ("Manage sections", lambda c: _manage_sections(site_path)),
+            ("Manage categories", lambda c: _manage_categories(site_path)),
         ]
         click.echo("\nWhat would you like to change?")
         for idx, (label, _) in enumerate(menu, 1):
@@ -1578,18 +2390,8 @@ def view(name):
     page_count = sum(1 for _ in pages_dir.rglob("*.md")) if pages_dir.is_dir() else 0
     post_count = sum(1 for _ in posts_dir.rglob("*.md")) if posts_dir.is_dir() else 0
 
-    sections = []
-    nav_file = site_path / "nav.yml"
-    if nav_file.exists():
-        try:
-            nav_data = yaml.safe_load(nav_file.read_text(encoding="utf-8")) or {}
-            sections = [
-                s.get("code", "?")
-                for s in (nav_data.get("sections") or [])
-                if isinstance(s, dict)
-            ]
-        except (OSError, yaml.YAMLError):
-            pass
+    nav = read_nav_yml(site_path)
+    sections = [s.get("code", "?") for s in nav["sections"]]
 
     click.echo(f"Site:        {name}")
     click.echo(f"Path:        {site_path}")
@@ -1601,6 +2403,10 @@ def view(name):
     if cat["use"]:
         all_codes = [cat["default_code"]] + cat["codes"]
         click.echo(f"Categories:  enabled — {', '.join(c for c in all_codes if c)}")
+        if nav["date_categories"]:
+            newest = format_date_category(nav["date_categories"][0])
+            click.echo(f"             + {len(nav['date_categories'])} date categor"
+                       f"{'y' if len(nav['date_categories']) == 1 else 'ies'} (newest: {newest})")
     else:
         click.echo("Categories:  disabled")
     click.echo(f"Sections:    {', '.join(sections) if sections else '(none)'}")
