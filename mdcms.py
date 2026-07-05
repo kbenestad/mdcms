@@ -5,7 +5,7 @@
 #
 # Licensed under Apache 2.0 licence.
 #
-# CURRENT VERSION: 0.6.9 - 4 July 2026
+# CURRENT VERSION: 0.6.10 - 5 July 2026
 #
 # Copyright 2026 Kristian Benestad
 #
@@ -42,8 +42,8 @@ import certifi
 import click
 import yaml
 
-CLI_VERSION = "0.6.9"
-CLI_RELEASE_DATE = "4 July 2026"
+CLI_VERSION = "0.6.10"
+CLI_RELEASE_DATE = "5 July 2026"
 MIN_SUPPORTED_VERSION = "0.3"
 
 # Version detection in a site's config.yml. The current header carries the
@@ -2157,6 +2157,23 @@ def _upgrade_package(kind: str) -> None:
         raise click.ClickException("Upgrade command failed — see output above.")
 
 
+def _reexec_with_sudo() -> None:
+    """Re-invoke the current upgrade command under sudo. Does not return."""
+    exe_path = Path(sys.executable).resolve()
+    click.echo(click.style(
+        "Upgrading mdcms requires sudo privileges. Please enter your password or re-run as a sudo user.",
+        fg="yellow"
+    ))
+    os.execvp("sudo", ["sudo", str(exe_path)] + sys.argv[1:])
+
+
+def _permission_denied(exe_path: Path) -> "click.ClickException":
+    return click.ClickException(
+        f"Permission denied writing to {exe_path}. Re-run with elevated permissions, "
+        f"e.g.: sudo mdcms upgrade"
+    )
+
+
 def _upgrade_binary(latest: str) -> None:
     exe_path = Path(sys.executable).resolve()
 
@@ -2169,6 +2186,15 @@ def _upgrade_binary(latest: str) -> None:
             f"{_binary_release_asset().rsplit('/', 1)[0]}/mdcms.deb && sudo dpkg -i mdcms.deb"
         )
 
+    # Linux/macOS binaries are commonly installed to a root-owned location
+    # (e.g. /usr/local/bin). Detect that up front and re-exec under sudo
+    # instead of downloading the binary only to fail to write it.
+    if (platform.system() != "Windows" and os.geteuid() != 0
+            and not os.access(exe_path, os.W_OK)):
+        if shutil.which("sudo"):
+            _reexec_with_sudo()
+        raise _permission_denied(exe_path)
+
     asset = _binary_release_asset()
     click.echo(f"Downloading v{latest} binary for this platform ...")
     data = _http_get(f"{REPO_RAW_BASE}/latest/{asset}")
@@ -2176,9 +2202,9 @@ def _upgrade_binary(latest: str) -> None:
         raise click.ClickException("Downloaded binary was empty — aborting.")
 
     tmp_path = exe_path.with_name(exe_path.name + ".new")
-    tmp_path.write_bytes(data)
 
     if platform.system() == "Windows":
+        tmp_path.write_bytes(data)
         # The running .exe is locked, so hand the swap off to a detached helper
         # script that waits for this process to exit before replacing it.
         bat_path = exe_path.with_name("mdcms_upgrade.bat")
@@ -2200,14 +2226,14 @@ def _upgrade_binary(latest: str) -> None:
         return
 
     try:
+        tmp_path.write_bytes(data)
         tmp_path.chmod(0o755)
         os.replace(tmp_path, exe_path)
     except PermissionError:
         tmp_path.unlink(missing_ok=True)
-        raise click.ClickException(
-            f"Permission denied writing to {exe_path}. Re-run with elevated permissions, "
-            f"e.g.: sudo mdcms upgrade"
-        )
+        if shutil.which("sudo"):
+            _reexec_with_sudo()
+        raise _permission_denied(exe_path)
     click.echo(click.style(f"Upgraded to v{latest}.", fg="green"))
 
 
