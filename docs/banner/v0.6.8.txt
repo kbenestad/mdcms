@@ -1,1 +1,1 @@
-This is the latest version.
+This version is outdated. Please go to https://github.com/kbenestad/mdcms to update.
