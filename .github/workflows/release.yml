@@ -204,12 +204,37 @@ jobs:
         with:
           python-version: "3.12"
 
+      # Capture the version being replaced *before* bumping, so the outdated
+      # banner can be written for the right file.
+      - name: Capture previous version
+        id: prevver
+        shell: bash
+        run: |
+          OLD_VERSION=$(python -c "import re;print(re.search(r'CLI_VERSION = \"([^\"]+)\"', open('mdcms.py').read()).group(1))")
+          echo "old_version=$OLD_VERSION" >> "$GITHUB_OUTPUT"
+
       # Apply the same version bump to main so the committed source (and the
       # next `pip install mdcms` / template download) matches the released tag.
       - name: Apply release version from tag
         if: github.ref_type == 'tag'
         shell: bash
         run: python scripts/bump_version.py "${GITHUB_REF_NAME}"
+
+      # docs/banner/v{version}.txt is what `mdcms --version` fetches to show a
+      # one-line status message for the running CLI. Mark the version just
+      # replaced as outdated, and create the file for the new release.
+      - name: Update version banners
+        if: github.ref_type == 'tag'
+        shell: bash
+        run: |
+          OLD_VERSION="${{ steps.prevver.outputs.old_version }}"
+          NEW_VERSION=$(python -c "import re;print(re.search(r'CLI_VERSION = \"([^\"]+)\"', open('mdcms.py').read()).group(1))")
+          NEW_DATE=$(python -c "import re;print(re.search(r'CLI_RELEASE_DATE = \"([^\"]+)\"', open('mdcms.py').read()).group(1))")
+          mkdir -p docs/banner
+          if [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
+            echo "This version is outdated. Please run mdcms upgrade or visit github.com/kbenestad/mdcms for more information." > "docs/banner/v${OLD_VERSION}.txt"
+          fi
+          echo "This is the latest version (${NEW_DATE})." > "docs/banner/v${NEW_VERSION}.txt"
 
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
@@ -234,7 +259,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add latest mdcms.py pyproject.toml app/config.yml app/index.html
+          git add latest mdcms.py pyproject.toml app/config.yml app/index.html docs/banner
           if git diff --staged --quiet; then
             echo "Nothing to commit."
           else
