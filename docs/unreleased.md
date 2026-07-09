@@ -11,5 +11,6 @@ Changes merged into `development` that have not yet been released to `main`.
 ## Fixed
 
 - `mdcms upgrade` on a standalone-binary install crashed with an uncaught `PermissionError` traceback when the binary's install location (e.g. `/usr/local/bin`) wasn't writable by the current user — the download-to-temp-file step wasn't covered by the existing permission-error handling. It now detects this case up front and automatically re-execs itself under `sudo` (prompting for the password), instead of failing or requiring the user to manually retype the command with `sudo`.
+- Markdown task list items (`- [ ] foo`, `- [x] done`) rendered with a bullet point next to the checkbox. The renderer now tags task-list `<li>` elements and suppresses their `list-style`, so only the checkbox shows.
 
 ---

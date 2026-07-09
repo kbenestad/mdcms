@@ -557,6 +557,11 @@ body {
 .md-content ul, .md-content ol { margin-bottom: 1.1em; padding-left: 1.75em; }
 .md-content li { margin-bottom: 0.3em; }
 .md-content li > ul, .md-content li > ol { margin-bottom: 0.3em; margin-top: 0.3em; }
+.md-content li.mdcms-task-list-item { list-style: none; }
+.md-content li.mdcms-task-list-item input[type="checkbox"] {
+  margin: 0 0.5em 0 -1.75em;
+  vertical-align: middle;
+}
 
 .md-content blockquote {
   border-left: 4px solid var(--accent);
@@ -1965,6 +1970,14 @@ body.scanlines-active::after {
       const esc = (codeText || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       const cls = codeLang ? ' class="language-' + codeLang + '"' : '';
       return '<pre><code' + cls + '>' + esc + '</code></pre>';
+    };
+
+    renderer.listitem = function(text, task, checked) {
+      let itemText = text;
+      if (typeof text === 'object') {
+        itemText = text.text; task = text.task; checked = text.checked;
+      }
+      return `<li${task ? ' class="mdcms-task-list-item"' : ''}>${itemText}</li>\n`;
     };
 
     marked.use({ renderer });
