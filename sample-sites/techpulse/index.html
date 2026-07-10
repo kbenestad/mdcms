@@ -934,7 +934,10 @@ a.pagination-link:hover { background: var(--nav-hover-bg); color: var(--font-col
     transition: transform 0.3s ease, visibility 0s ease 0.3s;
     padding: 0.5rem 0;
   }
+  .layout-topbar .mobile-nav-panel.nav-right { left: auto; right: 0; transform: translateX(100%); }
   .layout-topbar .mobile-nav-panel.open { transform: translateX(0); visibility: visible; transition: transform 0.3s ease; }
+  .layout-topbar .mobile-nav-panel.nav-right .sidebar-search-row,
+  .layout-topbar .mobile-nav-panel.nav-right .sidebar-footer-row { flex-direction: row-reverse; }
   .layout-topbar .mobile-overlay { top: 56px; z-index: 90; }
   .layout-topbar .mobile-nav-panel .nav-item {
     padding: 0.6rem 1.25rem;
@@ -2886,6 +2889,14 @@ function fmtDatetime(dtStr) {
   }
 
   // ─── Shell ────────────────────────────────────────────────
+  // Standard sidebar/panel side when nothing overrides it: right for an
+  // RTL default-category, left otherwise (including sites with no category
+  // system at all, which have no direction concept).
+  function standardNavPosition() {
+    const dflt = categoriesUse && defaultCategoryCode ? categoriesByCode[defaultCategoryCode] : null;
+    return (dflt && dflt.direction === 'rtl') ? 'right' : 'left';
+  }
+
   // Builds the dark-mode + panel-toggle row shared by the sidebar and by the
   // topbar's narrow-viewport nav panel, which mirrors the sidebar's look.
   // With a search bar the row is [search][darkmode][panel] (mirrored via CSS
@@ -2908,7 +2919,7 @@ function fmtDatetime(dtStr) {
 
   function buildSidebar() {
     const app = document.getElementById('app');
-    const navPos = config['nav-position'] || 'left';
+    const navPos = config['nav-position'] || standardNavPosition();
     const layout = el('div', { className: `layout-sidebar nav-${navPos}` });
 
     const mobileHeader = el('div', { className: 'mobile-header' });
@@ -3038,10 +3049,12 @@ function fmtDatetime(dtStr) {
 
     // Narrow viewports (too narrow for the topbar itself) fall back to a
     // sidebar-styled off-canvas panel — same look, search/darkmode/panel-
-    // toggle row and nav-item styling as navigation: sidebar.
+    // toggle row and nav-item styling as navigation: sidebar. Slides from
+    // the standard side (right for an RTL default-category, left otherwise).
     const hasSearch = config.search !== false;
-    const mobilePanel = el('div', { className: 'mobile-nav-panel', id: 'mobileNavPanel' });
-    const toggleRow = buildPanelToggleRow('left', hasSearch, () => closeDrawer());
+    const navPos = standardNavPosition();
+    const mobilePanel = el('div', { className: `mobile-nav-panel nav-${navPos}`, id: 'mobileNavPanel' });
+    const toggleRow = buildPanelToggleRow(navPos, hasSearch, () => closeDrawer());
     if (hasSearch) mobilePanel.appendChild(toggleRow);
     const mobileNavLinks = el('div', { className: 'nav-links', id: 'mobileNavLinks' });
     mobilePanel.appendChild(mobileNavLinks);
