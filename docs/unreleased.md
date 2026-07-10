@@ -7,6 +7,7 @@ Changes merged into `development` that have not yet been released to `main`.
 ## Added
 
 - The release workflow now maintains `docs/banner/v{version}.txt` automatically: on a tagged release, the file for the version being replaced is overwritten with an "outdated, please run `mdcms upgrade`" message, and a new file is created for the released version reading "This is the latest version (`d Mmmm YYYY`)." These are what `mdcms --version` fetches to show a one-line status message. `.github/workflows/release.yml` change only.
+- Sidebar collapse toggle: whenever a sidebar nav surface is shown (`navigation: sidebar`, or a narrow viewport falling back from `navigation: topbar`), a panel-toggle button now sits next to the dark-mode toggle (`left_panel_close`/`right_panel_close`, mirrored to `left_panel_open`/`right_panel_open` when collapsed, depending on `nav-position`). On desktop it collapses the sidebar out of view entirely, leaving a small fixed reopen button at the edge; on narrow viewports it closes the open drawer, same as the overlay. `navigation: topbar`'s narrow-viewport nav panel is now restyled to look and behave like the sidebar (same off-canvas slide, search/dark-mode/panel-toggle row, nav-item styling) instead of the old top-down dropdown.
 
 ## Fixed
 

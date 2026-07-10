@@ -184,9 +184,45 @@ body {
 .layout-sidebar.nav-left .sidebar { left: 0; }
 .layout-sidebar.nav-right .sidebar { right: 0; border-right: none; border-left: 1px solid var(--divider); }
 
-.layout-sidebar .main-area { flex: 1; min-width: 0; }
+.layout-sidebar .main-area { flex: 1; min-width: 0; transition: margin-left 0.3s ease, margin-right 0.3s ease; }
 .layout-sidebar.nav-left .main-area { margin-left: var(--nav-width); }
 .layout-sidebar.nav-right .main-area { margin-right: var(--nav-width); }
+
+/* Collapsible sidebar (desktop only — narrow viewports use the off-canvas
+   open/close behaviour further down instead). Toggled via the panel button
+   next to the dark-mode toggle; a fixed reopen button appears at the edge
+   the sidebar used to occupy. */
+.sidebar-reopen-btn { display: none; }
+@media (min-width: 769px) {
+  .layout-sidebar.sidebar-collapsed .sidebar { transform: translateX(-100%); visibility: hidden; }
+  .layout-sidebar.nav-right.sidebar-collapsed .sidebar { transform: translateX(100%); }
+  .layout-sidebar.nav-left.sidebar-collapsed .main-area { margin-left: 0; }
+  .layout-sidebar.nav-right.sidebar-collapsed .main-area { margin-right: 0; }
+
+  .sidebar-reopen-btn {
+    position: fixed;
+    top: 1rem;
+    z-index: 110;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    padding: 0;
+    color: var(--nav-toggle-colour);
+    background: var(--bg-nav);
+    border: 1px solid var(--divider);
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .sidebar-reopen-btn:hover { color: var(--nav-link-colour, var(--font-colour)); }
+  .sidebar-reopen-btn svg { width: 18px; height: 18px; }
+  .layout-sidebar.nav-left .sidebar-reopen-btn { left: 1rem; }
+  .layout-sidebar.nav-right .sidebar-reopen-btn { right: 1rem; }
+  .layout-sidebar.sidebar-collapsed .sidebar-reopen-btn { display: flex; }
+}
 
 .main-content { max-width: var(--main-width); margin: 0 auto; padding: 2rem 3rem 4rem; }
 
@@ -222,8 +258,12 @@ body {
 /* Search */
 .search-container { padding: 0.75rem 1.25rem; flex-shrink: 0; }
 
-/* Sidebar search row: search bar with dark-mode toggle to its right */
-.sidebar-search-row {
+/* Sidebar search row: search bar with dark-mode toggle and panel toggle to
+   its right (or mirrored when the sidebar is right-aligned). Used both by
+   the sidebar and by the topbar's narrow-viewport nav panel, which mirrors
+   the sidebar's look. */
+.sidebar-search-row,
+.sidebar-footer-row {
   display: flex;
   align-items: stretch;
   gap: 0.5rem;
@@ -231,6 +271,12 @@ body {
   flex-shrink: 0;
 }
 .sidebar-search-row .search-container { flex: 1; min-width: 0; padding: 0; }
+.sidebar-footer-row .theme-toggle { flex: 1; width: auto; }
+
+.layout-sidebar.nav-right .sidebar-search-row,
+.layout-sidebar.nav-right .sidebar-footer-row {
+  flex-direction: row-reverse;
+}
 
 .search-box {
   width: 100%;
@@ -353,13 +399,7 @@ body {
   font-weight: 600;
 }
 
-/* Sidebar footer */
-.sidebar-footer {
-  padding: 0.75rem 1.25rem;
-  flex-shrink: 0;
-}
-
-.theme-toggle {
+.theme-toggle, .panel-toggle {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -376,11 +416,12 @@ body {
   width: 100%;
   justify-content: center;
 }
-.theme-toggle:hover { color: var(--nav-link-colour, var(--font-colour)); border-color: var(--nav-toggle-colour); }
-.theme-toggle svg { width: 16px; height: 16px; flex-shrink: 0; }
+.theme-toggle:hover, .panel-toggle:hover { color: var(--nav-link-colour, var(--font-colour)); border-color: var(--nav-toggle-colour); }
+.theme-toggle svg, .panel-toggle svg { width: 16px; height: 16px; flex-shrink: 0; }
 
-/* Compact, icon-only toggle used beside the sidebar search bar */
-.theme-toggle-compact { width: auto; flex-shrink: 0; padding: 0.4rem 0.55rem; gap: 0; }
+/* Compact, icon-only toggle used beside the sidebar search bar. The panel
+   toggle is always icon-only, so it always carries this shape. */
+.theme-toggle-compact, .panel-toggle { width: auto; flex-shrink: 0; padding: 0.4rem 0.55rem; gap: 0; }
 .theme-toggle-compact span:not(.mdcms-icon) { display: none; }
 
 /* ═══════════════════════════════════════════
@@ -870,24 +911,31 @@ a.pagination-link:hover { background: var(--nav-hover-bg); color: var(--font-col
 
   .topbar-nav { display: none; }
   .topbar-search { display: none; }
+  /* The dark-mode toggle moves into the sidebar-styled nav panel below,
+     alongside the panel toggle, so the fixed topbar only keeps the hamburger. */
+  .topbar-actions > .theme-toggle { display: none; }
   .layout-topbar .hamburger { display: inline-flex; }
   /* .topbar-nav carries flex:1; with it hidden, push the actions to the right edge */
   .layout-topbar .topbar-actions { margin-left: auto; }
 
   .layout-topbar .mobile-nav-panel {
-    display: block;
+    display: flex;
+    flex-direction: column;
     position: fixed;
-    top: 56px; left: 0; right: 0; bottom: 0;
+    top: 56px; left: 0; bottom: 0;
+    width: 80vw;
+    max-width: 320px;
     background: var(--bg-nav);
-    z-index: 90;
+    z-index: 100;
     overflow-y: auto;
-    transform: translateY(-100%);
-    opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    box-shadow: var(--shadow-md);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.3s ease, visibility 0s ease 0.3s;
     padding: 0.5rem 0;
   }
-  .layout-topbar .mobile-nav-panel.open { transform: translateY(0); opacity: 1; }
-  .layout-topbar .mobile-nav-panel .search-container { padding: 0.75rem 1rem; }
+  .layout-topbar .mobile-nav-panel.open { transform: translateX(0); visibility: visible; transition: transform 0.3s ease; }
+  .layout-topbar .mobile-overlay { top: 56px; z-index: 90; }
   .layout-topbar .mobile-nav-panel .nav-item {
     padding: 0.6rem 1.25rem;
     font-size: 1rem;
@@ -916,7 +964,7 @@ a.pagination-link:hover { background: var(--nav-hover-bg); color: var(--font-col
 
 @media (max-width: 480px) {
   .layout-sidebar .sidebar { width: 100vw; max-width: none; }
-  .layout-topbar .mobile-nav-panel { bottom: 0; }
+  .layout-topbar .mobile-nav-panel { width: 100vw; max-width: none; bottom: 0; }
   .main-content { padding: 1rem 1rem 3rem; }
 }
 
@@ -1221,8 +1269,8 @@ body.scanlines-active::after {
 }
 
 @media print {
-  .sidebar, .topbar, .scroll-top, .hamburger,
-  .mobile-header, .theme-toggle, .search-container { display: none !important; }
+  .sidebar, .topbar, .scroll-top, .hamburger, .mobile-nav-panel,
+  .mobile-header, .theme-toggle, .panel-toggle, .sidebar-reopen-btn, .search-container { display: none !important; }
   .main-area { margin: 0 !important; }
   .main-content { max-width: 100%; padding: 0; }
   body.scanlines-active::after { display: none; }
@@ -1315,7 +1363,7 @@ body.scanlines-active::after {
   }
 
   // ─── Icons ────────────────────────────────────────────────
-  const STANDARD_ICONS = ['dark_mode','light_mode','menu','search','arrow_right','arrow_drop_down','mobile_arrow_down','language','info','warning','error','success','exclamation','dangerous','report','history','text_compare','keyboard_arrow_right','keyboard_arrow_down','keyboard_double_arrow_right','keyboard_double_arrow_down','expand_content','collapse_content','add','minimize'];
+  const STANDARD_ICONS = ['dark_mode','light_mode','menu','search','arrow_right','arrow_drop_down','mobile_arrow_down','language','info','warning','error','success','exclamation','dangerous','report','history','text_compare','keyboard_arrow_right','keyboard_arrow_down','keyboard_double_arrow_right','keyboard_double_arrow_down','expand_content','collapse_content','add','minimize','left_panel_close','left_panel_open','right_panel_close','right_panel_open'];
   const iconCache = {};
 
   function normaliseIconName(name) {
@@ -1679,13 +1727,12 @@ body.scanlines-active::after {
     const darkSheet = document.getElementById('hljs-dark');
     if (lightSheet) lightSheet.disabled = (theme === 'dark');
     if (darkSheet) darkSheet.disabled = (theme === 'light');
-    const btn = document.querySelector('.theme-toggle');
-    if (btn) {
-      const isDark = theme === 'dark';
+    const isDark = theme === 'dark';
+    document.querySelectorAll('.theme-toggle').forEach((btn) => {
       btn.innerHTML = '';
       btn.appendChild(iconEl(isDark ? 'light_mode' : 'dark_mode'));
       btn.appendChild(el('span', { textContent: isDark ? 'Light mode' : 'Dark mode' }));
-    }
+    });
     computeDerivedTokens();
   }
 
@@ -2839,6 +2886,26 @@ function fmtDatetime(dtStr) {
   }
 
   // ─── Shell ────────────────────────────────────────────────
+  // Builds the dark-mode + panel-toggle row shared by the sidebar and by the
+  // topbar's narrow-viewport nav panel, which mirrors the sidebar's look.
+  // With a search bar the row is [search][darkmode][panel] (mirrored via CSS
+  // row-reverse for a right-aligned panel); without one it's [darkmode][panel].
+  function buildPanelToggleRow(navPos, hasSearch, onPanelToggle) {
+    const row = el('div', { className: hasSearch ? 'sidebar-search-row' : 'sidebar-footer-row' });
+    if (hasSearch) row.appendChild(buildSearchWidget());
+    const themeBtn = el('button', {
+      className: hasSearch ? 'theme-toggle theme-toggle-compact' : 'theme-toggle',
+      'aria-label': 'Toggle theme'
+    });
+    themeBtn.addEventListener('click', toggleTheme);
+    row.appendChild(themeBtn);
+    const panelBtn = el('button', { className: 'panel-toggle', 'aria-label': 'Collapse sidebar' });
+    panelBtn.appendChild(iconEl(navPos === 'right' ? 'right_panel_close' : 'left_panel_close'));
+    panelBtn.addEventListener('click', onPanelToggle);
+    row.appendChild(panelBtn);
+    return row;
+  }
+
   function buildSidebar() {
     const app = document.getElementById('app');
     const navPos = config['nav-position'] || 'left';
@@ -2874,24 +2941,32 @@ function fmtDatetime(dtStr) {
     }
     sidebar.appendChild(header);
 
-    if (config.search !== false) {
-      const searchRow = el('div', { className: 'sidebar-search-row' });
-      searchRow.appendChild(buildSearchWidget());
-      const rowToggle = el('button', { className: 'theme-toggle theme-toggle-compact', 'aria-label': 'Toggle theme' });
-      rowToggle.addEventListener('click', toggleTheme);
-      searchRow.appendChild(rowToggle);
-      sidebar.appendChild(searchRow);
+    const isDesktopViewport = () => window.matchMedia('(min-width: 769px)').matches;
+    function togglePanel() {
+      if (isDesktopViewport()) setSidebarCollapsed(!layout.classList.contains('sidebar-collapsed'));
+      else closeMobileMenu();
     }
+    const hasSearch = config.search !== false;
+    const toggleRow = buildPanelToggleRow(navPos, hasSearch, togglePanel);
+    if (hasSearch) sidebar.appendChild(toggleRow);
 
     const navLinksEl = el('div', { className: 'nav-links', id: 'navLinks' });
     sidebar.appendChild(navLinksEl);
 
-    if (config.search === false) {
-      const sidebarFooter = el('div', { className: 'sidebar-footer' });
-      const toggleBtn = el('button', { className: 'theme-toggle', 'aria-label': 'Toggle theme' });
-      toggleBtn.addEventListener('click', toggleTheme);
-      sidebarFooter.appendChild(toggleBtn);
-      sidebar.appendChild(sidebarFooter);
+    if (!hasSearch) sidebar.appendChild(toggleRow);
+
+    const reopenBtn = el('button', { className: 'sidebar-reopen-btn', 'aria-label': 'Expand sidebar' });
+    reopenBtn.appendChild(iconEl(navPos === 'right' ? 'right_panel_open' : 'left_panel_open'));
+    reopenBtn.addEventListener('click', () => setSidebarCollapsed(false));
+
+    function setSidebarCollapsed(collapsed) {
+      layout.classList.toggle('sidebar-collapsed', collapsed);
+      try { localStorage.setItem('md-cms-sidebar-collapsed', collapsed ? '1' : '0'); } catch (e) { /* localStorage unavailable */ }
+    }
+    if (isDesktopViewport()) {
+      try {
+        if (localStorage.getItem('md-cms-sidebar-collapsed') === '1') layout.classList.add('sidebar-collapsed');
+      } catch (e) { /* localStorage unavailable */ }
     }
 
     const mainArea = el('div', { className: 'main-area' });
@@ -2911,6 +2986,7 @@ function fmtDatetime(dtStr) {
 
     layout.appendChild(sidebar);
     layout.appendChild(overlay);
+    layout.appendChild(reopenBtn);
     layout.appendChild(mainArea);
     app.appendChild(layout);
 
@@ -2960,13 +3036,23 @@ function fmtDatetime(dtStr) {
     actions.appendChild(hamburger);
     topbar.appendChild(actions);
 
+    // Narrow viewports (too narrow for the topbar itself) fall back to a
+    // sidebar-styled off-canvas panel — same look, search/darkmode/panel-
+    // toggle row and nav-item styling as navigation: sidebar.
+    const hasSearch = config.search !== false;
     const mobilePanel = el('div', { className: 'mobile-nav-panel', id: 'mobileNavPanel' });
-    if (config.search !== false) mobilePanel.appendChild(buildSearchWidget());
+    const toggleRow = buildPanelToggleRow('left', hasSearch, () => closeDrawer());
+    if (hasSearch) mobilePanel.appendChild(toggleRow);
     const mobileNavLinks = el('div', { className: 'nav-links', id: 'mobileNavLinks' });
     mobilePanel.appendChild(mobileNavLinks);
+    if (!hasSearch) mobilePanel.appendChild(toggleRow);
+
+    const overlay = el('div', { className: 'mobile-overlay' });
+    overlay.addEventListener('click', () => closeDrawer());
 
     layout.appendChild(topbar);
     layout.appendChild(mobilePanel);
+    layout.appendChild(overlay);
 
     const mainArea = el('div', { className: 'main-area' });
     const mainContent = el('div', { className: 'main-content' });
@@ -2984,15 +3070,16 @@ function fmtDatetime(dtStr) {
     app.appendChild(layout);
 
     hamburger.addEventListener('click', () => {
-      const panel = document.getElementById('mobileNavPanel');
-      panel.classList.toggle('open');
+      mobilePanel.classList.toggle('open');
+      overlay.classList.toggle('active');
       hamburger.innerHTML = ''; hamburger.appendChild(iconEl('menu'));
     });
-    window._closeMobileMenu = function() {
-      const panel = document.getElementById('mobileNavPanel');
-      if (panel) panel.classList.remove('open');
+    function closeDrawer() {
+      mobilePanel.classList.remove('open');
+      overlay.classList.remove('active');
       hamburger.innerHTML = ''; hamburger.appendChild(iconEl('menu'));
-    };
+    }
+    window._closeMobileMenu = closeDrawer;
 
     document.addEventListener('click', () => closeTopbarGroups(null));
     // Fixed-position dropdowns are placed relative to the viewport, so close them
