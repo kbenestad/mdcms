@@ -2073,24 +2073,38 @@ def _interactive_config(site_path: Path):
 
 # ─── CLI commands ─────────────────────────────────────────────
 
-def _version_callback(ctx, param, value):
-    if not value or ctx.resilient_parsing:
-        return
-    click.echo(f"mdcms v{CLI_VERSION} (released {CLI_RELEASE_DATE})")
+def _fetch_banner_message() -> str:
+    """Fetch this version's one-line status message from docs/banner/v{CLI_VERSION}.txt."""
     url = f"https://raw.githubusercontent.com/kbenestad/mdcms/refs/heads/main/docs/banner/v{CLI_VERSION}.txt?t={int(time.time())}"
     try:
         ssl_ctx = ssl.create_default_context(cafile=certifi.where())
         req = urllib.request.Request(url, headers={"User-Agent": f"mdcms/{CLI_VERSION}"})
         with urllib.request.urlopen(req, context=ssl_ctx, timeout=5) as resp:
-            click.echo(resp.read().decode("utf-8").strip())
-    except urllib.error.HTTPError as e:
-        if e.code == 404:
-            click.echo("There is no online information defined for this version.")
-        else:
-            click.echo("There is no online information defined for this version.")
+            return resp.read().decode("utf-8").strip()
     except Exception:
-        click.echo("There is no online information defined for this version.")
+        return "There is no online information defined for this version."
+
+
+def _version_callback(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo(f"mdcms v{CLI_VERSION} (released {CLI_RELEASE_DATE})")
+    click.echo(_fetch_banner_message())
     ctx.exit()
+
+
+def _print_startup_banner() -> None:
+    """Print the boxed MD-CMS wordmark/version/status banner shown before the bare-command help."""
+    width = 80
+    left, right = "MD-CMS", "kbenestad/mdcms"
+    padding = " " * (width - len(left) - len(right))
+    click.echo("=" * width)
+    click.echo(click.style(left, bold=True) + padding + click.style(right, fg="bright_black"))
+    click.echo(click.style(f"v{CLI_VERSION} • {CLI_RELEASE_DATE}".rjust(width), fg="bright_black"))
+    message = _fetch_banner_message()
+    click.echo(click.style(message, fg="green" if "latest version" in message.lower() else "yellow"))
+    click.echo("=" * width)
+    click.echo()
 
 
 _REMOTE_VERSION_RE = re.compile(r'CLI_VERSION = "([^"]+)"')
@@ -2237,14 +2251,21 @@ def _upgrade_binary(latest: str) -> None:
     click.echo(click.style(f"Upgraded to v{latest}.", fg="green"))
 
 
-@click.group()
+@click.group(invoke_without_command=True,
+             epilog="Use --help at any command for more information")
 @click.option("--version", is_flag=True, is_eager=True, expose_value=False,
               callback=_version_callback, help="Show version and exit.")
-def cli():
+@click.pass_context
+def cli(ctx):
     """MD-CMS — Markdown-based CMS companion CLI.
 
     Manage and build MD-CMS sites locally or in CI/CD pipelines.
     """
+    if ctx.invoked_subcommand is None:
+        click.clear()
+        _print_startup_banner()
+        click.echo(ctx.get_help())
+        ctx.exit()
 
 
 @cli.command()
