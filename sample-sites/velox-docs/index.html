@@ -2659,8 +2659,11 @@ function fmtDatetime(dtStr) {
   // named in `sectionArg`).
   function renderTocTag(container, cfg) {
     const raw = (cfg && cfg.tagName ? cfg.tagName : 'toc').trim();
-    const parts = raw.split(/\s+/);
-    const base = parts[0];
+    // Accept "toc-section reference", "toc-section: reference", and a
+    // "section: reference" option line — every other mdcms block takes
+    // key: value options, so authors reasonably write all three forms.
+    const m = raw.match(/^(toc(?:-section|-page)?)\s*:?\s*(\S*)/);
+    const base = m ? m[1] : raw.split(/\s+/)[0];
 
     if (base === 'toc-page') {
       renderTocPageTag(container);
@@ -2668,7 +2671,9 @@ function fmtDatetime(dtStr) {
     }
 
     const variant = base === 'toc-section' ? 'section' : 'all';
-    const sectionArg = variant === 'section' ? (parts[1] || null) : null;
+    const sectionArg = variant === 'section'
+      ? ((m && m[2]) || (cfg && cfg.options && cfg.options.section) || null)
+      : null;
 
     const byCode = {};
     navSections.forEach(s => { byCode[s.code] = s; });
@@ -2882,7 +2887,7 @@ function fmtDatetime(dtStr) {
         var cfg = JSON.parse(tagEl.getAttribute('data-config'));
         if (/^callout-(info|warning|success|error)$/.test(cfg.tagName)) {
           renderCalloutTag(tagEl, cfg);
-        } else if (/^toc(-section|-page)?(\s|$)/.test(cfg.tagName)) {
+        } else if (/^toc(-section|-page)?(\s|:|$)/.test(cfg.tagName)) {
           renderTocTag(tagEl, cfg);
         } else if (/^tab(-underline|-filled)?$/.test(cfg.tagName)) {
           renderTabsTag(tagEl, cfg);

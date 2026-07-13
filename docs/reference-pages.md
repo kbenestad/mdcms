@@ -137,11 +137,24 @@ toc-section
 ```
 ````
 
-With no argument, it lists the pages of the section the current page belongs to (or the unsectioned pages, if the current page has no `section-id`). Pass a section id to list a specific section regardless of the current page:
+With no argument, it lists the pages of the section the current page belongs to (or the unsectioned pages, if the current page has no `section-id`). Pass a section id to list a specific section regardless of the current page — all three spellings are equivalent:
 
 ````markdown
 ```mdcms
 toc-section reference
+```
+````
+
+````markdown
+```mdcms
+toc-section: reference
+```
+````
+
+````markdown
+```mdcms
+toc-section
+section: reference
 ```
 ````
 
@@ -153,7 +166,7 @@ toc-page
 ```
 ````
 
-None of these take options.
+Apart from `toc-section`'s section id (in any of the three spellings above), none of these take options.
 
 ---
 
