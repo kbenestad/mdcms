@@ -4,7 +4,7 @@
 
   Licensed under Apache 2.0 licence.
 
-  CURRENT VERSION: 0.6.10 - 5 July 2026
+  CURRENT VERSION: 0.6.11 - 10 July 2026
 -->
 <!--
   MD-CMS — Renderer
@@ -1019,6 +1019,15 @@ a.pagination-link:hover { background: var(--nav-hover-bg); color: var(--font-col
 .post-sep { color: var(--font-colour-muted); flex-shrink: 0; }
 .post-title { flex: 1; }
 .posts-empty { color: var(--font-colour-muted); font-style: italic; }
+
+/* Narrow viewports: stack date/time above the title, with air below the
+   title so each item stays visually separated from the next. */
+@media (max-width: 600px) {
+  .post-list a { flex-direction: column; gap: 0.15rem; }
+  .post-list li { padding: 0.5rem 0 0.85rem; }
+  .post-date { min-width: 0; }
+  .post-sep { display: none; }
+}
 
 .post-year-select {
   padding: 0.3rem 0.6rem;

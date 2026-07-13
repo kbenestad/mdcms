@@ -216,7 +216,7 @@ paginate: yes
 ```
 ````
 
-Reliable tags (others are known-broken): `posts-created-chronological-byyearmonth`, `posts-created-reversechronological`. Use `created` frontmatter (format: `YYYY-MM-DD HH:MM`) for posts.
+The full grammar is `posts-created-<order>[-<modifier>]` — order `chronological` | `reversechronological`, optional modifier `byyear` | `byyearmonth` | `lastyear` | `lastmonth`. All variants work (verified end-to-end in-browser, July 2026), including the `limit:`, `paginate:` (`yes` = page bar with Prev/Next/jump, `no` = "Load more" batches — the default, `none` = hard cap at `limit`), `selectyear:`, and `defaultyear:` options. Use `created` frontmatter (format: `YYYY-MM-DD HH:MM`) for posts. On viewports ≤ 600px each list item stacks: date/time on top, title link underneath, extra padding below the link before the next item's divider.
 
 ## Release workflow
 
@@ -244,7 +244,6 @@ Because `publish` and `publish-intel` push to `main`, the repo's **Actions → W
 
 ## Known limitations
 
-- Most `posts-*` tag variants are broken. Only `posts-datetime-chronological-byyearmonth` and `posts-datetime-reversechronological` reliably work.
 - Section headings in the nav are non-clickable (sections-sitemap is not yet implemented).
 - `mdcms fetch-deps` is currently broken (`NameError` — `CDN_DEPS`/`_fetch_bunny_fonts`/`_patch_index_html` are referenced but undefined). See `docs/knownbugs.md`.
 
@@ -319,10 +318,10 @@ All UI icons served as local SVGs from `app/assets/icons/`. No Google Fonts or e
 - Category code validation uses `CATEGORY_CODE_RE = re.compile(r"^[a-zA-Z0-9\-]+$")` — codes must match this.
 - `scan_and_categorize()` takes both `directory` and `site_root` — paths in records are always relative to `site_root`.
 - The `sample-sites/` directory holds several reference sites (sidebar and topbar, docs / blog / book / news styles) plus `index.html`, a self-contained gallery that previews any site under any theme from `themes/` via the renderer's `?theme=` override. `sample-sites/themes.json` is the generated theme manifest it reads. Deployed to GitHub Pages from `main` only (`.github/workflows/pages.yml`) — there is no branch switcher (one was added to preview `development` via jsDelivr, but jsDelivr's CDN cache lags fresh pushes by minutes to hours and didn't reliably show new themes, so it was removed). This is why theme changes are pushed straight to `main` — see the Branching convention section. Rebuild any sample site with `mdcms build --path sample-sites/<name>`, and regenerate the theme manifest if you add themes.
-- **⚠️ Each of the seven sample sites carries its own static copy of `index.html` — not a live link to `app/index.html`.** Every time `app/index.html` changes (any renderer fix, new theme token, CSS/JS change), re-copy it into all seven `sample-sites/<name>/index.html` in the same commit, preserving each site's own `<title>`. Skipping this means the fix is invisible in the deployed picker even after merging to `main` — this has already caused two renderer fixes (the `heading` palette token and the Bunny Fonts multi-family bug) to silently not show up until caught and re-synced separately. Quick re-sync for all seven at once:
+- **⚠️ Each of the eight sample sites carries its own static copy of `index.html` — not a live link to `app/index.html`.** Every time `app/index.html` changes (any renderer fix, new theme token, CSS/JS change), re-copy it into all eight `sample-sites/<name>/index.html` in the same commit, preserving each site's own `<title>`. Skipping this means the fix is invisible in the deployed picker even after merging to `main` — this has already caused three renderer fixes (the `heading` palette token, the Bunny Fonts multi-family bug, and the collapsible sidebar missing from `hearth-and-bean`) to silently not show up until caught and re-synced separately. If a new sample site is added, add it to the list below in the same commit. Quick re-sync for all eight at once:
   ```bash
   canonical_title=$(grep -o '<title>.*</title>' app/index.html)
-  for d in showcase techpulse kitchen-table neuraldb-docs modern-philosophy velox-docs wandering-algorithm; do
+  for d in showcase techpulse kitchen-table neuraldb-docs modern-philosophy velox-docs wandering-algorithm hearth-and-bean; do
     title=$(grep -o '<title>.*</title>' "sample-sites/$d/index.html")
     cp app/index.html "sample-sites/$d/index.html"
     python3 - "$d" "$title" "$canonical_title" <<'PYEOF'
