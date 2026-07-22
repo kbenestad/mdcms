@@ -5,7 +5,7 @@
 #
 # Licensed under Apache 2.0 licence.
 #
-# CURRENT VERSION: 0.6.11 - 10 July 2026
+# CURRENT VERSION: 0.6.13 - 22 July 2026
 #
 # Copyright 2026 Kristian Benestad
 #
@@ -42,9 +42,14 @@ import certifi
 import click
 import yaml
 
-CLI_VERSION = "0.6.11"
-CLI_RELEASE_DATE = "10 July 2026"
+CLI_VERSION = "0.6.13"
+CLI_RELEASE_DATE = "22 July 2026"
 MIN_SUPPORTED_VERSION = "0.3"
+
+# Minimum theme-file format the renderer/build supports. Theme files carry their
+# own marker (`# mdcms theme vX.Y[.Z]`) independent of the site version; older
+# themes are auto-refreshed from the library on build (see _ensure_theme_current).
+MIN_SUPPORTED_THEME_VERSION = "0.6.0"
 
 # Version detection in a site's config.yml. The current header carries the
 # version on a `CURRENT VERSION: X.Y[.Z] - <date>` line; older sites (still in
@@ -52,6 +57,9 @@ MIN_SUPPORTED_VERSION = "0.3"
 # Both are recognised so existing sites keep building after this format change.
 VERSION_LINE_RE = re.compile(r"CURRENT VERSION:\s*v?(\d+\.\d+(?:\.\d+)?)", re.IGNORECASE)
 MARKER_RE = re.compile(r"mdcms v(\d+\.\d+(?:\.\d+)?)", re.IGNORECASE)
+# Theme files carry `# mdcms theme vX.Y[.Z]`; the legacy `mdcms vX.Y` marker
+# (MARKER_RE) is still accepted as a fallback for themes installed before 0.6.0.
+THEME_VERSION_RE = re.compile(r"mdcms theme v(\d+\.\d+(?:\.\d+)?)", re.IGNORECASE)
 CATEGORY_CODE_RE = re.compile(r"^[a-zA-Z0-9\-]+$")
 
 REGISTRY_FILE = Path.home() / ".config" / "mdcms" / "sites.json"
@@ -87,6 +95,26 @@ def read_site_version(site_path: Path) -> "str | None":
         return None
     m = VERSION_LINE_RE.search(header) or MARKER_RE.search(header)
     return m.group(1) if m else None
+
+
+def theme_version_from_text(text: str) -> "str | None":
+    """Extract a theme version marker from a theme file's leading comment header.
+
+    Recognises the current `# mdcms theme vX.Y[.Z]` marker and, as a fallback,
+    the legacy `# mdcms vX.Y | DO NOT REMOVE THIS COMMENT` marker themes carried
+    before 0.6.0. Returns the version string, or None when no marker is present.
+    """
+    header = "\n".join(text.splitlines()[:25])
+    m = THEME_VERSION_RE.search(header) or MARKER_RE.search(header)
+    return m.group(1) if m else None
+
+
+def read_theme_version(theme_path: Path) -> "str | None":
+    """Read the version marker from a theme file, or None if it can't be read."""
+    try:
+        return theme_version_from_text(theme_path.read_text(encoding="utf-8"))
+    except OSError:
+        return None
 
 
 def version_status(site_version: str) -> "tuple[str, str]":
@@ -651,6 +679,9 @@ def run_build(site_path: Path):
         raise click.ClickException("pages/ directory not found in site.")
 
     cfg = read_config(site_path)
+
+    _ensure_theme_current(site_path, cfg)
+
     cat = get_category_info(cfg)
 
     all_codes = [c for c in ([cat["default_code"]] + cat["codes"]) if c]
@@ -1327,6 +1358,73 @@ def install_theme(site_path: Path, entry: dict) -> str:
     rel = f"assets/themes/{entry['file']}"
     set_config_keys(site_path, {"theme": rel})
     return rel
+
+
+def _ensure_theme_current(site_path: Path, cfg: dict):
+    """Check the site's installed theme against MIN_SUPPORTED_THEME_VERSION.
+
+    Themes carry their own `# mdcms theme vX.Y[.Z]` marker. When the file a
+    site's `theme:` points at is unmarked or older than the minimum, fetch a
+    fresh copy of the same theme from the library and write it back to the very
+    path config.yml names — leaving the site's `theme:` key untouched. Library
+    themes (`assets/themes/<file>.yaml`) refresh in place; a starter `theme.yml`
+    is not in the library, so it only warns (reinstall via `mdcms config`).
+    Never fatal: any problem is reported as a warning so the build still runs.
+    """
+    theme_rel = cfg.get("theme")
+    if not theme_rel:
+        return
+    theme_path = site_path / theme_rel
+    if not theme_path.exists():
+        return
+
+    tv = read_theme_version(theme_path)
+    if tv is not None and _parse_ver(tv) >= _parse_ver(MIN_SUPPORTED_THEME_VERSION):
+        return  # already current
+
+    filename = Path(theme_rel).name
+    old = f"v{tv}" if tv else "unversioned"
+    try:
+        entries = load_theme_index()
+    except click.ClickException as e:
+        click.echo(click.style(
+            f"Warning: theme '{filename}' is {old} (needs v{MIN_SUPPORTED_THEME_VERSION}); "
+            f"could not reach the theme library to refresh it: {e}", fg="yellow"))
+        return
+
+    match = next((e for e in entries if e["file"].lower() == filename.lower()), None)
+    if not match:
+        click.echo(click.style(
+            f"Warning: theme '{filename}' is {old} (needs v{MIN_SUPPORTED_THEME_VERSION}) "
+            f"but is not in the theme library, so it can't be auto-refreshed. "
+            f"Install a current theme with 'mdcms config --theme <name>' "
+            f"or bring its marker up to date manually.", fg="yellow"))
+        return
+
+    try:
+        new_bytes = _fetch_theme_bytes(match)
+    except (OSError, urllib.error.URLError) as e:
+        click.echo(click.style(
+            f"Warning: theme '{filename}' is {old} but could not be refreshed: {e}", fg="yellow"))
+        return
+
+    # Only overwrite when the library copy is actually newer. When the source
+    # itself is stale (e.g. building from a checkout whose themes/ hasn't been
+    # synced), rewriting would be a no-op that repeats on every build — warn
+    # about the library instead of claiming a bogus "v0.4 → v0.4" update.
+    new_v = theme_version_from_text(new_bytes.decode("utf-8", "replace"))
+    if new_v is None or _parse_ver(new_v) < _parse_ver(MIN_SUPPORTED_THEME_VERSION):
+        src = f"v{new_v}" if new_v else "unversioned"
+        click.echo(click.style(
+            f"Warning: theme '{filename}' is {old}, but the copy in the theme library "
+            f"is itself {src} (below v{MIN_SUPPORTED_THEME_VERSION}) — not refreshing. "
+            f"The theme library needs updating.", fg="yellow"))
+        return
+
+    theme_path.write_bytes(new_bytes)
+    click.echo(click.style(
+        f"  Updated theme '{filename}' ({old} → v{new_v}) — refreshed from the theme library.",
+        fg="cyan"))
 
 
 def _resolve_theme_query(entries: list, query: str) -> dict:
