@@ -23,8 +23,10 @@
 
 """MD-CMS — CLI tool for managing and building MD-CMS sites."""
 
+import base64
 import datetime
 import json
+import mimetypes
 import os
 import platform
 import re
@@ -930,6 +932,357 @@ def generate_site_manifest(site_path: Path):
         json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8"
     )
     click.echo(f"  Wrote {MANIFEST_FILENAME} ({len(files)} files)")
+
+
+# ─── Single-file bundle ────────────────────────────────────────
+#
+# Produces one self-contained HTML file that embeds config.yml, theme.yml,
+# nav.yml, search.json, every page/post, and referenced assets, so the site
+# can be opened from any storage medium with no sibling files and no server.
+#
+# Mechanism: a small shim monkey-patches window.fetch to serve embedded
+# content for the paths the renderer already fetches (config/theme/nav/
+# search/pages/icons) — the renderer's own JS is untouched. A handful of
+# other call sites (favicon, logo, category fonts) build asset paths by
+# string-concatenation rather than fetch(), so those specific lines are
+# patched, verbatim-match-or-skip, to consult the same embedded map.
+
+_FONT_MIME_BY_EXT = {
+    ".woff2": "font/woff2",
+    ".woff": "font/woff",
+    ".ttf": "font/ttf",
+    ".otf": "font/otf",
+}
+
+_BUNDLE_LOGO_IMG_SRC = 'src: `assets/images/${config.logo}`'
+_BUNDLE_FAVICON_LINE = 'if (link) link.href = `assets/images/${config.favicon}`;'
+_BUNDLE_LOGO_FAVICON_LINE = 'if (link) link.href = `assets/images/${config.logo}`;'
+_BUNDLE_FONT_FACE_LINE = (
+    'const css = `@font-face { font-family: "${family}"; '
+    'src: url("assets/fonts/${cat.font}"); }`;'
+)
+_BUNDLE_FONT_FACE_OBJ_LINE = "const face = new FontFace(family, `url(assets/fonts/${cat.font})`);"
+_BUNDLE_BUNNY_GUARD = "if (bunnyFonts.length) {"
+_BUNDLE_GOOGLE_GUARD = "if (googleFonts.length) {"
+
+# navigateTo() rewrites window.location's pathname to `basePath + slug` for
+# clean-URL pages. basePath is derived from wherever the page was opened, which
+# for a bundle opened straight off disk is a directory that doesn't contain the
+# bundle file itself — pushState/replaceState to that URL throws a SecurityError
+# under file:// (Chrome refuses history navigation to an unrelated local path).
+# Skip all three history calls when running under file:// so the bundle degrades
+# to in-memory-only routing (no address-bar URL, no Back/Forward) instead of
+# throwing and aborting navigation.
+_BUNDLE_HISTORY_BLOCK_OLD = """    if (historyMode === 'push') {
+      // Re-navigating to the URL already showing (e.g. clicking the current
+      // nav link again) must not stack a duplicate entry that Back would land
+      // on with nothing visibly changing.
+      if (u.href === window.location.href) {
+        window.history.replaceState(null, '', u);
+      } else {
+        window.history.pushState(null, '', u);
+      }
+    } else if (historyMode === 'replace') {
+      window.history.replaceState(null, '', u);
+    }"""
+_BUNDLE_HISTORY_BLOCK_NEW = """    if (window.location.protocol !== 'file:') {
+      if (historyMode === 'push') {
+        // Re-navigating to the URL already showing (e.g. clicking the current
+        // nav link again) must not stack a duplicate entry that Back would land
+        // on with nothing visibly changing.
+        if (u.href === window.location.href) {
+          window.history.replaceState(null, '', u);
+        } else {
+          window.history.pushState(null, '', u);
+        }
+      } else if (historyMode === 'replace') {
+        window.history.replaceState(null, '', u);
+      }
+    }"""
+
+_SCRIPT_SRC_RE = re.compile(r'<script src="(https://[^"]+)"></script>')
+_LINK_CSS_RE = re.compile(r'<link rel="stylesheet" href="(https://[^"]+)"([^>]*)>')
+_FONT_CSS_URL_RE = re.compile(r'url\((["\']?)(https?://[^)"\']+)\1\)')
+
+
+def _bundle_mime_for(path: Path) -> str:
+    ext = path.suffix.lower()
+    if ext in _FONT_MIME_BY_EXT:
+        return _FONT_MIME_BY_EXT[ext]
+    mime, _ = mimetypes.guess_type(path.name)
+    return mime or "application/octet-stream"
+
+
+def _bundle_data_uri(path: Path) -> str:
+    mime = _bundle_mime_for(path)
+    b64 = base64.b64encode(path.read_bytes()).decode("ascii")
+    return f"data:{mime};base64,{b64}"
+
+
+def _bundle_collect_asset_refs(site_path: Path, cfg: dict, theme_text: "str | None") -> list:
+    """Every 'assets/...' path referenced from config.yml, theme.yml, or page/post bodies."""
+    refs: list = []
+    _collect_yaml_assets(cfg, "config.yml", refs)
+    if theme_text:
+        try:
+            theme_data = yaml.safe_load(theme_text) or {}
+            _collect_yaml_assets(theme_data, "theme.yml", refs)
+        except yaml.YAMLError:
+            pass
+    for folder in ("pages", "posts"):
+        d = site_path / folder
+        if not d.is_dir():
+            continue
+        for md_file in sorted(d.rglob("*.md")):
+            content = md_file.read_text(encoding="utf-8")
+            for m in _ASSET_RE.finditer(content):
+                refs.append((m.group(), str(md_file)))
+    seen: set = set()
+    ordered: list = []
+    for asset_path, _source in refs:
+        if asset_path in seen:
+            continue
+        seen.add(asset_path)
+        ordered.append(asset_path)
+    return ordered
+
+
+def _bundle_patch_literal(html: str, old: str, new: str, warnings: list, label: str) -> str:
+    if old not in html:
+        warnings.append(f"bundle: could not find expected snippet for {label} — skipping that patch.")
+        return html
+    return html.replace(old, new)
+
+
+def _bundle_parse_font_spec(spec: "str | None") -> "dict | None":
+    if not spec:
+        return None
+    parts = str(spec).split(":")
+    if len(parts) >= 3:
+        return {"provider": parts[0].strip(), "name": ":".join(parts[1:-1]).strip(), "weight": parts[-1].strip()}
+    if len(parts) == 2:
+        return {"provider": "bunny", "name": parts[0].strip(), "weight": parts[1].strip()}
+    return {"provider": "bunny", "name": parts[0].strip(), "weight": "400"}
+
+
+def _bundle_inline_webfont_css(css_text: str, warnings: list) -> str:
+    def repl(m):
+        font_url = m.group(2)
+        try:
+            font_bytes = _http_get(font_url)
+        except Exception as e:
+            warnings.append(f"bundle: failed to download web font {font_url}: {e}")
+            return m.group(0)
+        mime = _bundle_mime_for(Path(font_url.split("?")[0]))
+        b64 = base64.b64encode(font_bytes).decode("ascii")
+        return f"url(data:{mime};base64,{b64})"
+    return _FONT_CSS_URL_RE.sub(repl, css_text)
+
+
+def _bundle_offline_webfont_style(cfg: dict, theme_data: dict, warnings: list) -> str:
+    """Fetch Bunny/Google web-font CSS + font files, return an inlined <style> block (or '')."""
+    src = theme_data or {}
+    body = _bundle_parse_font_spec(src.get("font-body") or cfg.get("font-body"))
+    heading = _bundle_parse_font_spec(src.get("font-heading") or src.get("font-title") or cfg.get("font-title"))
+    code = _bundle_parse_font_spec(src.get("font-code") or cfg.get("font-code"))
+    all_fonts = [f for f in (body, heading, code) if f]
+    bunny_fonts = [f for f in all_fonts if f["provider"] == "bunny"]
+    google_fonts = [f for f in all_fonts if f["provider"] == "google"]
+
+    css_blocks = []
+    if bunny_fonts:
+        family = "|".join(f"{f['name'].replace(' ', '+')}:{f['weight']}" for f in bunny_fonts)
+        url = f"https://fonts.bunny.net/css?family={family}"
+        try:
+            css_blocks.append(_bundle_inline_webfont_css(_http_get(url).decode("utf-8"), warnings))
+        except Exception as e:
+            warnings.append(f"bundle: failed to download Bunny Fonts CSS: {e}")
+    if google_fonts:
+        family = "&".join(f"family={f['name'].replace(' ', '+')}:wght@{f['weight']}" for f in google_fonts)
+        url = f"https://fonts.googleapis.com/css2?{family}&display=swap"
+        try:
+            css_blocks.append(_bundle_inline_webfont_css(_http_get(url).decode("utf-8"), warnings))
+        except Exception as e:
+            warnings.append(f"bundle: failed to download Google Fonts CSS: {e}")
+
+    if not css_blocks:
+        return ""
+    return '<style id="mdcms-bundle-webfonts">\n' + "\n".join(css_blocks) + "\n</style>"
+
+
+def _bundle_inline_vendor_deps(html: str, warnings: list) -> str:
+    def script_repl(m):
+        url = m.group(1)
+        try:
+            return f"<script>{_http_get(url).decode('utf-8')}</script>"
+        except Exception as e:
+            warnings.append(f"bundle: failed to download {url}: {e}")
+            return m.group(0)
+    html = _SCRIPT_SRC_RE.sub(script_repl, html)
+
+    def link_repl(m):
+        url, attrs = m.group(1), m.group(2)
+        try:
+            return f"<style{attrs}>{_http_get(url).decode('utf-8')}</style>"
+        except Exception as e:
+            warnings.append(f"bundle: failed to download {url}: {e}")
+            return m.group(0)
+    return _LINK_CSS_RE.sub(link_repl, html)
+
+
+def generate_bundle(site_path: Path, cfg: dict, output: Path, offline: bool) -> list:
+    """Assemble a single self-contained HTML file for site_path. Returns a list of warnings."""
+    warnings: list = []
+    index_file = site_path / "index.html"
+    if not index_file.exists():
+        raise click.ClickException(f"No index.html found at {site_path}")
+    for required in ("nav.yml", "search.json"):
+        if not (site_path / required).exists():
+            raise click.ClickException(f"{required} not found — run 'mdcms build' first.")
+
+    config_text = (site_path / "config.yml").read_text(encoding="utf-8")
+    nav_text = (site_path / "nav.yml").read_text(encoding="utf-8")
+    search_text = (site_path / "search.json").read_text(encoding="utf-8")
+
+    theme_file = cfg.get("theme")
+    theme_text = None
+    if theme_file and (site_path / theme_file).exists():
+        theme_text = (site_path / theme_file).read_text(encoding="utf-8")
+
+    bundle_map: dict = {
+        "config.yml": config_text,
+        "nav.yml": nav_text,
+        "search.json": search_text,
+    }
+    if theme_file and theme_text is not None:
+        bundle_map[theme_file] = theme_text
+
+    # Referenced binary/text assets (favicon, logo, category fonts, markdown images) as data: URIs.
+    asset_refs = _bundle_collect_asset_refs(site_path, cfg, theme_text)
+    for rel in asset_refs:
+        asset_path = site_path / rel
+        if asset_path.is_file():
+            bundle_map[rel] = _bundle_data_uri(asset_path)
+        elif not asset_path.is_dir():
+            warnings.append(f"bundle: referenced asset not found, left as a broken link: {rel}")
+
+    # Icons: embed every svg under assets/icons/ verbatim (loadIcon() expects raw SVG
+    # text, not a data: URI) — wins over any data: URI an icon path also picked up above.
+    icons_dir = site_path / "assets" / "icons"
+    if icons_dir.is_dir():
+        for f in sorted(icons_dir.iterdir()):
+            if f.is_file() and f.suffix.lower() == ".svg":
+                bundle_map[f"assets/icons/{f.name}"] = f.read_text(encoding="utf-8")
+
+    # Pages/posts: embed raw markdown, with in-body asset references swapped for data: URIs.
+    for folder in ("pages", "posts"):
+        d = site_path / folder
+        if not d.is_dir():
+            continue
+        for md_file in sorted(d.rglob("*.md")):
+            rel = str(md_file.relative_to(site_path)).replace("\\", "/")
+            text = md_file.read_text(encoding="utf-8")
+            bundle_map[rel] = _ASSET_RE.sub(lambda m: bundle_map.get(m.group(), m.group()), text)
+
+    html = index_file.read_text(encoding="utf-8")
+
+    # Bundle never ships PWA install/service-worker plumbing — a single file has
+    # no separate origin for a service worker to manage.
+    html = html.replace('<link rel="manifest" href="manifest.json">\n', "")
+    html = re.sub(
+        r"<script>\nif \('serviceWorker' in navigator\) \{.*?\n</script>\n\n?",
+        "",
+        html,
+        count=1,
+        flags=re.DOTALL,
+    )
+
+    # Patch the handful of call sites that build asset paths by string
+    # concatenation instead of fetch() — point them at the same embedded map.
+    html = _bundle_patch_literal(
+        html, _BUNDLE_LOGO_IMG_SRC,
+        "src: (window.__MDCMS_BUNDLE__ && window.__MDCMS_BUNDLE__['assets/images/' + config.logo]) "
+        "|| `assets/images/${config.logo}`",
+        warnings, "sidebar/topbar logo image",
+    )
+    html = _bundle_patch_literal(
+        html, _BUNDLE_FAVICON_LINE,
+        "if (link) link.href = (window.__MDCMS_BUNDLE__ && "
+        "window.__MDCMS_BUNDLE__['assets/images/' + config.favicon]) || `assets/images/${config.favicon}`;",
+        warnings, "favicon override (config.favicon)",
+    )
+    html = _bundle_patch_literal(
+        html, _BUNDLE_LOGO_FAVICON_LINE,
+        "if (link) link.href = (window.__MDCMS_BUNDLE__ && "
+        "window.__MDCMS_BUNDLE__['assets/images/' + config.logo]) || `assets/images/${config.logo}`;",
+        warnings, "favicon override (config.logo)",
+    )
+    html = _bundle_patch_literal(
+        html, _BUNDLE_FONT_FACE_LINE,
+        'const css = `@font-face { font-family: "${family}"; src: url("'
+        '${(window.__MDCMS_BUNDLE__ && window.__MDCMS_BUNDLE__["assets/fonts/" + cat.font]) '
+        '|| ("assets/fonts/" + cat.font)}"); }`;',
+        warnings, "category font @font-face rule",
+    )
+    html = _bundle_patch_literal(
+        html, _BUNDLE_FONT_FACE_OBJ_LINE,
+        'const face = new FontFace(family, `url(${(window.__MDCMS_BUNDLE__ && '
+        'window.__MDCMS_BUNDLE__["assets/fonts/" + cat.font]) || ("assets/fonts/" + cat.font)})`);',
+        warnings, "category font FontFace object",
+    )
+    html = _bundle_patch_literal(
+        html, _BUNDLE_HISTORY_BLOCK_OLD, _BUNDLE_HISTORY_BLOCK_NEW,
+        warnings, "URL history updates (disabled under file://)",
+    )
+
+    offline_marker = "true" if offline else "false"
+    if offline:
+        theme_data = {}
+        if theme_text:
+            try:
+                theme_data = yaml.safe_load(theme_text) or {}
+            except yaml.YAMLError:
+                theme_data = {}
+        webfont_style = _bundle_offline_webfont_style(cfg, theme_data, warnings)
+        if webfont_style:
+            html = html.replace("</head>", webfont_style + "\n</head>", 1)
+        html = _bundle_patch_literal(
+            html, _BUNDLE_BUNNY_GUARD,
+            "if (bunnyFonts.length && !window.__MDCMS_BUNDLE_OFFLINE__) {",
+            warnings, "Bunny Fonts CDN guard",
+        )
+        html = _bundle_patch_literal(
+            html, _BUNDLE_GOOGLE_GUARD,
+            "if (googleFonts.length && !window.__MDCMS_BUNDLE_OFFLINE__) {",
+            warnings, "Google Fonts CDN guard",
+        )
+        html = _bundle_inline_vendor_deps(html, warnings)
+
+    # Escape "</" so embedded content (e.g. markdown containing a literal "</script>")
+    # can't prematurely close this <script> tag when the browser's HTML parser runs.
+    bundle_json = json.dumps(bundle_map, ensure_ascii=False).replace("</", "<\\/")
+
+    shim = (
+        "<script>\n"
+        f"window.__MDCMS_BUNDLE__ = {bundle_json};\n"
+        f"window.__MDCMS_BUNDLE_OFFLINE__ = {offline_marker};\n"
+        "(function() {\n"
+        "  var bundle = window.__MDCMS_BUNDLE__;\n"
+        "  var realFetch = window.fetch.bind(window);\n"
+        "  window.fetch = function(input, init) {\n"
+        "    var url = (typeof input === 'string' ? input : input.url).replace(/^\\.?\\//, '');\n"
+        "    if (Object.prototype.hasOwnProperty.call(bundle, url)) {\n"
+        "      return Promise.resolve(new Response(bundle[url], { status: 200 }));\n"
+        "    }\n"
+        "    return realFetch(input, init);\n"
+        "  };\n"
+        "})();\n"
+        "</script>\n"
+    )
+    html = html.replace("<head>\n", "<head>\n" + shim, 1)
+
+    output.write_text(html, encoding="utf-8")
+    return warnings
 
 
 # ─── Template download ────────────────────────────────────────
@@ -2698,6 +3051,47 @@ def fetch_deps(name, path_override):
     _patch_index_html(site_path, local_font_css)
 
     click.echo(click.style("Done. Site is ready for offline use.", fg="green"))
+
+
+@cli.command()
+@click.argument("name", required=False, default=None)
+@click.option("--path", "path_override", default=None, type=click.Path(),
+              help="Explicit site path (no registry lookup).")
+@click.option("--output", "output_override", default=None, type=click.Path(),
+              help="Output file path. Defaults to bundle.html in the site root.")
+@click.option("--offline", is_flag=True,
+              help="Also inline vendor JS/CSS libraries and web fonts, so the bundle needs "
+                   "zero network access ever. Without this flag those still load from CDN.")
+def bundle(name, path_override, output_override, offline):
+    """Build a single self-contained HTML file (config, nav, search, pages, assets all embedded).
+
+    The result can be opened directly from any storage — a USB stick, an email
+    attachment, a wiki upload — with no server and no sibling files. Requires
+    nav.yml and search.json to already exist; run 'mdcms build' first.
+
+    \b
+    Examples:
+      mdcms bundle mysite                  # bundle.html, CDN libs/fonts still need internet
+      mdcms bundle mysite --offline        # fully self-contained, zero network access
+      mdcms bundle --path ./site --output dist/site.html
+    """
+    site_path = resolve_site_path(name, path_override)
+    output = Path(output_override) if output_override else site_path / "bundle.html"
+
+    cfg = read_config(site_path)
+    click.echo(f"Bundling: {site_path}" + (" (offline)" if offline else ""))
+    warnings = generate_bundle(site_path, cfg, output, offline)
+    for w in warnings:
+        click.echo(click.style(w, fg="yellow"))
+
+    size_mb = output.stat().st_size / (1024 * 1024)
+    click.echo(f"  Wrote {output} ({size_mb:.1f} MB)")
+    if size_mb > 25:
+        click.echo(click.style(
+            "  Warning: this is a large single file — fine for browsers, but consider "
+            "whether a regular multi-file build suits this site better.", fg="yellow",
+        ))
+    click.echo(click.style("Bundle complete.", fg="green"))
 
 
 @cli.command()
