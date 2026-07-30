@@ -1305,6 +1305,16 @@ body.scanlines-active::after {
 (function() {
   'use strict';
 
+  // ─── Storage ──────────────────────────────────────────────
+  // Merely touching window.localStorage throws in a sandboxed iframe that
+  // lacks allow-same-origin (e.g. OneDrive's/Google Drive's in-browser HTML
+  // preview) — not just an unset value, an actual SecurityError. Every read
+  // or write goes through here so one guard covers all of them.
+  const safeStorage = {
+    get(key) { try { return localStorage.getItem(key); } catch (e) { return null; } },
+    set(key, value) { try { localStorage.setItem(key, value); } catch (e) { /* unavailable */ } },
+  };
+
   // ─── State ────────────────────────────────────────────────
 
   // Capture the intended pathname before anything mutates the URL.
@@ -1734,7 +1744,7 @@ body.scanlines-active::after {
   // ─── Theme ────────────────────────────────────────────────
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('md-cms-theme', theme);
+    safeStorage.set('md-cms-theme', theme);
     const lightSheet = document.getElementById('hljs-light');
     const darkSheet = document.getElementById('hljs-dark');
     if (lightSheet) lightSheet.disabled = (theme === 'dark');
@@ -1749,7 +1759,7 @@ body.scanlines-active::after {
   }
 
   function getInitialTheme() {
-    const saved = localStorage.getItem('md-cms-theme');
+    const saved = safeStorage.get('md-cms-theme');
     if (saved) return saved;
     const def = config['default-theme'] || 'system';
     if (def === 'system') {
@@ -2986,12 +2996,10 @@ function fmtDatetime(dtStr) {
 
     function setSidebarCollapsed(collapsed) {
       layout.classList.toggle('sidebar-collapsed', collapsed);
-      try { localStorage.setItem('md-cms-sidebar-collapsed', collapsed ? '1' : '0'); } catch (e) { /* localStorage unavailable */ }
+      safeStorage.set('md-cms-sidebar-collapsed', collapsed ? '1' : '0');
     }
     if (isDesktopViewport()) {
-      try {
-        if (localStorage.getItem('md-cms-sidebar-collapsed') === '1') layout.classList.add('sidebar-collapsed');
-      } catch (e) { /* localStorage unavailable */ }
+      if (safeStorage.get('md-cms-sidebar-collapsed') === '1') layout.classList.add('sidebar-collapsed');
     }
 
     const mainArea = el('div', { className: 'main-area' });
@@ -3345,11 +3353,11 @@ function fmtDatetime(dtStr) {
   }
 
   function sectionExpanded(code) {
-    return localStorage.getItem('md-cms-section:' + code) === 'expanded';
+    return safeStorage.get('md-cms-section:' + code) === 'expanded';
   }
   function toggleSection(code) {
     const key = 'md-cms-section:' + code;
-    localStorage.setItem(key, localStorage.getItem(key) === 'expanded' ? 'collapsed' : 'expanded');
+    safeStorage.set(key, safeStorage.get(key) === 'expanded' ? 'collapsed' : 'expanded');
   }
 
   function makeNavItem(page, depth) {
@@ -3696,7 +3704,7 @@ function fmtDatetime(dtStr) {
 
     const result = await fetchPageFile(file);
     if (!result.ok) {
-      const offlineMsg = !navigator.onLine && localStorage.getItem('mdcms-offline');
+      const offlineMsg = !navigator.onLine && safeStorage.get('mdcms-offline');
       const bodyMsg = offlineMsg
         ? `<p>${offlineMsg}</p>`
         : `<p>${pageNotFoundMessage()}</p>`;
@@ -3849,7 +3857,7 @@ function fmtDatetime(dtStr) {
         const offlineText = typeof offlineMsgCfg === 'string'
           ? offlineMsgCfg
           : (offlineMsgCfg[defaultCategoryCode] || offlineMsgCfg['en'] || Object.values(offlineMsgCfg)[0] || '');
-        if (offlineText) localStorage.setItem('mdcms-offline', offlineText);
+        if (offlineText) safeStorage.set('mdcms-offline', offlineText);
       }
 
       loadFonts(themeConfig);
