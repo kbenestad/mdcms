@@ -4,7 +4,7 @@
 
   Licensed under Apache 2.0 licence.
 
-  CURRENT VERSION: 0.6.8 - 4 July 2026
+  CURRENT VERSION: 0.6.11 - 10 July 2026
 -->
 <!--
   MD-CMS — Renderer
@@ -184,9 +184,45 @@ body {
 .layout-sidebar.nav-left .sidebar { left: 0; }
 .layout-sidebar.nav-right .sidebar { right: 0; border-right: none; border-left: 1px solid var(--divider); }
 
-.layout-sidebar .main-area { flex: 1; min-width: 0; }
+.layout-sidebar .main-area { flex: 1; min-width: 0; transition: margin-left 0.3s ease, margin-right 0.3s ease; }
 .layout-sidebar.nav-left .main-area { margin-left: var(--nav-width); }
 .layout-sidebar.nav-right .main-area { margin-right: var(--nav-width); }
+
+/* Collapsible sidebar (desktop only — narrow viewports use the off-canvas
+   open/close behaviour further down instead). Toggled via the panel button
+   next to the dark-mode toggle; a fixed reopen button appears at the edge
+   the sidebar used to occupy. */
+.sidebar-reopen-btn { display: none; }
+@media (min-width: 769px) {
+  .layout-sidebar.sidebar-collapsed .sidebar { transform: translateX(-100%); visibility: hidden; }
+  .layout-sidebar.nav-right.sidebar-collapsed .sidebar { transform: translateX(100%); }
+  .layout-sidebar.nav-left.sidebar-collapsed .main-area { margin-left: 0; }
+  .layout-sidebar.nav-right.sidebar-collapsed .main-area { margin-right: 0; }
+
+  .sidebar-reopen-btn {
+    position: fixed;
+    top: 1rem;
+    z-index: 110;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    padding: 0;
+    color: var(--nav-toggle-colour);
+    background: var(--bg-nav);
+    border: 1px solid var(--divider);
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .sidebar-reopen-btn:hover { color: var(--nav-link-colour, var(--font-colour)); }
+  .sidebar-reopen-btn svg { width: 18px; height: 18px; }
+  .layout-sidebar.nav-left .sidebar-reopen-btn { left: 1rem; }
+  .layout-sidebar.nav-right .sidebar-reopen-btn { right: 1rem; }
+  .layout-sidebar.sidebar-collapsed .sidebar-reopen-btn { display: flex; }
+}
 
 .main-content { max-width: var(--main-width); margin: 0 auto; padding: 2rem 3rem 4rem; }
 
@@ -222,8 +258,12 @@ body {
 /* Search */
 .search-container { padding: 0.75rem 1.25rem; flex-shrink: 0; }
 
-/* Sidebar search row: search bar with dark-mode toggle to its right */
-.sidebar-search-row {
+/* Sidebar search row: search bar with dark-mode toggle and panel toggle to
+   its right (or mirrored when the sidebar is right-aligned). Used both by
+   the sidebar and by the topbar's narrow-viewport nav panel, which mirrors
+   the sidebar's look. */
+.sidebar-search-row,
+.sidebar-footer-row {
   display: flex;
   align-items: stretch;
   gap: 0.5rem;
@@ -231,6 +271,12 @@ body {
   flex-shrink: 0;
 }
 .sidebar-search-row .search-container { flex: 1; min-width: 0; padding: 0; }
+.sidebar-footer-row .theme-toggle { flex: 1; width: auto; }
+
+.layout-sidebar.nav-right .sidebar-search-row,
+.layout-sidebar.nav-right .sidebar-footer-row {
+  flex-direction: row-reverse;
+}
 
 .search-box {
   width: 100%;
@@ -353,13 +399,7 @@ body {
   font-weight: 600;
 }
 
-/* Sidebar footer */
-.sidebar-footer {
-  padding: 0.75rem 1.25rem;
-  flex-shrink: 0;
-}
-
-.theme-toggle {
+.theme-toggle, .panel-toggle {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -376,11 +416,12 @@ body {
   width: 100%;
   justify-content: center;
 }
-.theme-toggle:hover { color: var(--nav-link-colour, var(--font-colour)); border-color: var(--nav-toggle-colour); }
-.theme-toggle svg { width: 16px; height: 16px; flex-shrink: 0; }
+.theme-toggle:hover, .panel-toggle:hover { color: var(--nav-link-colour, var(--font-colour)); border-color: var(--nav-toggle-colour); }
+.theme-toggle svg, .panel-toggle svg { width: 16px; height: 16px; flex-shrink: 0; }
 
-/* Compact, icon-only toggle used beside the sidebar search bar */
-.theme-toggle-compact { width: auto; flex-shrink: 0; padding: 0.4rem 0.55rem; gap: 0; }
+/* Compact, icon-only toggle used beside the sidebar search bar. The panel
+   toggle is always icon-only, so it always carries this shape. */
+.theme-toggle-compact, .panel-toggle { width: auto; flex-shrink: 0; padding: 0.4rem 0.55rem; gap: 0; }
 .theme-toggle-compact span:not(.mdcms-icon) { display: none; }
 
 /* ═══════════════════════════════════════════
@@ -557,6 +598,11 @@ body {
 .md-content ul, .md-content ol { margin-bottom: 1.1em; padding-left: 1.75em; }
 .md-content li { margin-bottom: 0.3em; }
 .md-content li > ul, .md-content li > ol { margin-bottom: 0.3em; margin-top: 0.3em; }
+.md-content li.mdcms-task-list-item { list-style: none; }
+.md-content li.mdcms-task-list-item input[type="checkbox"] {
+  margin: 0 0.5em 0 -1.75em;
+  vertical-align: middle;
+}
 
 .md-content blockquote {
   border-left: 4px solid var(--accent);
@@ -700,6 +746,47 @@ body {
   margin-top: 0.15rem;
 }
 
+/* ═══════════════════════════════════════════
+   PAGINATION (section feature: pagination: on)
+   ═══════════════════════════════════════════ */
+.pagination-widget {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+.pagination-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--font-colour-muted);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+a.pagination-link:hover { background: var(--nav-hover-bg); color: var(--font-colour); }
+.pagination-link.disabled { opacity: 0.35; }
+.pagination-link .mdcms-icon { font-size: 0.9rem; }
+.pagination-arrow-prev { transform: scaleX(-1); }
+.pagination-sep { color: var(--divider); }
+
+.pagination-top {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.25rem 0 1rem;
+}
+.pagination-top[dir="rtl"] { justify-content: flex-start; }
+.pagination-top:empty { display: none; padding: 0; }
+
+.pagination-bottom {
+  justify-content: space-between;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--divider);
+}
+
 /* Font-loading banner */
 .font-loading-banner {
   background: rgba(var(--accent-rgb), 0.08);
@@ -824,24 +911,34 @@ body {
 
   .topbar-nav { display: none; }
   .topbar-search { display: none; }
+  /* The dark-mode toggle moves into the sidebar-styled nav panel below,
+     alongside the panel toggle, so the fixed topbar only keeps the hamburger. */
+  .topbar-actions > .theme-toggle { display: none; }
   .layout-topbar .hamburger { display: inline-flex; }
   /* .topbar-nav carries flex:1; with it hidden, push the actions to the right edge */
   .layout-topbar .topbar-actions { margin-left: auto; }
 
   .layout-topbar .mobile-nav-panel {
-    display: block;
+    display: flex;
+    flex-direction: column;
     position: fixed;
-    top: 56px; left: 0; right: 0; bottom: 0;
+    top: 56px; left: 0; bottom: 0;
+    width: 80vw;
+    max-width: 320px;
     background: var(--bg-nav);
-    z-index: 90;
+    z-index: 100;
     overflow-y: auto;
-    transform: translateY(-100%);
-    opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    box-shadow: var(--shadow-md);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.3s ease, visibility 0s ease 0.3s;
     padding: 0.5rem 0;
   }
-  .layout-topbar .mobile-nav-panel.open { transform: translateY(0); opacity: 1; }
-  .layout-topbar .mobile-nav-panel .search-container { padding: 0.75rem 1rem; }
+  .layout-topbar .mobile-nav-panel.nav-right { left: auto; right: 0; transform: translateX(100%); }
+  .layout-topbar .mobile-nav-panel.open { transform: translateX(0); visibility: visible; transition: transform 0.3s ease; }
+  .layout-topbar .mobile-nav-panel.nav-right .sidebar-search-row,
+  .layout-topbar .mobile-nav-panel.nav-right .sidebar-footer-row { flex-direction: row-reverse; }
+  .layout-topbar .mobile-overlay { top: 56px; z-index: 90; }
   .layout-topbar .mobile-nav-panel .nav-item {
     padding: 0.6rem 1.25rem;
     font-size: 1rem;
@@ -870,7 +967,7 @@ body {
 
 @media (max-width: 480px) {
   .layout-sidebar .sidebar { width: 100vw; max-width: none; }
-  .layout-topbar .mobile-nav-panel { bottom: 0; }
+  .layout-topbar .mobile-nav-panel { width: 100vw; max-width: none; bottom: 0; }
   .main-content { padding: 1rem 1rem 3rem; }
 }
 
@@ -922,6 +1019,15 @@ body {
 .post-sep { color: var(--font-colour-muted); flex-shrink: 0; }
 .post-title { flex: 1; }
 .posts-empty { color: var(--font-colour-muted); font-style: italic; }
+
+/* Narrow viewports: stack date/time above the title, with air below the
+   title so each item stays visually separated from the next. */
+@media (max-width: 600px) {
+  .post-list a { flex-direction: column; gap: 0.15rem; }
+  .post-list li { padding: 0.5rem 0 0.85rem; }
+  .post-date { min-width: 0; }
+  .post-sep { display: none; }
+}
 
 .post-year-select {
   padding: 0.3rem 0.6rem;
@@ -1175,8 +1281,8 @@ body.scanlines-active::after {
 }
 
 @media print {
-  .sidebar, .topbar, .scroll-top, .hamburger,
-  .mobile-header, .theme-toggle, .search-container { display: none !important; }
+  .sidebar, .topbar, .scroll-top, .hamburger, .mobile-nav-panel,
+  .mobile-header, .theme-toggle, .panel-toggle, .sidebar-reopen-btn, .search-container { display: none !important; }
   .main-area { margin: 0 !important; }
   .main-content { max-width: 100%; padding: 0; }
   body.scanlines-active::after { display: none; }
@@ -1198,6 +1304,16 @@ body.scanlines-active::after {
    ═══════════════════════════════════════════════════════════════ */
 (function() {
   'use strict';
+
+  // ─── Storage ──────────────────────────────────────────────
+  // Merely touching window.localStorage throws in a sandboxed iframe that
+  // lacks allow-same-origin (e.g. OneDrive's/Google Drive's in-browser HTML
+  // preview) — not just an unset value, an actual SecurityError. Every read
+  // or write goes through here so one guard covers all of them.
+  const safeStorage = {
+    get(key) { try { return localStorage.getItem(key); } catch (e) { return null; } },
+    set(key, value) { try { localStorage.setItem(key, value); } catch (e) { /* unavailable */ } },
+  };
 
   // ─── State ────────────────────────────────────────────────
 
@@ -1231,6 +1347,11 @@ body.scanlines-active::after {
   let defaultCategoryCode = null;
   let activeCategory = null;      // current code
   let sectionnamesMode = 'same';  // 'same' | 'per-category'
+  // When any date categories exist (categories-dates: yes), the nav and search
+  // always reflect default-category's content — even while viewing an older
+  // dated category — since a dated variant is a historical record of one page,
+  // not a snapshot of the whole site. Set once nav.yml's date-categories load.
+  let categoriesNavFollowsDefault = false;
   let loadedFonts = new Set();    // track which font files have been loaded
   let defaultLineHeight = null;   // theme/CSS default, captured after theme is applied
 
@@ -1264,7 +1385,7 @@ body.scanlines-active::after {
   }
 
   // ─── Icons ────────────────────────────────────────────────
-  const STANDARD_ICONS = ['dark_mode','light_mode','menu','search','arrow_right','arrow_drop_down','mobile_arrow_down','language','info','warning','error','success','exclamation','dangerous','report','history','text_compare','keyboard_arrow_right','keyboard_arrow_down','keyboard_double_arrow_right','keyboard_double_arrow_down','expand_content','collapse_content','add','minimize'];
+  const STANDARD_ICONS = ['dark_mode','light_mode','menu','search','arrow_right','arrow_drop_down','mobile_arrow_down','language','info','warning','error','success','exclamation','dangerous','report','history','text_compare','keyboard_arrow_right','keyboard_arrow_down','keyboard_double_arrow_right','keyboard_double_arrow_down','expand_content','collapse_content','add','minimize','left_panel_close','left_panel_open','right_panel_close','right_panel_open'];
   const iconCache = {};
 
   function normaliseIconName(name) {
@@ -1381,16 +1502,52 @@ body.scanlines-active::after {
     activeCategory = (fromUrl && categoriesByCode[fromUrl]) ? fromUrl : defaultCategoryCode;
   }
 
-  function setActiveCategory(code) {
+  const _MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+
+  // Renders a YYYYMMDD code as "d Mmmm YYYY", e.g. "4 July 2026".
+  function formatDateCategoryLabel(code) {
+    const year = code.slice(0, 4), month = parseInt(code.slice(4, 6), 10), day = parseInt(code.slice(6, 8), 10);
+    if (!year || !month || !day || month < 1 || month > 12) return code;
+    return `${day} ${_MONTH_NAMES[month - 1]} ${year}`;
+  }
+
+  // Merges the date categories mdcms build auto-detected (nav.yml's
+  // date-categories, newest first) into categoriesList/categoriesByCode.
+  // Called once nav.yml is parsed — after initCategories(), which only knows
+  // about the categories declared in config.yml.
+  function mergeDateCategories(dateCodes) {
+    if (!categoriesUse || !Array.isArray(dateCodes) || !dateCodes.length) return;
+    dateCodes.forEach(code => {
+      if (categoriesByCode[code]) return; // already declared (e.g. as the default) — don't clobber it
+      const entry = { code, name: formatDateCategoryLabel(code), _isDate: true };
+      categoriesList.push(entry);
+      categoriesByCode[code] = entry;
+    });
+    categoriesNavFollowsDefault = true;
+
+    // The URL's ?cat= may reference a date code that wasn't known yet when
+    // initCategories() first resolved activeCategory.
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get('cat');
+    if (fromUrl && categoriesByCode[fromUrl]) activeCategory = fromUrl;
+  }
+
+  function setActiveCategory(code, { history: historyMode = 'replace' } = {}) {
     if (!categoriesByCode[code]) return;
     activeCategory = code;
-    const url = new URL(window.location);
-    if (code === defaultCategoryCode) url.searchParams.delete('cat');
-    else url.searchParams.set('cat', code);
-    window.history.replaceState(null, '', url);
     maybeLoadCategoryFont(code).then(() => {
       renderNav();
-      if (currentPage) navigateTo(currentPage);
+      if (currentPage) {
+        // Let navigateTo own the history entry so switching category and
+        // re-rendering the page don't fight over window.history.
+        navigateTo(currentPage, { history: historyMode });
+      } else {
+        const url = new URL(window.location);
+        if (code === defaultCategoryCode) url.searchParams.delete('cat');
+        else url.searchParams.set('cat', code);
+        window.history.replaceState(null, '', url);
+      }
     });
   }
 
@@ -1501,49 +1658,108 @@ body.scanlines-active::after {
   }
 
   function pageDisplayTitle(page) {
-    if (categoriesUse && page.titles && activeCategory && page.titles[activeCategory]) {
-      return page.titles[activeCategory];
+    // Used for nav items, TOC listings, and pagination labels — never for the
+    // content pane itself, which always renders the actually-fetched variant's
+    // own title. When date categories exist, nav labels stay pinned to
+    // default-category so browsing the site doesn't inherit whatever historical
+    // date happens to be active for the page currently open.
+    const navCode = categoriesNavFollowsDefault ? defaultCategoryCode : activeCategory;
+    if (categoriesUse && page.titles && navCode && page.titles[navCode]) {
+      return page.titles[navCode];
     }
     return page.title;
   }
 
   function pageShouldDisplay(page) {
-    // Nav filter. Returns true if the page should appear in nav for the active category.
+    // Nav filter. Returns true if the page should appear in nav for the nav-basis category.
     //   - Non-category sites: always show
     //   - Home page: always show (per config.homepage or default 'pages/home.md')
-    //   - Variant exists for active category: show
-    //   - Active category has notfoundmessage: show (renderer falls back to default language)
-    //   - Active category has visibilityifnocontent: visible: show (renderer shows pagenotfoundmessage)
+    //   - Variant exists for the nav-basis category: show
+    //   - Nav-basis category has notfoundmessage: show (renderer falls back to default language)
+    //   - Nav-basis category has visibilityifnocontent: visible: show (renderer shows pagenotfoundmessage)
     //   - Otherwise: hide
+    //
+    // The nav-basis category is normally activeCategory. But once any date
+    // category exists (categories-dates: yes), a dated category is a historical
+    // record of one page, not a snapshot of the whole site — so nav visibility
+    // always follows default-category instead, even while viewing an older date.
     if (!categoriesUse) return true;
     if (page.file === defaultPage()) return true;
     if (page.uncategorized) return true;
+    const navCode = categoriesNavFollowsDefault ? defaultCategoryCode : activeCategory;
     const variants = page.variants || [];
-    if (variants.includes(activeCategory)) return true;
-    const cat = categoriesByCode[activeCategory];
+    if (variants.includes(navCode)) return true;
+    const cat = categoriesByCode[navCode];
     return !!(cat && (cat.notfoundmessage || cat.visibilityifnocontent === 'visible'));
+  }
+
+  // ─── Pagination (section feature: pagination: on) ─────────
+  function sectionPaginationEnabled(sectionCode) {
+    if (!sectionCode) return false;
+    const section = navSections.find(s => s.code === sectionCode);
+    const v = section && section.pagination;
+    return v === true || v === 'on' || v === 'yes';
+  }
+
+  function getPaginationNeighbors(file) {
+    const page = navData.find(p => p.file === file);
+    if (!page) return null;
+    const sid = page['section-id'];
+    if (!sectionPaginationEnabled(sid)) return null;
+    const siblings = navData.filter(p => p['section-id'] === sid && pageShouldDisplay(p));
+    siblings.sort((a, b) => ((a.sort ?? 999) - (b.sort ?? 999)) || a.file.localeCompare(b.file));
+    const idx = siblings.findIndex(p => p.file === file);
+    if (idx === -1) return null;
+    const prev = idx > 0 ? siblings[idx - 1] : null;
+    const next = idx < siblings.length - 1 ? siblings[idx + 1] : null;
+    if (!prev && !next) return null;
+    return { prev, next };
+  }
+
+  function buildPaginationWidget(neighbors, extraClass) {
+    const bar = el('div', { className: 'pagination-widget' + (extraClass ? ' ' + extraClass : '') });
+    const { prev, next } = neighbors;
+
+    const prevLink = prev
+      ? el('a', { className: 'pagination-link pagination-prev', href: '#' + prev.file, title: pageDisplayTitle(prev) })
+      : el('span', { className: 'pagination-link pagination-prev disabled' });
+    prevLink.appendChild(iconEl('keyboard_arrow_right', 'pagination-arrow pagination-arrow-prev'));
+    prevLink.appendChild(document.createTextNode('Previous'));
+    if (prev) prevLink.addEventListener('click', e => { e.preventDefault(); navigateTo(prev.file); });
+    bar.appendChild(prevLink);
+
+    bar.appendChild(el('span', { className: 'pagination-sep', textContent: '|' }));
+
+    const nextLink = next
+      ? el('a', { className: 'pagination-link pagination-next', href: '#' + next.file, title: pageDisplayTitle(next) })
+      : el('span', { className: 'pagination-link pagination-next disabled' });
+    nextLink.appendChild(document.createTextNode('Next'));
+    nextLink.appendChild(iconEl('keyboard_arrow_right', 'pagination-arrow pagination-arrow-next'));
+    if (next) nextLink.addEventListener('click', e => { e.preventDefault(); navigateTo(next.file); });
+    bar.appendChild(nextLink);
+
+    return bar;
   }
 
   // ─── Theme ────────────────────────────────────────────────
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('md-cms-theme', theme);
+    safeStorage.set('md-cms-theme', theme);
     const lightSheet = document.getElementById('hljs-light');
     const darkSheet = document.getElementById('hljs-dark');
     if (lightSheet) lightSheet.disabled = (theme === 'dark');
     if (darkSheet) darkSheet.disabled = (theme === 'light');
-    const btn = document.querySelector('.theme-toggle');
-    if (btn) {
-      const isDark = theme === 'dark';
+    const isDark = theme === 'dark';
+    document.querySelectorAll('.theme-toggle').forEach((btn) => {
       btn.innerHTML = '';
       btn.appendChild(iconEl(isDark ? 'light_mode' : 'dark_mode'));
       btn.appendChild(el('span', { textContent: isDark ? 'Light mode' : 'Dark mode' }));
-    }
+    });
     computeDerivedTokens();
   }
 
   function getInitialTheme() {
-    const saved = localStorage.getItem('md-cms-theme');
+    const saved = safeStorage.get('md-cms-theme');
     if (saved) return saved;
     const def = config['default-theme'] || 'system';
     if (def === 'system') {
@@ -1823,6 +2039,14 @@ body.scanlines-active::after {
       const esc = (codeText || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       const cls = codeLang ? ' class="language-' + codeLang + '"' : '';
       return '<pre><code' + cls + '>' + esc + '</code></pre>';
+    };
+
+    renderer.listitem = function(text, task, checked) {
+      let itemText = text;
+      if (typeof text === 'object') {
+        itemText = text.text; task = text.task; checked = text.checked;
+      }
+      return `<li${task ? ' class="mdcms-task-list-item"' : ''}>${itemText}</li>\n`;
     };
 
     marked.use({ renderer });
@@ -2445,8 +2669,11 @@ function fmtDatetime(dtStr) {
   // named in `sectionArg`).
   function renderTocTag(container, cfg) {
     const raw = (cfg && cfg.tagName ? cfg.tagName : 'toc').trim();
-    const parts = raw.split(/\s+/);
-    const base = parts[0];
+    // Accept "toc-section reference", "toc-section: reference", and a
+    // "section: reference" option line — every other mdcms block takes
+    // key: value options, so authors reasonably write all three forms.
+    const m = raw.match(/^(toc(?:-section|-page)?)\s*:?\s*(\S*)/);
+    const base = m ? m[1] : raw.split(/\s+/)[0];
 
     if (base === 'toc-page') {
       renderTocPageTag(container);
@@ -2454,7 +2681,9 @@ function fmtDatetime(dtStr) {
     }
 
     const variant = base === 'toc-section' ? 'section' : 'all';
-    const sectionArg = variant === 'section' ? (parts[1] || null) : null;
+    const sectionArg = variant === 'section'
+      ? ((m && m[2]) || (cfg && cfg.options && cfg.options.section) || null)
+      : null;
 
     const byCode = {};
     navSections.forEach(s => { byCode[s.code] = s; });
@@ -2668,7 +2897,7 @@ function fmtDatetime(dtStr) {
         var cfg = JSON.parse(tagEl.getAttribute('data-config'));
         if (/^callout-(info|warning|success|error)$/.test(cfg.tagName)) {
           renderCalloutTag(tagEl, cfg);
-        } else if (/^toc(-section|-page)?(\s|$)/.test(cfg.tagName)) {
+        } else if (/^toc(-section|-page)?(\s|:|$)/.test(cfg.tagName)) {
           renderTocTag(tagEl, cfg);
         } else if (/^tab(-underline|-filled)?$/.test(cfg.tagName)) {
           renderTabsTag(tagEl, cfg);
@@ -2684,9 +2913,37 @@ function fmtDatetime(dtStr) {
   }
 
   // ─── Shell ────────────────────────────────────────────────
+  // Standard sidebar/panel side when nothing overrides it: right for an
+  // RTL default-category, left otherwise (including sites with no category
+  // system at all, which have no direction concept).
+  function standardNavPosition() {
+    const dflt = categoriesUse && defaultCategoryCode ? categoriesByCode[defaultCategoryCode] : null;
+    return (dflt && dflt.direction === 'rtl') ? 'right' : 'left';
+  }
+
+  // Builds the dark-mode + panel-toggle row shared by the sidebar and by the
+  // topbar's narrow-viewport nav panel, which mirrors the sidebar's look.
+  // With a search bar the row is [search][darkmode][panel] (mirrored via CSS
+  // row-reverse for a right-aligned panel); without one it's [darkmode][panel].
+  function buildPanelToggleRow(navPos, hasSearch, onPanelToggle) {
+    const row = el('div', { className: hasSearch ? 'sidebar-search-row' : 'sidebar-footer-row' });
+    if (hasSearch) row.appendChild(buildSearchWidget());
+    const themeBtn = el('button', {
+      className: hasSearch ? 'theme-toggle theme-toggle-compact' : 'theme-toggle',
+      'aria-label': 'Toggle theme'
+    });
+    themeBtn.addEventListener('click', toggleTheme);
+    row.appendChild(themeBtn);
+    const panelBtn = el('button', { className: 'panel-toggle', 'aria-label': 'Collapse sidebar' });
+    panelBtn.appendChild(iconEl(navPos === 'right' ? 'right_panel_close' : 'left_panel_close'));
+    panelBtn.addEventListener('click', onPanelToggle);
+    row.appendChild(panelBtn);
+    return row;
+  }
+
   function buildSidebar() {
     const app = document.getElementById('app');
-    const navPos = config['nav-position'] || 'left';
+    const navPos = config['nav-position'] || standardNavPosition();
     const layout = el('div', { className: `layout-sidebar nav-${navPos}` });
 
     const mobileHeader = el('div', { className: 'mobile-header' });
@@ -2719,24 +2976,30 @@ function fmtDatetime(dtStr) {
     }
     sidebar.appendChild(header);
 
-    if (config.search !== false) {
-      const searchRow = el('div', { className: 'sidebar-search-row' });
-      searchRow.appendChild(buildSearchWidget());
-      const rowToggle = el('button', { className: 'theme-toggle theme-toggle-compact', 'aria-label': 'Toggle theme' });
-      rowToggle.addEventListener('click', toggleTheme);
-      searchRow.appendChild(rowToggle);
-      sidebar.appendChild(searchRow);
+    const isDesktopViewport = () => window.matchMedia('(min-width: 769px)').matches;
+    function togglePanel() {
+      if (isDesktopViewport()) setSidebarCollapsed(!layout.classList.contains('sidebar-collapsed'));
+      else closeMobileMenu();
     }
+    const hasSearch = config.search !== false;
+    const toggleRow = buildPanelToggleRow(navPos, hasSearch, togglePanel);
+    if (hasSearch) sidebar.appendChild(toggleRow);
 
     const navLinksEl = el('div', { className: 'nav-links', id: 'navLinks' });
     sidebar.appendChild(navLinksEl);
 
-    if (config.search === false) {
-      const sidebarFooter = el('div', { className: 'sidebar-footer' });
-      const toggleBtn = el('button', { className: 'theme-toggle', 'aria-label': 'Toggle theme' });
-      toggleBtn.addEventListener('click', toggleTheme);
-      sidebarFooter.appendChild(toggleBtn);
-      sidebar.appendChild(sidebarFooter);
+    if (!hasSearch) sidebar.appendChild(toggleRow);
+
+    const reopenBtn = el('button', { className: 'sidebar-reopen-btn', 'aria-label': 'Expand sidebar' });
+    reopenBtn.appendChild(iconEl(navPos === 'right' ? 'right_panel_open' : 'left_panel_open'));
+    reopenBtn.addEventListener('click', () => setSidebarCollapsed(false));
+
+    function setSidebarCollapsed(collapsed) {
+      layout.classList.toggle('sidebar-collapsed', collapsed);
+      safeStorage.set('md-cms-sidebar-collapsed', collapsed ? '1' : '0');
+    }
+    if (isDesktopViewport()) {
+      if (safeStorage.get('md-cms-sidebar-collapsed') === '1') layout.classList.add('sidebar-collapsed');
     }
 
     const mainArea = el('div', { className: 'main-area' });
@@ -2744,6 +3007,7 @@ function fmtDatetime(dtStr) {
     const mainContent = el('div', { className: 'main-content' });
     const catBar = buildCategoryBar();
     if (catBar) mainContent.appendChild(catBar);
+    mainContent.appendChild(el('div', { className: 'pagination-top', id: 'paginationTopBar' }));
     mainContent.appendChild(el('div', { id: 'pageContent' }));
     mainArea.appendChild(mainContent);
 
@@ -2755,6 +3019,7 @@ function fmtDatetime(dtStr) {
 
     layout.appendChild(sidebar);
     layout.appendChild(overlay);
+    layout.appendChild(reopenBtn);
     layout.appendChild(mainArea);
     app.appendChild(layout);
 
@@ -2804,18 +3069,31 @@ function fmtDatetime(dtStr) {
     actions.appendChild(hamburger);
     topbar.appendChild(actions);
 
-    const mobilePanel = el('div', { className: 'mobile-nav-panel', id: 'mobileNavPanel' });
-    if (config.search !== false) mobilePanel.appendChild(buildSearchWidget());
+    // Narrow viewports (too narrow for the topbar itself) fall back to a
+    // sidebar-styled off-canvas panel — same look, search/darkmode/panel-
+    // toggle row and nav-item styling as navigation: sidebar. Slides from
+    // the standard side (right for an RTL default-category, left otherwise).
+    const hasSearch = config.search !== false;
+    const navPos = standardNavPosition();
+    const mobilePanel = el('div', { className: `mobile-nav-panel nav-${navPos}`, id: 'mobileNavPanel' });
+    const toggleRow = buildPanelToggleRow(navPos, hasSearch, () => closeDrawer());
+    if (hasSearch) mobilePanel.appendChild(toggleRow);
     const mobileNavLinks = el('div', { className: 'nav-links', id: 'mobileNavLinks' });
     mobilePanel.appendChild(mobileNavLinks);
+    if (!hasSearch) mobilePanel.appendChild(toggleRow);
+
+    const overlay = el('div', { className: 'mobile-overlay' });
+    overlay.addEventListener('click', () => closeDrawer());
 
     layout.appendChild(topbar);
     layout.appendChild(mobilePanel);
+    layout.appendChild(overlay);
 
     const mainArea = el('div', { className: 'main-area' });
     const mainContent = el('div', { className: 'main-content' });
     const catBar = buildCategoryBar();
     if (catBar) mainContent.appendChild(catBar);
+    mainContent.appendChild(el('div', { className: 'pagination-top', id: 'paginationTopBar' }));
     mainContent.appendChild(el('div', { id: 'pageContent' }));
     mainArea.appendChild(mainContent);
     if (config.footer) {
@@ -2827,15 +3105,16 @@ function fmtDatetime(dtStr) {
     app.appendChild(layout);
 
     hamburger.addEventListener('click', () => {
-      const panel = document.getElementById('mobileNavPanel');
-      panel.classList.toggle('open');
+      mobilePanel.classList.toggle('open');
+      overlay.classList.toggle('active');
       hamburger.innerHTML = ''; hamburger.appendChild(iconEl('menu'));
     });
-    window._closeMobileMenu = function() {
-      const panel = document.getElementById('mobileNavPanel');
-      if (panel) panel.classList.remove('open');
+    function closeDrawer() {
+      mobilePanel.classList.remove('open');
+      overlay.classList.remove('active');
       hamburger.innerHTML = ''; hamburger.appendChild(iconEl('menu'));
-    };
+    }
+    window._closeMobileMenu = closeDrawer;
 
     document.addEventListener('click', () => closeTopbarGroups(null));
     // Fixed-position dropdowns are placed relative to the viewport, so close them
@@ -2975,7 +3254,7 @@ function fmtDatetime(dtStr) {
     // Apply RTL to page content + category bar based on active direction
     const direction = (cat && cat.direction === 'rtl') ? 'rtl' : 'ltr';
     document.querySelectorAll('.category-bar').forEach(b => b.setAttribute('dir', direction));
-    document.querySelectorAll('.md-content, .title-bar').forEach(el => el.setAttribute('dir', direction));
+    document.querySelectorAll('.md-content, .title-bar, .pagination-top, .pagination-bottom').forEach(el => el.setAttribute('dir', direction));
     document.querySelectorAll('.sidebar').forEach(el => el.setAttribute('dir', direction));
     // Apply per-category line-height override, or restore theme default
     const lh = cat && cat['line-height'];
@@ -2990,7 +3269,8 @@ function fmtDatetime(dtStr) {
     }
     let results = fuseInstance.search(query, { limit: 16 });
     if (categoriesUse && activeCategory) {
-      results = results.filter(r => !r.item.category || r.item.category === activeCategory);
+      const navCode = categoriesNavFollowsDefault ? defaultCategoryCode : activeCategory;
+      results = results.filter(r => !r.item.category || r.item.category === navCode);
     }
     results = results.slice(0, 8);
     if (!results.length) {
@@ -3073,11 +3353,11 @@ function fmtDatetime(dtStr) {
   }
 
   function sectionExpanded(code) {
-    return localStorage.getItem('md-cms-section:' + code) === 'expanded';
+    return safeStorage.get('md-cms-section:' + code) === 'expanded';
   }
   function toggleSection(code) {
     const key = 'md-cms-section:' + code;
-    localStorage.setItem(key, localStorage.getItem(key) === 'expanded' ? 'collapsed' : 'expanded');
+    safeStorage.set(key, safeStorage.get(key) === 'expanded' ? 'collapsed' : 'expanded');
   }
 
   function makeNavItem(page, depth) {
@@ -3357,7 +3637,15 @@ function fmtDatetime(dtStr) {
   }
 
   // ─── Page loading ─────────────────────────────────────────
-  async function navigateTo(file) {
+  // historyMode controls how this navigation affects browser history:
+  //   'push'    — user-initiated navigation; add a new entry so Back returns
+  //               to the previous page (the default).
+  //   'replace' — initial load, or a re-render of the page already showing;
+  //               update the current entry in place without stacking a new one.
+  //   'none'    — the navigation is itself the result of Back/Forward
+  //               (popstate/hashchange); the browser already moved through
+  //               history, so leave it untouched.
+  async function navigateTo(file, { history: historyMode = 'push' } = {}) {
     currentPage = file;
     const contentEl = document.getElementById('pageContent');
     highlightNav(file);
@@ -3374,7 +3662,7 @@ function fmtDatetime(dtStr) {
           || !(pageEntry.variants && pageEntry.variants.length)
           || pageEntry.variants.includes(activeCategory);
         if (!hasVariant) {
-          setActiveCategory(defaultCategoryCode);
+          setActiveCategory(defaultCategoryCode, { history: historyMode });
           return;
         }
       }
@@ -3397,18 +3685,33 @@ function fmtDatetime(dtStr) {
       u.pathname = basePath;
       u.hash = '#' + file;
     }
-    window.history.replaceState(null, '', u);
+    if (historyMode === 'push') {
+      // Re-navigating to the URL already showing (e.g. clicking the current
+      // nav link again) must not stack a duplicate entry that Back would land
+      // on with nothing visibly changing.
+      if (u.href === window.location.href) {
+        window.history.replaceState(null, '', u);
+      } else {
+        window.history.pushState(null, '', u);
+      }
+    } else if (historyMode === 'replace') {
+      window.history.replaceState(null, '', u);
+    }
+    // historyMode === 'none': triggered by Back/Forward — the browser already
+    // updated the URL and history position, so don't touch it here.
 
     contentEl.innerHTML = '<div class="loading-spinner"></div>';
 
     const result = await fetchPageFile(file);
     if (!result.ok) {
-      const offlineMsg = !navigator.onLine && localStorage.getItem('mdcms-offline');
+      const offlineMsg = !navigator.onLine && safeStorage.get('mdcms-offline');
       const bodyMsg = offlineMsg
         ? `<p>${offlineMsg}</p>`
         : `<p>${pageNotFoundMessage()}</p>`;
       contentEl.innerHTML = `<div class="error-message"><h2>Page not available</h2>${bodyMsg}</div>`;
       document.title = (config.sitename || 'MD-CMS');
+      const topBarEl = document.getElementById('paginationTopBar');
+      if (topBarEl) topBarEl.innerHTML = '';
       refreshCategoryBar();
       if (categoriesUse) populateCategoryOptions('');
       return;
@@ -3426,6 +3729,19 @@ function fmtDatetime(dtStr) {
 
     // Hydrate any mdcms tag blocks (post listings)
     hydrateMdcmsTags();
+
+    // Pagination: section feature (`pagination: on` in nav.yml). Shown at the
+    // bottom of the page, and again in the upper right below the category
+    // selector (or on its own if categories are disabled).
+    const paginationNeighbors = getPaginationNeighbors(file);
+    const topBarEl = document.getElementById('paginationTopBar');
+    if (topBarEl) {
+      topBarEl.innerHTML = '';
+      if (paginationNeighbors) topBarEl.appendChild(buildPaginationWidget(paginationNeighbors));
+    }
+    if (paginationNeighbors) {
+      contentEl.appendChild(buildPaginationWidget(paginationNeighbors, 'pagination-bottom'));
+    }
 
     const firstH = contentEl.querySelector('.md-content h1, .md-content h2');
     if (firstH && (meta.author || meta.created)) {
@@ -3484,7 +3800,7 @@ function fmtDatetime(dtStr) {
   window.addEventListener('hashchange', () => {
     const page = getPageFromHash();
     if (isInPageAnchor(page)) return;
-    if (page && page !== currentPage) navigateTo(page);
+    if (page && page !== currentPage) navigateTo(page, { history: 'none' });
   });
 
   window.addEventListener('popstate', () => {
@@ -3492,7 +3808,7 @@ function fmtDatetime(dtStr) {
     const pathPage = slug ? resolveSlugToFile(slug) : null;
     const page = pathPage || getPageFromHash();
     if (!pathPage && isInPageAnchor(page)) return;
-    if (page && page !== currentPage) navigateTo(page);
+    if (page && page !== currentPage) navigateTo(page, { history: 'none' });
   });
 
   // ─── Scroll to top ───────────────────────────────────────
@@ -3541,7 +3857,7 @@ function fmtDatetime(dtStr) {
         const offlineText = typeof offlineMsgCfg === 'string'
           ? offlineMsgCfg
           : (offlineMsgCfg[defaultCategoryCode] || offlineMsgCfg['en'] || Object.values(offlineMsgCfg)[0] || '');
-        if (offlineText) localStorage.setItem('mdcms-offline', offlineText);
+        if (offlineText) safeStorage.set('mdcms-offline', offlineText);
       }
 
       loadFonts(themeConfig);
@@ -3571,6 +3887,7 @@ function fmtDatetime(dtStr) {
         } else {
           navData = parsed.pages || [];
           navSections = parsed.sections || [];
+          mergeDateCategories(parsed['date-categories']);
         }
         renderNav();
       }
@@ -3603,7 +3920,9 @@ function fmtDatetime(dtStr) {
       }
 
       const hashPage = getPageFromHash();
-      await navigateTo(routeFromPath || hashPage || defaultPage());
+      // First paint replaces the initial entry rather than pushing, so the very
+      // first Back leaves the site instead of cycling on the landing page.
+      await navigateTo(routeFromPath || hashPage || defaultPage(), { history: 'replace' });
     } catch (err) {
       document.getElementById('app').innerHTML = `<div style="max-width:600px;margin:4rem auto;padding:2rem;text-align:center;font-family:system-ui;">
         <h1 style="color:#EF4444;font-size:1.5rem;">MD-CMS Error</h1>

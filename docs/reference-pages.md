@@ -137,11 +137,24 @@ toc-section
 ```
 ````
 
-With no argument, it lists the pages of the section the current page belongs to (or the unsectioned pages, if the current page has no `section-id`). Pass a section id to list a specific section regardless of the current page:
+With no argument, it lists the pages of the section the current page belongs to (or the unsectioned pages, if the current page has no `section-id`). Pass a section id to list a specific section regardless of the current page — all three spellings are equivalent:
 
 ````markdown
 ```mdcms
 toc-section reference
+```
+````
+
+````markdown
+```mdcms
+toc-section: reference
+```
+````
+
+````markdown
+```mdcms
+toc-section
+section: reference
 ```
 ````
 
@@ -153,20 +166,13 @@ toc-page
 ```
 ````
 
-None of these take options.
+Apart from `toc-section`'s section id (in any of the three spellings above), none of these take options.
 
 ---
 
 ### Post listings — `posts-created-*`
 
 Generate a chronologically sorted list of posts (files in `posts/`). Requires each post to have a `created:` value in frontmatter.
-
-**Reliable variants** (others are broken — do not use):
-
-```
-posts-created-chronological-byyearmonth
-posts-created-reversechronological
-```
 
 The grammar:
 
@@ -176,22 +182,33 @@ posts-created-<order>[-<modifier>]
   modifier: byyear | byyearmonth | lastyear | lastmonth   (optional)
 ```
 
-- `byyear` / `byyearmonth` — group output by year, or by year-and-month.
+- `byyear` / `byyearmonth` — group output by year, or by year-and-month. A year
+  dropdown is shown when more than one year has posts (`selectyear: no` hides
+  it; `defaultyear: 2025` picks the initially shown year — default is the
+  current year, falling back to the newest year with posts).
 - `lastyear` / `lastmonth` — filter to posts from the last 365/30 days.
 - No modifier — flat list of all posts.
+
+All variants work (verified in-browser, July 2026).
 
 ````markdown
 ```mdcms
 posts-created-reversechronological
-limit: 10                      # Max number of posts shown. Default: all.
-                               # When paginate: yes, this is the page size (batch size).
+limit: 10                      # Batch/page size. Default: all (batches of 20).
 
 paginate: yes                  # Pagination mode:
-                               # yes   — show a "load more" button after batchSize posts.
-                               # none  — show only the first <limit> posts, no pagination.
-                               # no    — show all posts at once (default).
+                               # yes   — full pagination bar: "Page x/y",
+                               #         Previous/Next buttons, jump-to-page.
+                               # no    — show <limit> posts with a "Load more"
+                               #         button (default).
+                               # none  — show only the first <limit> posts,
+                               #         no controls.
 ```
 ````
+
+On narrow viewports (≤ 600px) each list item stacks into two lines — date and
+time on top, the title link underneath — with extra space below the link to
+separate it from the next item.
 
 **Category filtering:** When `categories-use: yes`, the listing automatically filters to the active category.
 

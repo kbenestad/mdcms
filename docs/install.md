@@ -72,3 +72,41 @@ Verify which version you have installed by running `mdcms --version`.
 ## Update
 
 MD-CMS consists of two separate pieces of software: The CLI tool (which you run from the terminal) and the renderer (the index.html file, which the browser reads). To update the CLI, simply rerun the installation command and overwrite `mdcms`. To update the renderer, download the latest index.html and overwrite it in your sites.
+
+## Building your own binary
+
+The commands above download a pre-built binary from the latest GitHub release. If you want to build one yourself instead — from a local checkout, a branch that hasn't been released yet, or a modified copy of `mdcms.py` — you can produce the exact same kind of standalone executable with [PyInstaller](https://pyinstaller.org/), the same tool the release workflow (`.github/workflows/release.yml`) uses.
+
+### Build
+
+PyInstaller needs to run from a normal Python environment, but on most current Linux distros `pip install` refuses to touch the system Python directly (`externally-managed-environment`). A virtual environment sidesteps that safely — it only affects the build, not the resulting binary:
+
+```
+python3 -m venv mdcms-build-venv
+source mdcms-build-venv/bin/activate       # Windows: mdcms-build-venv\Scripts\activate
+pip install pyinstaller click pyyaml certifi
+pyinstaller --onefile --name mdcms --collect-data certifi mdcms.py
+```
+
+Run this from the directory containing `mdcms.py`. `--collect-data certifi` is required — it bundles certifi's CA bundle into the binary so HTTPS calls (template downloads, theme fetches, `mdcms update`, etc.) work without depending on the system's CA store. Skipping it is the most common way a self-built binary breaks.
+
+The finished binary lands at `dist/mdcms` (`dist/mdcms.exe` on Windows). You can `deactivate` and delete the venv afterwards — the binary itself doesn't need Python or the venv to run.
+
+### Running it without installing
+
+The binary in `dist/` is fully standalone; you don't have to move it anywhere or make it an "installed" command to use it. From the directory containing it:
+
+```
+./dist/mdcms --help
+./dist/mdcms build --path ./my-site
+```
+
+or from anywhere else, by pointing at it with a relative or full path:
+
+```
+/full/path/to/dist/mdcms --help
+```
+
+This is also the safest way to try a freshly built binary if you already have `mdcms` installed some other way (pip, pipx, or a downloaded release binary) — running `mdcms` bare resolves to whatever comes first on your `PATH`, which is very likely the existing install, not the one you just built. Run `which -a mdcms` to see every `mdcms` your shell can find, in the order it would try them, if you're not sure which one a bare `mdcms` would run.
+
+Only copy the binary onto your `PATH` (e.g. `cp dist/mdcms ~/.local/bin/mdcms`, or `/usr/local/bin/mdcms` as in the install commands above) once you're sure it's the one you want to keep using as your default `mdcms`.
