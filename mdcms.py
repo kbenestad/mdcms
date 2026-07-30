@@ -623,6 +623,81 @@ def validate_assets(site_path: Path, cfg: dict) -> list:
     return warnings
 
 
+# The renderer parses config.yml/theme.yml/nav.yml and page frontmatter with js-yaml
+# in the browser, which enforces the full YAML spec's restriction on which characters
+# may appear in a document at all. PyYAML (used by this CLI) is far more lenient and
+# accepts things like a stray non-breaking space without complaint, so a file that
+# builds cleanly here can still fail at runtime with "the stream contains non-printable
+# characters" — usually from copy-pasting text out of a webpage or word processor.
+def _is_yaml_printable(cp: int) -> bool:
+    return (
+        cp in (0x09, 0x0A, 0x0D)
+        or (0x20 <= cp <= 0x7E)
+        or (0xA1 <= cp <= 0xD7FF and cp not in (0x2028, 0x2029))
+        or (0xE000 <= cp <= 0xFFFD and cp != 0xFEFF)
+        or (0x10000 <= cp <= 0x10FFFF)
+    )
+
+
+def _find_yaml_unprintable(text: str, start_line: int = 1) -> list:
+    """Return [(line, col, codepoint)] — line/col match js-yaml's own 1-indexed
+    error-message numbering, so a warning here points at the same spot the
+    renderer's runtime error would."""
+    problems: list = []
+    line, col = start_line, 1
+    for ch in text:
+        cp = ord(ch)
+        if not _is_yaml_printable(cp):
+            problems.append((line, col, cp))
+        if ch == "\n":
+            line += 1
+            col = 1
+        else:
+            col += 1
+    return problems
+
+
+def validate_yaml_printable(site_path: Path, cfg: dict) -> list:
+    """Return warning strings for characters that will make the renderer's
+    stricter YAML parser fail at runtime, even though this CLI's own YAML
+    parsing accepted the file without complaint."""
+    warnings: list = []
+
+    def _check(text: str, source: str, start_line: int = 1):
+        for line, col, cp in _find_yaml_unprintable(text, start_line):
+            warnings.append(
+                f"Warning: {source} has a character the renderer's YAML parser will "
+                f"reject at ({line}:{col}) — likely a non-breaking space or other "
+                f"invisible character from a copy-paste (U+{cp:04X})."
+            )
+
+    config_file = site_path / "config.yml"
+    if config_file.exists():
+        _check(config_file.read_text(encoding="utf-8"), "config.yml")
+
+    theme_name = cfg.get("theme")
+    if theme_name:
+        theme_file = site_path / theme_name
+        if theme_file.exists():
+            _check(theme_file.read_text(encoding="utf-8"), theme_name)
+
+    for folder in ("pages", "posts"):
+        d = site_path / folder
+        if not d.is_dir():
+            continue
+        for md_file in sorted(d.rglob("*.md")):
+            try:
+                content = md_file.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError):
+                continue
+            m = re.match(r"^---\s*\n(.*?)\n---\s*\n", content, re.DOTALL)
+            if m:
+                rel = str(md_file.relative_to(site_path)).replace("\\", "/")
+                _check(m.group(1), f"{rel} frontmatter", start_line=2)
+
+    return warnings
+
+
 # ─── Core build logic ─────────────────────────────────────────
 
 _TITLE_RE = re.compile(r"<title>[^<]*</title>")
@@ -758,6 +833,10 @@ def run_build(site_path: Path):
 
     asset_warnings = validate_assets(site_path, cfg)
     for w in asset_warnings:
+        click.echo(click.style(w, fg="yellow"))
+
+    yaml_char_warnings = validate_yaml_printable(site_path, cfg)
+    for w in yaml_char_warnings:
         click.echo(click.style(w, fg="yellow"))
 
     if auto_created:
@@ -1305,7 +1384,11 @@ def generate_bundle(site_path: Path, cfg: dict, output: Path, offline: bool) -> 
     )
     html = html.replace("<head>\n", "<head>\n" + shim, 1)
 
-    output.write_text(html, encoding="utf-8")
+    # A leading UTF-8 BOM is valid before <!doctype html> (browsers strip it) and
+    # helps naive file-type/encoding sniffers used by some mobile cloud-storage
+    # previewers (observed misbehaviour: OneDrive) correctly identify the file as
+    # UTF-8 text instead of misdetecting ordinary multi-byte characters as binary.
+    output.write_bytes(b"\xef\xbb\xbf" + html.encode("utf-8"))
     return warnings
 
 
