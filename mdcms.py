@@ -969,10 +969,14 @@ _BUNDLE_GOOGLE_GUARD = "if (googleFonts.length) {"
 # clean-URL pages. basePath is derived from wherever the page was opened, which
 # for a bundle opened straight off disk is a directory that doesn't contain the
 # bundle file itself — pushState/replaceState to that URL throws a SecurityError
-# under file:// (Chrome refuses history navigation to an unrelated local path).
-# Skip all three history calls when running under file:// so the bundle degrades
-# to in-memory-only routing (no address-bar URL, no Back/Forward) instead of
-# throwing and aborting navigation.
+# in any scheme that isn't a real served origin: file:// on desktop, but also
+# content:// (Android's "open with browser" from a file manager/download list
+# hands the page a content://media/external/... URL, not file://) and likely
+# blob:// too. Rather than block-list every opaque scheme a browser might use,
+# allow-list the two schemes a real server can actually be reached at — skip
+# all three history calls otherwise, so the bundle degrades to in-memory-only
+# routing (no address-bar URL, no Back/Forward) instead of throwing and
+# aborting navigation.
 _BUNDLE_HISTORY_BLOCK_OLD = """    if (historyMode === 'push') {
       // Re-navigating to the URL already showing (e.g. clicking the current
       // nav link again) must not stack a duplicate entry that Back would land
@@ -985,7 +989,7 @@ _BUNDLE_HISTORY_BLOCK_OLD = """    if (historyMode === 'push') {
     } else if (historyMode === 'replace') {
       window.history.replaceState(null, '', u);
     }"""
-_BUNDLE_HISTORY_BLOCK_NEW = """    if (window.location.protocol !== 'file:') {
+_BUNDLE_HISTORY_BLOCK_NEW = """    if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
       if (historyMode === 'push') {
         // Re-navigating to the URL already showing (e.g. clicking the current
         // nav link again) must not stack a duplicate entry that Back would land
