@@ -1,0 +1,1 @@
+This version is outdated. Please run mdcms upgrade or visit github.com/kbenestad/mdcms for more information.
