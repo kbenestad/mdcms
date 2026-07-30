@@ -6,6 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Every merge into `main` is a release. Before committing any change to `mdcms.py`, ask: "Is this intended to be merged to main immediately?" If yes, bump `CLI_VERSION` and `CLI_RELEASE_DATE` in `mdcms.py` and `version` in `pyproject.toml` before committing. If the work is exploratory or not yet ready to merge, leave the version unchanged and ask again when the merge is imminent.
 
+**Which segment to bump — strict semver `X.Y.Z`:**
+- **`X`** (major) — breaking changes.
+- **`Y`** (minor) — new features. Bump `Y` and reset `Z` to `0`.
+- **`Z`** (patch) — fixes and other updates to existing behaviour.
+
+When a release bundles both new features and fixes, the feature bump wins (`Y`, not `Z`).
+
 ## Branching convention
 
 Only two branches exist in this repository: **`main`** and **`development`**. No other branches should be created or left alive.
@@ -244,6 +251,10 @@ Because `publish` and `publish-intel` push to `main`, the repo's **Actions → W
 **Release checklist:** just tag. `git tag v0.6.7 && git push origin v0.6.7` — the workflow does the version bump, the build, the `latest/` commit, and the GitHub release. Update `MIN_SUPPORTED_VERSION` in `mdcms.py` only when dropping support for older site formats.
 
 **Note:** Git tag pushes must be done from a local machine — the cloud environment cannot push tags (HTTP 403).
+
+**Version status banner (`mdcms --version` / bare-command banner).** Every new version needs its own `docs/banner/v{X.Y.Z}.txt` — a one-line "this is the latest version" status message — and the *previous* version's banner file must be amended at the same time to tell users to update. `docs/banner/v{CLI_VERSION}.txt` is what the running CLI fetches at runtime from `raw.githubusercontent.com/.../main/docs/banner/v{CLI_VERSION}.txt`; it's keyed off the *local* binary's own version, not a live comparison against the latest release, so the message is only correct if that file's content is kept in sync as newer versions ship — a banner nobody amends just keeps telling people they're up to date forever.
+
+In practice this is automated, not a manual step to remember: on a tag push, the `publish` job's "Update version banners" step scans every `docs/banner/v*.txt` and rewrites any file (other than the one for the version just released) that still claims to be "the latest version" to the outdated/`mdcms upgrade` message, then writes a fresh "latest version" file for the new release. Because it re-scans all files each time rather than diffing a single before/after version, it's self-healing — it also repairs any banner a past release failed to flip. (This replaced an earlier before/after-diff approach that could silently skip the flip when `mdcms.py`'s `CLI_VERSION` was already bumped on `main` before the tag workflow ran, which is the normal case per the versioning rule above since that bump happens in the commit that merges to `main` — this caused `docs/banner/v0.6.12.txt` to wrongly claim "latest version" after v0.6.13 shipped, until caught and fixed.)
 
 ## Known limitations
 
