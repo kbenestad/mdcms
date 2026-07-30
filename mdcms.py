@@ -1007,6 +1007,24 @@ _BUNDLE_HISTORY_BLOCK_NEW = """    if (window.location.protocol === 'http:' || w
 _SCRIPT_SRC_RE = re.compile(r'<script src="(https://[^"]+)"></script>')
 _LINK_CSS_RE = re.compile(r'<link rel="stylesheet" href="(https://[^"]+)"([^>]*)>')
 _FONT_CSS_URL_RE = re.compile(r'url\((["\']?)(https?://[^)"\']+)\1\)')
+_CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+
+
+def _bundle_escape_js_control_chars(text: str) -> str:
+    """Escape raw control bytes as \\xNN — some mobile file-type sniffers (observed:
+    NextCloud/OneDrive) misdetect a literal control byte as binary/corrupt content and
+    refuse to preview an otherwise-valid text file. A real CDN library can legitimately
+    contain one (js-yaml's minified escape-sequence table has a literal BEL and ESC byte)
+    when inlined verbatim for --offline. \\xNN is semantically identical inside any JS
+    string or regex literal, which is the only place a raw control byte can validly sit
+    in already-valid JS source, so this is safe for arbitrary downloaded script content."""
+    return _CONTROL_CHAR_RE.sub(lambda m: f"\\x{ord(m.group()):02x}", text)
+
+
+def _bundle_strip_control_chars(text: str) -> str:
+    """Drop stray control bytes from CSS content — CSS has no equivalent short escape
+    worth relying on here, and legitimate CSS should never contain one anyway."""
+    return _CONTROL_CHAR_RE.sub("", text)
 
 
 def _bundle_mime_for(path: Path) -> str:
@@ -1080,7 +1098,7 @@ def _bundle_inline_webfont_css(css_text: str, warnings: list) -> str:
         mime = _bundle_mime_for(Path(font_url.split("?")[0]))
         b64 = base64.b64encode(font_bytes).decode("ascii")
         return f"url(data:{mime};base64,{b64})"
-    return _FONT_CSS_URL_RE.sub(repl, css_text)
+    return _bundle_strip_control_chars(_FONT_CSS_URL_RE.sub(repl, css_text))
 
 
 def _bundle_offline_webfont_style(cfg: dict, theme_data: dict, warnings: list) -> str:
@@ -1118,7 +1136,8 @@ def _bundle_inline_vendor_deps(html: str, warnings: list) -> str:
     def script_repl(m):
         url = m.group(1)
         try:
-            return f"<script>{_http_get(url).decode('utf-8')}</script>"
+            content = _bundle_escape_js_control_chars(_http_get(url).decode("utf-8"))
+            return f"<script>{content}</script>"
         except Exception as e:
             warnings.append(f"bundle: failed to download {url}: {e}")
             return m.group(0)
@@ -1127,7 +1146,8 @@ def _bundle_inline_vendor_deps(html: str, warnings: list) -> str:
     def link_repl(m):
         url, attrs = m.group(1), m.group(2)
         try:
-            return f"<style{attrs}>{_http_get(url).decode('utf-8')}</style>"
+            content = _bundle_strip_control_chars(_http_get(url).decode("utf-8"))
+            return f"<style{attrs}>{content}</style>"
         except Exception as e:
             warnings.append(f"bundle: failed to download {url}: {e}")
             return m.group(0)
