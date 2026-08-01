@@ -1385,7 +1385,12 @@ body.scanlines-active::after {
   }
 
   // ─── Icons ────────────────────────────────────────────────
-  const STANDARD_ICONS = ['dark_mode','light_mode','menu','search','arrow_right','arrow_drop_down','mobile_arrow_down','language','info','warning','error','success','exclamation','dangerous','report','history','text_compare','keyboard_arrow_right','keyboard_arrow_down','keyboard_double_arrow_right','keyboard_double_arrow_down','expand_content','collapse_content','add','minimize','left_panel_close','left_panel_open','right_panel_close','right_panel_open'];
+  // CORE_ICONS are rendered unconditionally by the app itself, so every site needs
+  // them regardless of config. The rest are only pulled in when a site's config.yml
+  // or theme.yml actually names them (categories-selecticon, nav-section-expand-icon,
+  // nav-section-collapse-icon, callout icon overrides) — see the preload logic below.
+  // `mdcms build` mirrors this same split to keep assets/icons/ trimmed to what's used.
+  const CORE_ICONS = ['dark_mode','light_mode','menu','search','arrow_right','arrow_drop_down','info','warning','error','success','keyboard_arrow_right','left_panel_close','left_panel_open','right_panel_close','right_panel_open'];
   const iconCache = {};
 
   function normaliseIconName(name) {
@@ -3863,8 +3868,15 @@ function fmtDatetime(dtStr) {
       loadFonts(themeConfig);
       initCategories();
 
-      const iconsToPreload = [...STANDARD_ICONS];
+      const iconsToPreload = [...CORE_ICONS];
       if (config['categories-selecticon']) iconsToPreload.push(config['categories-selecticon']);
+      if (themeConfig['nav-section-expand-icon']) iconsToPreload.push(themeConfig['nav-section-expand-icon']);
+      if (themeConfig['nav-section-collapse-icon']) iconsToPreload.push(themeConfig['nav-section-collapse-icon']);
+      const themeCalloutsCfg = themeConfig.callouts || {};
+      for (const calloutType of ['info', 'warning', 'success', 'error']) {
+        const iconOverride = (themeCalloutsCfg[calloutType] || {}).icon;
+        if (iconOverride) iconsToPreload.push(iconOverride);
+      }
       await Promise.all(iconsToPreload.map(name => loadIcon(name)));
 
       const navMode = config.navigation || 'sidebar';
