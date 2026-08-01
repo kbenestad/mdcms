@@ -5,7 +5,7 @@
 #
 # Licensed under Apache 2.0 licence.
 #
-# CURRENT VERSION: 0.7.0 - 30 July 2026
+# CURRENT VERSION: 0.8.0 - 1 August 2026
 #
 # Copyright 2026 Kristian Benestad
 #
@@ -44,8 +44,8 @@ import certifi
 import click
 import yaml
 
-CLI_VERSION = "0.7.0"
-CLI_RELEASE_DATE = "30 July 2026"
+CLI_VERSION = "0.8.0"
+CLI_RELEASE_DATE = "1 August 2026"
 MIN_SUPPORTED_VERSION = "0.3"
 
 # Minimum theme-file format the renderer/build supports. Theme files carry their
@@ -70,6 +70,30 @@ MANIFEST_FILENAME = "mdcms.json"
 
 REPO_RAW_BASE = "https://raw.githubusercontent.com/kbenestad/mdcms/main"
 THEMES_MANIFEST_PATH = "sample-sites/themes.json"
+
+# Mirrors CORE_ICONS in app/index.html — those are rendered unconditionally, so every
+# site needs them. OPTIONAL_ICONS is the rest of the stock icon pack: only pulled in
+# when a site's config.yml/theme.yml actually names one (categories-selecticon,
+# nav-section-expand-icon, nav-section-collapse-icon, or a theme.yml callout icon
+# override) — see compute_referenced_icons().
+CORE_ICONS = [
+    "dark_mode", "light_mode", "menu", "search", "arrow_right", "arrow_drop_down",
+    "info", "warning", "error", "success", "keyboard_arrow_right",
+    "left_panel_close", "left_panel_open", "right_panel_close", "right_panel_open",
+]
+OPTIONAL_ICONS = [
+    "keyboard_arrow_down", "keyboard_double_arrow_right", "keyboard_double_arrow_down",
+    "expand_content", "collapse_content", "add", "minimize", "language",
+]
+ALL_KNOWN_ICONS = frozenset(CORE_ICONS) | frozenset(OPTIONAL_ICONS)
+
+# Icons that used to ship in the stock pack but were never actually referenced by
+# anything (index.html, config.yml, or any theme in themes/) and were dropped from
+# it. Never downloaded — only cleaned up from assets/icons/ if a site still has one
+# left over from before the pack was trimmed and it's unreferenced.
+LEGACY_ICONS = frozenset({
+    "mobile_arrow_down", "exclamation", "dangerous", "report", "history", "text_compare",
+})
 
 GITHUB_URL_RE = re.compile(
     r"https?://github\.com/([^/]+)/([^/]+?)(?:\.git)?"
@@ -698,6 +722,88 @@ def validate_yaml_printable(site_path: Path, cfg: dict) -> list:
     return warnings
 
 
+# ─── Icon sync ─────────────────────────────────────────────────
+
+def compute_referenced_icons(site_path: Path, cfg: dict) -> set:
+    """Return the set of icon names (without .svg) this site actually needs.
+
+    Starts from CORE_ICONS (rendered unconditionally by index.html) and adds any
+    icon named by config.yml/theme.yml: categories-selecticon, nav-section-expand-icon,
+    nav-section-collapse-icon, and per-type callout icon overrides. Mirrors the
+    preload logic in app/index.html — keep the two in sync.
+    """
+    icons = set(CORE_ICONS)
+
+    selecticon = cfg.get("categories-selecticon")
+    if selecticon:
+        icons.add(selecticon)
+
+    theme_file = cfg.get("theme")
+    theme_data: dict = {}
+    if theme_file:
+        theme_path = site_path / theme_file
+        if theme_path.exists():
+            try:
+                theme_data = yaml.safe_load(theme_path.read_text(encoding="utf-8")) or {}
+            except (OSError, yaml.YAMLError):
+                theme_data = {}
+
+    for key in ("nav-section-expand-icon", "nav-section-collapse-icon"):
+        val = theme_data.get(key)
+        if val:
+            icons.add(val)
+
+    theme_callouts = theme_data.get("callouts") or {}
+    for callout_type in ("info", "warning", "success", "error"):
+        icon_override = (theme_callouts.get(callout_type) or {}).get("icon")
+        if icon_override:
+            icons.add(icon_override)
+
+    return icons
+
+
+def sync_icons(site_path: Path, cfg: dict) -> None:
+    """Download any missing referenced icons into assets/icons/, and remove any
+    stock icon (from ALL_KNOWN_ICONS) that's no longer referenced. Icons with
+    names outside ALL_KNOWN_ICONS are left alone — they may be custom additions.
+    """
+    icons_dir = site_path / "assets" / "icons"
+    referenced = compute_referenced_icons(site_path, cfg)
+
+    added, removed, failed = [], [], []
+    root = _local_repo_root()
+
+    for name in sorted(referenced):
+        dest = icons_dir / f"{name}.svg"
+        if dest.exists():
+            continue
+        try:
+            if root:
+                src = root / "app" / "assets" / "icons" / f"{name}.svg"
+                data = src.read_bytes() if src.exists() else _http_get(f"{TEMPLATE_BASE_URL}/assets/icons/{name}.svg")
+            else:
+                data = _http_get(f"{TEMPLATE_BASE_URL}/assets/icons/{name}.svg")
+        except (OSError, urllib.error.URLError):
+            failed.append(name)
+            continue
+        icons_dir.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(data)
+        added.append(name)
+
+    if icons_dir.is_dir():
+        for f in sorted(icons_dir.glob("*.svg")):
+            if f.stem in (ALL_KNOWN_ICONS | LEGACY_ICONS) and f.stem not in referenced:
+                f.unlink()
+                removed.append(f.stem)
+
+    if added:
+        click.echo(f"  Icons downloaded: {', '.join(added)}")
+    if removed:
+        click.echo(f"  Icons removed (unreferenced): {', '.join(removed)}")
+    for name in failed:
+        click.echo(click.style(f"  Warning: could not download icon '{name}.svg'", fg="yellow"))
+
+
 # ─── Core build logic ─────────────────────────────────────────
 
 _TITLE_RE = re.compile(r"<title>[^<]*</title>")
@@ -758,6 +864,7 @@ def run_build(site_path: Path):
     cfg = read_config(site_path)
 
     _ensure_theme_current(site_path, cfg)
+    sync_icons(site_path, cfg)
 
     cat = get_category_info(cfg)
 
@@ -2927,21 +3034,27 @@ def register(name, path, source):
 
 
 @cli.command("delete")
-@click.argument("name")
-def delete_site(name):
-    """Remove a registered site. Does not delete any files."""
+@click.argument("names", nargs=-1, required=True)
+@click.option("-y", "--yes", is_flag=True, help="Skip the confirmation prompt.")
+def delete_site(names, yes):
+    """Remove one or more registered sites. Does not delete any files."""
     reg = load_registry()
-    if name not in reg["sites"]:
-        raise click.ClickException(f"Site '{name}' not found.")
 
-    info = reg["sites"][name]
-    click.echo(f"Site: {name}")
-    click.echo(f"Path: {info['path']}")
-    click.confirm("\nRemove this registration? (Site files will not be deleted.)", abort=True)
+    missing = [name for name in names if name not in reg["sites"]]
+    if missing:
+        raise click.ClickException(f"Site(s) not found: {', '.join(missing)}")
 
-    del reg["sites"][name]
+    click.echo("Sites to remove:")
+    for name in names:
+        click.echo(f"  {name}  ({reg['sites'][name]['path']})")
+
+    if not yes:
+        click.confirm("\nRemove these registrations? (Site files will not be deleted.)", abort=True)
+
+    for name in names:
+        del reg["sites"][name]
     save_registry(reg)
-    click.echo(click.style(f"Removed '{name}'.", fg="green"))
+    click.echo(click.style(f"Removed: {', '.join(names)}.", fg="green"))
 
 
 @cli.command()
