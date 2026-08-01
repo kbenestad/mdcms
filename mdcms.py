@@ -3265,8 +3265,11 @@ def update(name, path_override, force):
     if _bump_config_version_marker(site_path):
         click.echo(f"  config.yml version marker -> {CLI_VERSION}")
     else:
+        today = datetime.date.today()
+        config_file = site_path / "config.yml"
         click.echo(click.style(
-            "  Could not find a CURRENT VERSION banner in config.yml — update it by hand.",
+            f"  Could not find a CURRENT VERSION banner in config.yml — update it by hand in {config_file}:\n"
+            f"    # CURRENT VERSION: {CLI_VERSION} - {today.day} {today:%B %Y}",
             fg="yellow",
         ))
 
