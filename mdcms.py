@@ -34,6 +34,7 @@ import shutil
 import ssl
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -2853,17 +2854,44 @@ def _permission_denied(exe_path: Path) -> "click.ClickException":
     )
 
 
+def _upgrade_dpkg(latest: str, pkg: str) -> None:
+    """Download the .deb for this platform and install it via dpkg, keeping the
+    package database in sync (a raw binary swap would leave dpkg's record stale)."""
+    deb_dir = _binary_release_asset().rsplit("/", 1)[0]
+    deb_url = f"{REPO_RAW_BASE}/latest/{deb_dir}/mdcms.deb"
+    click.echo(f"Downloading v{latest} .deb package for this platform ...")
+    data = _http_get(deb_url)
+    if not data:
+        raise click.ClickException("Downloaded .deb package was empty — aborting.")
+
+    tmp_path = Path(tempfile.gettempdir()) / "mdcms.deb"
+    tmp_path.write_bytes(data)
+
+    cmd = ["dpkg", "-i", str(tmp_path)]
+    if os.geteuid() != 0:
+        if not shutil.which("sudo"):
+            raise click.ClickException(
+                f"Downloaded {tmp_path}, but installing it requires root and no 'sudo' is "
+                f"available on this system. Install it manually: dpkg -i {tmp_path}"
+            )
+        cmd = ["sudo"] + cmd
+
+    click.echo(f"Running: {' '.join(cmd)}")
+    try:
+        try:
+            result = subprocess.run(cmd)
+        except OSError as e:
+            raise click.ClickException(f"Could not run dpkg: {e}")
+        if result.returncode != 0:
+            raise click.ClickException("dpkg install failed — see output above.")
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+    click.echo(click.style(f"Upgraded to v{latest} (package '{pkg}').", fg="green"))
+
+
 def _upgrade_binary(latest: str) -> None:
     exe_path = Path(sys.executable).resolve()
-
-    pkg = _dpkg_owner_of(exe_path)
-    if pkg:
-        raise click.ClickException(
-            f"{exe_path} is managed by dpkg (package '{pkg}'). Re-run the .deb install instead "
-            "of a direct binary swap, so the package database stays in sync:\n"
-            "  curl -fsSLO https://raw.githubusercontent.com/kbenestad/mdcms/main/latest/"
-            f"{_binary_release_asset().rsplit('/', 1)[0]}/mdcms.deb && sudo dpkg -i mdcms.deb"
-        )
 
     # Linux/macOS binaries are commonly installed to a root-owned location
     # (e.g. /usr/local/bin). Detect that up front and re-exec under sudo
@@ -2938,12 +2966,12 @@ def cli(ctx):
 def upgrade(force):
     """Upgrade the mdcms CLI itself to the latest released version.
 
-    Detects how this copy of mdcms was installed — pip, pipx, or a standalone
-    binary — and upgrades it the matching way: `pip install --upgrade` /
-    `pipx upgrade` for package installs, or downloading and swapping the
-    executable for a standalone binary install. A dpkg-managed Linux install
-    is left alone with instructions to re-run the .deb install instead, so the
-    package database doesn't fall out of sync with the file on disk.
+    Detects how this copy of mdcms was installed — pip, pipx, a dpkg-managed
+    .deb, or a standalone binary — and upgrades it the matching way: `pip
+    install --upgrade` / `pipx upgrade` for package installs; downloading and
+    installing the new .deb via `dpkg -i` (re-execing under sudo if needed)
+    for a dpkg-managed install, so the package database stays in sync; or
+    downloading and swapping the executable for a standalone binary install.
     """
     click.echo(f"Current version: v{CLI_VERSION}")
     try:
@@ -2961,6 +2989,11 @@ def upgrade(force):
     if kind in ("pip", "pipx"):
         _upgrade_package(kind)
         click.echo(click.style(f"Upgraded to v{latest}.", fg="green"))
+        return
+
+    pkg = _dpkg_owner_of(Path(sys.executable).resolve())
+    if pkg:
+        _upgrade_dpkg(latest, pkg)
         return
 
     _upgrade_binary(latest)
@@ -3232,8 +3265,11 @@ def update(name, path_override, force):
     if _bump_config_version_marker(site_path):
         click.echo(f"  config.yml version marker -> {CLI_VERSION}")
     else:
+        today = datetime.date.today()
+        config_file = site_path / "config.yml"
         click.echo(click.style(
-            "  Could not find a CURRENT VERSION banner in config.yml — update it by hand.",
+            f"  Could not find a CURRENT VERSION banner in config.yml — update it by hand in {config_file}:\n"
+            f"    # CURRENT VERSION: {CLI_VERSION} - {today.day} {today:%B %Y}",
             fg="yellow",
         ))
 
