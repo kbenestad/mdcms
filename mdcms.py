@@ -5,7 +5,7 @@
 #
 # Licensed under Apache 2.0 licence.
 #
-# CURRENT VERSION: 0.8.1 - 2 August 2026
+# CURRENT VERSION: 0.8.2 - 4 August 2026
 #
 # Copyright 2026 Kristian Benestad
 #
@@ -45,8 +45,8 @@ import certifi
 import click
 import yaml
 
-CLI_VERSION = "0.8.1"
-CLI_RELEASE_DATE = "2 August 2026"
+CLI_VERSION = "0.8.2"
+CLI_RELEASE_DATE = "4 August 2026"
 MIN_SUPPORTED_VERSION = "0.3"
 
 # Minimum theme-file format the renderer/build supports. Theme files carry their
@@ -237,6 +237,26 @@ def read_nav_yml(site_path: Path) -> dict:
     }
 
 
+def read_nav_yml_for_edit(site_path: Path) -> dict:
+    """Read nav.yml for an in-place edit, refusing to proceed on a parse error.
+
+    `read_nav_yml` degrades to an empty nav so `mdcms build` — which regenerates
+    every page entry from disk anyway — can recover from a damaged file. Editing
+    commands must not do that: they write back what they read, so treating an
+    unparseable nav.yml as empty would silently delete every section and page it
+    still contains.
+    """
+    nav = read_nav_yml(site_path)
+    if nav["warning"]:
+        raise click.ClickException(
+            f"{nav['warning']}.\nRefusing to edit it — saving now would discard every section "
+            f"and page still in the file. Fix {site_path / 'nav.yml'} by hand, or delete it and "
+            "run 'mdcms build' to regenerate it (section metadata such as defaultname, sort, "
+            "parent and pagination would be lost)."
+        )
+    return nav
+
+
 # ─── Frontmatter parsing ─────────────────────────────────────
 
 def parse_frontmatter(filepath: Path) -> "tuple[dict, str]":
@@ -407,21 +427,67 @@ def select_primary(variants: dict, default_code: "str | None") -> dict:
 
 # ─── Nav / search generators ─────────────────────────────────
 
+def _yaml_double_quote(s: str) -> str:
+    """Render `s` as a YAML double-quoted scalar.
+
+    Backslashes must be escaped first: inside double quotes YAML treats `\\`
+    as an escape introducer, so an unescaped one from the source string (a
+    Windows path in a page title, say) produces an invalid escape sequence and
+    makes the whole file unparseable.
+    """
+    out = []
+    for ch in s:
+        if ch == "\\":
+            out.append("\\\\")
+        elif ch == '"':
+            out.append('\\"')
+        elif ch == "\n":
+            out.append("\\n")
+        elif ch == "\r":
+            out.append("\\r")
+        elif ch == "\t":
+            out.append("\\t")
+        elif ord(ch) < 0x20 or ord(ch) == 0x7F:
+            out.append("\\x%02x" % ord(ch))
+        else:
+            out.append(ch)
+    return '"' + "".join(out) + '"'
+
+
+def _yaml_needs_quoting(s: str) -> bool:
+    """True if `s` cannot be emitted as a bare YAML plain scalar.
+
+    Beyond the obvious cases (empty, surrounding whitespace, control characters,
+    characters that start a comment or a quoted/escaped run) the string is round-
+    tripped through the parser: anything that fails to parse, or that parses back
+    as something other than the same string — a list (`- dash lead`), a flow
+    sequence (`[2026] Roadmap`), a number (`2026`), a YAML 1.1 boolean (`yes`) —
+    has to be quoted.
+    """
+    if s == "" or s != s.strip():
+        return True
+    if any(ord(c) < 0x20 or ord(c) == 0x7F for c in s):
+        return True
+    if any(c in s for c in ':"\'#\\'):
+        return True
+    try:
+        return yaml.safe_load(s) != s
+    except yaml.YAMLError:
+        return True
+
+
 def _emit_value(v) -> str:
     if v is None:
         return ""
     s = str(v)
-    if s == "" or any(c in s for c in ':"\'#') or s.lower() in ("true", "false", "null"):
-        return '"' + s.replace('"', '\\"') + '"'
-    return s
+    return _yaml_double_quote(s) if _yaml_needs_quoting(s) else s
 
 
 def _emit_code(code) -> str:
-    """Quote a category code for YAML if left bare it would round-trip as a
-    different type — all-digit date codes (e.g. "20260704") parse back as
-    integers otherwise, breaking string joins/comparisons on rebuild."""
-    s = str(code)
-    return f'"{s}"' if s.isdigit() else s
+    """Quote a category or section code so it round-trips as a string —
+    all-digit date codes (e.g. "20260704") parse back as integers otherwise,
+    breaking string joins/comparisons on rebuild."""
+    return _emit_value(str(code))
 
 
 def merge_sections(page_entries: list, existing_sections: list) -> "tuple[list, list]":
@@ -458,7 +524,11 @@ def build_page_nav(
         file = base + ".md"
         primary = select_primary(variants, default_code)
         existing = existing_by_file.get(file, {})
-        sort = existing.get("sort") or primary.get("sort") or 100
+        # Frontmatter wins. nav.yml's own value is only a fallback for pages
+        # that declare no `sort:` at all — otherwise editing a page's sort (by
+        # hand or via `mdcms config`) would never reach nav.yml, because the
+        # value written on the very first build would keep overriding it.
+        sort = primary.get("sort") or existing.get("sort") or 100
         entry: dict = {
             "file": file,
             "title": primary.get("title", ""),
@@ -895,7 +965,11 @@ def run_build(site_path: Path):
 
     existing_nav = read_nav_yml(site_path)
     if existing_nav["warning"]:
-        click.echo(click.style(f"Warning: {existing_nav['warning']}; starting fresh.", fg="yellow"))
+        click.echo(click.style(
+            f"Warning: {existing_nav['warning']}; starting fresh. Page entries are rebuilt from "
+            "frontmatter, but any section metadata the file held (defaultname, sort, parent, "
+            "parent-sort, pagesvisibility, categorynames, pagination) is lost — sections will be "
+            "re-created with default values.", fg="yellow"))
     existing_sections = existing_nav["sections"]
     existing_pages = existing_nav["pages"]
 
@@ -1743,6 +1817,8 @@ def set_config_block(site_path: Path, key: str, block_lines: list) -> None:
             out.append("")
         out.extend(block_lines)
 
+    if out and out[-1] != "":
+        out.append("")  # keep the file newline-terminated
     config_file.write_text("\n".join(out), encoding="utf-8")
 
 
@@ -2328,7 +2404,7 @@ def _save_sections(site_path: Path, sections: list, nav: dict) -> None:
 
 
 def _add_section(site_path: Path):
-    nav = read_nav_yml(site_path)
+    nav = read_nav_yml_for_edit(site_path)
     sections = nav["sections"]
     code = click.prompt("New section code (letters, numbers, hyphens)").strip()
     if not code:
@@ -2346,7 +2422,7 @@ def _add_section(site_path: Path):
 
 
 def _rename_section(site_path: Path):
-    nav = read_nav_yml(site_path)
+    nav = read_nav_yml_for_edit(site_path)
     sections = nav["sections"]
     target = _pick_section(sections, "Section number to rename (0 = cancel)")
     if target is None:
@@ -2360,7 +2436,7 @@ def _rename_section(site_path: Path):
 
 
 def _resort_section(site_path: Path):
-    nav = read_nav_yml(site_path)
+    nav = read_nav_yml_for_edit(site_path)
     sections = nav["sections"]
     target = _pick_section(sections, "Section number to reorder (0 = cancel)")
     if target is None:
@@ -2372,7 +2448,7 @@ def _resort_section(site_path: Path):
 
 
 def _set_section_visibility(site_path: Path):
-    nav = read_nav_yml(site_path)
+    nav = read_nav_yml_for_edit(site_path)
     sections = nav["sections"]
     target = _pick_section(sections, "Section number (0 = cancel)")
     if target is None:
@@ -2387,7 +2463,7 @@ def _set_section_visibility(site_path: Path):
 
 
 def _toggle_section_pagination(site_path: Path):
-    nav = read_nav_yml(site_path)
+    nav = read_nav_yml_for_edit(site_path)
     sections = nav["sections"]
     target = _pick_section(sections, "Section number (0 = cancel)")
     if target is None:
@@ -2405,7 +2481,7 @@ def _toggle_section_pagination(site_path: Path):
 
 
 def _set_section_parent(site_path: Path):
-    nav = read_nav_yml(site_path)
+    nav = read_nav_yml_for_edit(site_path)
     sections = nav["sections"]
     target = _pick_section(sections, "Section number (0 = cancel)")
     if target is None:
@@ -2443,7 +2519,7 @@ def _set_section_parent(site_path: Path):
 
 
 def _delete_section(site_path: Path):
-    nav = read_nav_yml(site_path)
+    nav = read_nav_yml_for_edit(site_path)
     sections = nav["sections"]
     target = _pick_section(sections, "Section number to delete (0 = cancel)")
     if target is None:
@@ -2474,7 +2550,11 @@ def _delete_section(site_path: Path):
 def _manage_sections(site_path: Path):
     click.echo(click.style(f"\nSections — {site_path}", bold=True))
     while True:
-        nav = read_nav_yml(site_path)
+        try:
+            nav = read_nav_yml_for_edit(site_path)
+        except click.ClickException as e:
+            click.echo(click.style(f"  Error: {e.format_message()}", fg="red"))
+            return
         sections = nav["sections"]
         click.echo("\nCurrent sections:")
         if not sections:
@@ -2696,11 +2776,14 @@ def _interactive_config(site_path: Path):
         click.echo(f"   pwa             : {cfg.get('pwa', 'no')}")
         cat_info = get_category_info(cfg)
         pages_count = len(list_markdown_files(site_path))
-        sections_count = len(read_nav_yml(site_path)["sections"])
+        nav_state = read_nav_yml(site_path)
         click.echo(f"   categories      : {'yes' if cat_info['use'] else 'no'} "
                    f"({len(cat_info['codes'])} declared, {'default: ' + cat_info['default_code'] if cat_info['default_code'] else 'no default'})")
         click.echo(f"   pages/posts     : {pages_count} file(s)")
-        click.echo(f"   sections        : {sections_count}")
+        if nav_state["warning"]:
+            click.echo(f"   sections        : {click.style('unreadable', fg='red')} — {nav_state['warning']}")
+        else:
+            click.echo(f"   sections        : {len(nav_state['sections'])}")
 
         menu = [
             ("Site name", lambda c: _prompt_scalar(site_path, c, "sitename", "Site name")),
