@@ -5,7 +5,7 @@
 #
 # Licensed under Apache 2.0 licence.
 #
-# CURRENT VERSION: 0.8.2 - 4 August 2026
+# CURRENT VERSION: 0.8.3 - 11 August 2026
 #
 # Copyright 2026 Kristian Benestad
 #
@@ -45,8 +45,8 @@ import certifi
 import click
 import yaml
 
-CLI_VERSION = "0.8.2"
-CLI_RELEASE_DATE = "4 August 2026"
+CLI_VERSION = "0.8.3"
+CLI_RELEASE_DATE = "11 August 2026"
 MIN_SUPPORTED_VERSION = "0.3"
 
 # Minimum theme-file format the renderer/build supports. Theme files carry their
@@ -68,6 +68,10 @@ CATEGORY_CODE_RE = re.compile(r"^[a-zA-Z0-9\-]+$")
 REGISTRY_FILE = Path.home() / ".config" / "mdcms" / "sites.json"
 TEMPLATE_BASE_URL = "https://raw.githubusercontent.com/kbenestad/mdcms/main/app"
 MANIFEST_FILENAME = "mdcms.json"
+# Template files without which the downloaded site is not a site at all. A
+# manifest entry that 404s is skipped with a warning (see _apply_manifest);
+# these two are the exception and still abort the download.
+ESSENTIAL_TEMPLATE_FILES = frozenset({"index.html", "config.yml"})
 
 REPO_RAW_BASE = "https://raw.githubusercontent.com/kbenestad/mdcms/main"
 THEMES_MANIFEST_PATH = "sample-sites/themes.json"
@@ -1627,15 +1631,36 @@ def _safe_dest(dest_root: Path, rel: str) -> Path:
 
 
 def _apply_manifest(manifest: dict, base_url: str, dest: Path):
-    """Download all files in manifest from base_url into dest."""
+    """Download all files in manifest from base_url into dest.
+
+    A file that 404s is skipped with a warning instead of aborting the whole
+    download. mdcms.json is a static list checked in beside the site, so it goes
+    stale the moment a template drops a file — one missing icon should not cost
+    the user the site. Everything else (network errors, other HTTP statuses, a
+    missing ESSENTIAL_TEMPLATE_FILES entry) still fails the download.
+    """
     base = base_url.rstrip("/")
+    missing: list = []
     for rel in manifest.get("files", []):
         file_dest = _safe_dest(dest, rel)
-        file_dest.parent.mkdir(parents=True, exist_ok=True)
         click.echo(f"  {rel}")
-        file_dest.write_bytes(_http_get(f"{base}/{rel}"))
+        try:
+            data = _http_get(f"{base}/{rel}")
+        except urllib.error.HTTPError as e:
+            if e.code != 404 or str(rel) in ESSENTIAL_TEMPLATE_FILES:
+                raise
+            missing.append(str(rel))
+            continue
+        file_dest.parent.mkdir(parents=True, exist_ok=True)
+        file_dest.write_bytes(data)
     for rel in manifest.get("dirs", []):
         _safe_dest(dest, rel).mkdir(parents=True, exist_ok=True)
+    if missing:
+        click.echo(click.style(
+            f"Warning: {len(missing)} file(s) listed in {MANIFEST_FILENAME} could not be "
+            f"found and were skipped: {', '.join(missing)}",
+            fg="yellow",
+        ))
 
 
 def _download_tree_api(api_url: str, dest: Path, depth: int = 0):
