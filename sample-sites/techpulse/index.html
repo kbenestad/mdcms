@@ -4,7 +4,7 @@
 
   Licensed under Apache 2.0 licence.
 
-  CURRENT VERSION: 0.8.3 - 11 August 2026
+  CURRENT VERSION: 0.9.0 - 11 August 2026
 -->
 <!--
   MD-CMS — Renderer
@@ -1443,12 +1443,27 @@ body.scanlines-active::after {
     return iconCache[normaliseIconName(name)] || null;
   }
 
+  const warnedIcons = new Set();
+
   function iconEl(name, className) {
     const svg = getIcon(name);
     const span = document.createElement('span');
     span.className = 'mdcms-icon' + (className ? ' ' + className : '');
     const filename = normaliseIconName(name);
-    span.innerHTML = svg || '<img src="assets/icons/' + filename + '" alt="[missing: ' + filename + ']" style="width:1em;height:1em;display:inline-block;">';
+    // The <img> is a second chance: the preload fetch may have failed while the
+    // file is really there. Its alt is empty on purpose — a broken image renders
+    // its alt text, and inside a small icon button that reads as a UI glitch
+    // rather than as a missing asset. The diagnostic goes to the console instead,
+    // once per icon.
+    if (!svg) {
+      if (!warnedIcons.has(filename)) {
+        warnedIcons.add(filename);
+        console.warn('[mdcms] icon not found: assets/icons/' + filename);
+      }
+      span.innerHTML = '<img src="assets/icons/' + filename + '" alt="" style="width:1em;height:1em;display:inline-block;">';
+    } else {
+      span.innerHTML = svg;
+    }
     return span;
   }
 

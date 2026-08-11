@@ -4,14 +4,4 @@ Changes merged into `development` that have not yet been released to `main`.
 
 ---
 
-## New
-
-- **Copy button on code fences.** Every fenced code block now renders a copy
-  button in its top-right corner — on hover on pointer devices, always visible
-  on touch. It copies the block's plain text (no syntax-highlighting markup) and
-  briefly turns into a checkmark to confirm. Works for code fences anywhere a
-  page renders markdown, including inside callouts, tabs, and accordions, and in
-  a `mdcms bundle` file opened straight off disk. Set `code-copy: no` in
-  `config.yml` to turn it off. The button's two glyphs are inlined in
-  `index.html`, so it needs no icon download and no rebuild — a site gets it
-  as soon as its renderer is updated.
+_Nothing unreleased — everything on `development` has shipped in v0.9.0._
