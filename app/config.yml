@@ -57,6 +57,7 @@ offline-message: "This page is not available offline. Connect to the internet an
 # ──────────────────────────────────
 # search: true
 # default-theme: system      # light | dark | system
+# code-copy: no              # yes (default) shows a copy button on every code fence
 
 # ──────────────────────────────────
 # Reusable callout messages (optional)

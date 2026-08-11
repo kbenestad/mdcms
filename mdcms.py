@@ -85,6 +85,7 @@ CORE_ICONS = [
     "dark_mode", "light_mode", "menu", "search", "arrow_right", "arrow_drop_down",
     "info", "warning", "error", "success", "keyboard_arrow_right",
     "left_panel_close", "left_panel_open", "right_panel_close", "right_panel_open",
+    "content_copy", "check",
 ]
 OPTIONAL_ICONS = [
     "keyboard_arrow_down", "keyboard_double_arrow_right", "keyboard_double_arrow_down",

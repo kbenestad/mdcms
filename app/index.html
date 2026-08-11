@@ -639,6 +639,39 @@ body {
   font-size: 0.85em;
 }
 
+/* Copy button — the <pre> scrolls horizontally, so the button lives on a
+   non-scrolling wrapper around it and stays pinned while the code scrolls. */
+.md-content .code-block { position: relative; margin-bottom: 1.1em; }
+.md-content .code-block > pre { margin-bottom: 0; }
+.code-copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--divider);
+  border-radius: 6px;
+  background: var(--bg-main);
+  color: var(--font-colour-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.code-copy-btn .mdcms-icon { width: 1rem; height: 1rem; }
+.code-copy-btn .mdcms-icon svg { width: 100%; height: 100%; display: block; }
+.code-block:hover .code-copy-btn,
+.code-copy-btn:focus-visible { opacity: 1; }
+.code-copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+.code-copy-btn.copied { opacity: 1; color: var(--colour-success); border-color: currentColor; }
+.md-content[dir="rtl"] .code-copy-btn { right: auto; left: 0.5rem; }
+/* No hover on touch devices — keep the button visible so it stays reachable. */
+@media (hover: none) { .code-copy-btn { opacity: 1; } }
+@media print { .code-copy-btn { display: none; } }
+
 .md-content hr { border: none; height: 1px; background: var(--divider); margin: 2em 0; }
 .md-content img { max-width: 100%; height: auto; border-radius: 6px; margin: 0.5em 0; }
 
@@ -1390,7 +1423,7 @@ body.scanlines-active::after {
   // or theme.yml actually names them (categories-selecticon, nav-section-expand-icon,
   // nav-section-collapse-icon, callout icon overrides) — see the preload logic below.
   // `mdcms build` mirrors this same split to keep assets/icons/ trimmed to what's used.
-  const CORE_ICONS = ['dark_mode','light_mode','menu','search','arrow_right','arrow_drop_down','info','warning','error','success','keyboard_arrow_right','left_panel_close','left_panel_open','right_panel_close','right_panel_open'];
+  const CORE_ICONS = ['dark_mode','light_mode','menu','search','arrow_right','arrow_drop_down','info','warning','error','success','keyboard_arrow_right','left_panel_close','left_panel_open','right_panel_close','right_panel_open','content_copy','check'];
   const iconCache = {};
 
   function normaliseIconName(name) {
@@ -1744,6 +1777,88 @@ body.scanlines-active::after {
     bar.appendChild(nextLink);
 
     return bar;
+  }
+
+  // ─── Code fence copy button ───────────────────────────────
+  // Every rendered code fence gets a copy button, unless `code-copy: no` is set
+  // in config.yml. Runs after hljs so the button is added to the highlighted
+  // markup, and reads textContent (not innerHTML) so what lands on the clipboard
+  // is the plain source, free of highlight markup.
+
+  function legacyCopy(text) {
+    return new Promise((resolve, reject) => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:-9999px;opacity:0;';
+      document.body.appendChild(ta);
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error('copy failed'));
+    });
+  }
+
+  function copyTextToClipboard(text) {
+    // navigator.clipboard is undefined outside a secure context (plain http://),
+    // and can still reject on a file:// bundle where permission isn't granted —
+    // fall back to the execCommand path in both cases.
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).catch(() => legacyCopy(text));
+    }
+    return legacyCopy(text);
+  }
+
+  function codeCopyEnabled() {
+    // Default on — only an explicit negative turns it off. js-yaml parses on the
+    // YAML 1.2 core schema, where `no`/`off` stay strings rather than becoming
+    // false (PyYAML, on YAML 1.1, does convert them), so test both forms.
+    const v = config['code-copy'];
+    return !(v === false || v === 'no' || v === 'off' || v === 'false');
+  }
+
+  function addCodeCopyButtons(root) {
+    if (!codeCopyEnabled()) return;
+    root.querySelectorAll('.md-content pre > code').forEach(codeEl => {
+      const pre = codeEl.parentElement;
+      if (pre.parentElement && pre.parentElement.classList.contains('code-block')) return;
+
+      const wrapper = el('div', { className: 'code-block' });
+      pre.replaceWith(wrapper);
+      wrapper.appendChild(pre);
+
+      const btn = el('button', {
+        className: 'code-copy-btn',
+        type: 'button',
+        title: 'Copy code',
+        'aria-label': 'Copy code'
+      });
+      btn.appendChild(iconEl('content_copy'));
+
+      let resetTimer = null;
+      btn.addEventListener('click', () => {
+        copyTextToClipboard(codeEl.textContent).then(() => {
+          btn.innerHTML = '';
+          btn.appendChild(iconEl('check'));
+          btn.classList.add('copied');
+          btn.title = 'Copied';
+          btn.setAttribute('aria-label', 'Copied');
+          clearTimeout(resetTimer);
+          resetTimer = setTimeout(() => {
+            btn.innerHTML = '';
+            btn.appendChild(iconEl('content_copy'));
+            btn.classList.remove('copied');
+            btn.title = 'Copy code';
+            btn.setAttribute('aria-label', 'Copy code');
+          }, 1800);
+        }).catch(() => {
+          btn.title = 'Copy failed — select the code and copy manually';
+        });
+      });
+
+      wrapper.appendChild(btn);
+    });
   }
 
   // ─── Theme ────────────────────────────────────────────────
@@ -3772,6 +3887,7 @@ function fmtDatetime(dtStr) {
     if (typeof hljs !== 'undefined') {
       contentEl.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
     }
+    addCodeCopyButtons(contentEl);
     window.scrollTo(0, 0);
 
     refreshCategoryBar();

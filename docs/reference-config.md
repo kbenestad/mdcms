@@ -62,6 +62,20 @@ default-theme: system          # Starting colour mode. light, dark, or system.
 
 ---
 
+## Code blocks
+
+```yaml
+code-copy: no                  # Copy button on every code fence. Default: yes.
+                               # Set to no to render code blocks without it.
+```
+
+The button sits in the top-right corner of each fenced code block, appears on
+hover (and is always visible on touch devices), and copies the block's plain
+text — no syntax-highlighting markup. It applies to code fences anywhere a page
+renders markdown, including inside callouts, tabs, and accordions.
+
+---
+
 ## Layout overrides
 
 These can also be set in theme.yml. Values here apply on top of theme.yml.
@@ -274,6 +288,7 @@ homepage: pages/home.md
 nav-position: left
 search: true
 default-theme: system
+code-copy: yes
 
 pwa: yes
 pwa-name: "My Documentation"

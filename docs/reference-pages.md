@@ -307,7 +307,8 @@ Standard CommonMark plus GFM (GitHub-flavoured) extensions:
 - Tables
 - Strikethrough (`~~text~~`)
 - Task lists (`- [ ]` / `- [x]`)
-- Fenced code blocks with syntax language hints (`` ```python ``)
+- Fenced code blocks with syntax language hints (`` ```python ``) — each one gets a
+  copy button in its top-right corner (turn it off with `code-copy: no` in `config.yml`)
 - Autolinks
 
 **Raw HTML** passes through to the DOM. You can embed HTML directly:
