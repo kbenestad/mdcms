@@ -3,7 +3,7 @@
 #
 # Licensed under Apache 2.0 licence.
 #
-# CURRENT VERSION: 0.8.3 - 11 August 2026
+# CURRENT VERSION: 0.9.0 - 11 August 2026
 #
 # Site configuration.
 #
@@ -57,6 +57,7 @@ offline-message: "This page is not available offline. Connect to the internet an
 # ──────────────────────────────────
 # search: true
 # default-theme: system      # light | dark | system
+# code-copy: no              # yes (default) shows a copy button on every code fence
 
 # ──────────────────────────────────
 # Reusable callout messages (optional)

@@ -28,6 +28,28 @@ _Nothing awaiting release._
 
 ---
 
+## Fixed in v0.9.0
+
+### A missing icon file renders `[missing: foo.svg]` text inside the button
+
+**Symptom:** A UI control — the sidebar panel-close button, the theme toggle, a nav section chevron — shows bracketed placeholder text where its glyph should be, which reads as a rendering bug rather than as a missing file.
+
+**Root cause:** When `loadIcon()` cannot fetch an icon, `iconEl()` falls back to an `<img>` pointing at the same path with `alt="[missing: <filename>.svg]"`. Browsers render a broken image's `alt` text, so the placeholder string is drawn inside the button — typically a 2rem box, so it also overflows or clips. The `alt` was meant as a developer hint, but it surfaces in the UI of every visitor rather than to the person who can fix it.
+
+**Fix:** `iconEl()` now emits the fallback `<img>` with `alt=""`, so a genuinely missing file renders as empty space instead of text, and logs `[mdcms] icon not found: assets/icons/<filename>` to the console once per icon (tracked in a `warnedIcons` set) so the diagnostic is still available where it is useful. The `<img>` itself is kept: when the preload fetch failed but the file exists, it still displays.
+
+---
+
+### Code-fence copy button renders `[missing: content_copy.svg]` instead of an icon
+
+**Symptom:** On a site running the new renderer, the copy button in the corner of a code fence shows broken-image placeholder text rather than a copy glyph. `mdcms build` on such a site also prints `Warning: could not download icon 'content_copy.svg'`.
+
+**Root cause:** The copy button was first built on the shared icon system, with `content_copy` and `check` added to `CORE_ICONS`. Those two `.svg` files only existed on `development`, but `sync_icons()` downloads from `TEMPLATE_BASE_URL`, which points at `main` — so for anyone not running the CLI from a repo checkout (where `_local_repo_root()` short-circuits the download) the fetch 404s and the files never land in `assets/icons/`. `iconEl()` then falls back to an `<img>` whose `alt` is the `[missing: …]` text. The same gap would reopen for any site that picks up a new `index.html` via `mdcms update` without running `mdcms build` afterwards, since `update` does not sync icons.
+
+**Fix:** The copy button no longer uses the icon system. Its two glyphs are inlined in `app/index.html` as the `COPY_SVG` and `CHECK_SVG` constants — the pattern the accordion chevron (`CHEVRON_SVG`) and the scroll-top arrow already use — so the button is self-contained in the renderer and cannot render a placeholder. `content_copy`/`check` were removed from `CORE_ICONS` in both `mdcms.py` and `index.html`, and the two `.svg` files were dropped from `app/assets/icons/` and the sample sites, leaving the icon pack and `app/mdcms.json` exactly as they were before the feature. Both names were added to `LEGACY_ICONS` so `mdcms build` sweeps them out of any site that built against the interim version — unless the site references one by name (e.g. as `categories-selecticon`), in which case it counts as a custom icon and is kept.
+
+---
+
 ## Fixed in v0.8.3
 
 ### `mdcms register` aborts with HTTP 404 on every new site
