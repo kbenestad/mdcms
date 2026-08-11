@@ -661,8 +661,7 @@ body {
   opacity: 0;
   transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.code-copy-btn .mdcms-icon { width: 1rem; height: 1rem; }
-.code-copy-btn .mdcms-icon svg { width: 100%; height: 100%; display: block; }
+.code-copy-btn svg { width: 1rem; height: 1rem; display: block; }
 .code-block:hover .code-copy-btn,
 .code-copy-btn:focus-visible { opacity: 1; }
 .code-copy-btn:hover { color: var(--accent); border-color: var(--accent); }
@@ -1423,7 +1422,7 @@ body.scanlines-active::after {
   // or theme.yml actually names them (categories-selecticon, nav-section-expand-icon,
   // nav-section-collapse-icon, callout icon overrides) — see the preload logic below.
   // `mdcms build` mirrors this same split to keep assets/icons/ trimmed to what's used.
-  const CORE_ICONS = ['dark_mode','light_mode','menu','search','arrow_right','arrow_drop_down','info','warning','error','success','keyboard_arrow_right','left_panel_close','left_panel_open','right_panel_close','right_panel_open','content_copy','check'];
+  const CORE_ICONS = ['dark_mode','light_mode','menu','search','arrow_right','arrow_drop_down','info','warning','error','success','keyboard_arrow_right','left_panel_close','left_panel_open','right_panel_close','right_panel_open'];
   const iconCache = {};
 
   function normaliseIconName(name) {
@@ -1784,6 +1783,13 @@ body.scanlines-active::after {
   // in config.yml. Runs after hljs so the button is added to the highlighted
   // markup, and reads textContent (not innerHTML) so what lands on the clipboard
   // is the plain source, free of highlight markup.
+  //
+  // The two glyphs are inlined rather than loaded from assets/icons/ (same as the
+  // accordion chevron and the scroll-top arrow). A downloaded icon would make the
+  // button depend on `mdcms build` having fetched a file the site may not have
+  // yet, and a missing one renders as broken-image alt text inside the button.
+  const COPY_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
+  const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
 
   function legacyCopy(text) {
     return new Promise((resolve, reject) => {
@@ -1832,22 +1838,20 @@ body.scanlines-active::after {
         className: 'code-copy-btn',
         type: 'button',
         title: 'Copy code',
-        'aria-label': 'Copy code'
+        'aria-label': 'Copy code',
+        innerHTML: COPY_SVG
       });
-      btn.appendChild(iconEl('content_copy'));
 
       let resetTimer = null;
       btn.addEventListener('click', () => {
         copyTextToClipboard(codeEl.textContent).then(() => {
-          btn.innerHTML = '';
-          btn.appendChild(iconEl('check'));
+          btn.innerHTML = CHECK_SVG;
           btn.classList.add('copied');
           btn.title = 'Copied';
           btn.setAttribute('aria-label', 'Copied');
           clearTimeout(resetTimer);
           resetTimer = setTimeout(() => {
-            btn.innerHTML = '';
-            btn.appendChild(iconEl('content_copy'));
+            btn.innerHTML = COPY_SVG;
             btn.classList.remove('copied');
             btn.title = 'Copy code';
             btn.setAttribute('aria-label', 'Copy code');

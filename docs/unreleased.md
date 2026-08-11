@@ -12,5 +12,6 @@ Changes merged into `development` that have not yet been released to `main`.
   briefly turns into a checkmark to confirm. Works for code fences anywhere a
   page renders markdown, including inside callouts, tabs, and accordions, and in
   a `mdcms bundle` file opened straight off disk. Set `code-copy: no` in
-  `config.yml` to turn it off. Adds two icons to the core set,
-  `content_copy` and `check`, which `mdcms build` downloads automatically.
+  `config.yml` to turn it off. The button's two glyphs are inlined in
+  `index.html`, so it needs no icon download and no rebuild — a site gets it
+  as soon as its renderer is updated.
