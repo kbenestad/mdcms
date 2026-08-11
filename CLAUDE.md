@@ -42,6 +42,17 @@ In practice: check out `development`, do the work, push to `development`, PR `de
 
 `docs/unreleased.md` is a living document that tracks every fix or feature on `development` that has not yet been merged to `main`. Keep it current: whenever a change lands on `development`, add or update an entry in `unreleased.md` in the same commit (or a follow-up commit to `development`). When a batch of changes is merged to `main` and released, clear the entries that were released and leave the file in place for the next round of work.
 
+## Bug log — always update it
+
+`docs/knownbugs.md` is the permanent record of every bug found in MD-CMS, open or fixed, each with **Symptom**, **Root cause**, and **Fix**. It is not optional bookkeeping and not a "when I remember" file — **every** bug touched by a change gets its entry written in the same commit as the code. It is the only place the *why* of a fix survives; commit messages scroll away and `unreleased.md` gets cleared at each release.
+
+- **Bug found** (whether or not it is being fixed now) → add it under *Open bugs* with Symptom, Root cause if known, and `**Fix (not yet done):**` describing the intended approach.
+- **Bug fixed** → move that entry to *Fixed in development (not yet released)*, rewrite **Fix** to say what actually changed (name the functions/constants), and add the matching user-facing line to `docs/unreleased.md`.
+- **Release goes out** → retitle *Fixed in development (not yet released)* to *Fixed in vX.Y.Z*, open a fresh empty one above it, and clear `docs/unreleased.md` in the same commit. Never delete a fixed entry — the file is grouped by release and keeps them all.
+- A bug fixed in the same commit that introduced it (never released) needs no entry. Everything a user could have hit does.
+
+If a bug is discovered while working on something else, log it under *Open bugs* even if it is out of scope for the current task — an unlogged bug is one nobody else can find.
+
 ## What this project is
 
 MD-CMS is a markdown-based static site system with two distinct parts:

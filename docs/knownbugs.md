@@ -1,10 +1,46 @@
 # Known bugs
 
-Bugs that have been identified but not yet fixed. Fixed bugs are moved to the release notes.
+Every bug found in MD-CMS, open or fixed, with its symptom, root cause, and fix. Open bugs come first; fixed ones are kept below, grouped by the release that shipped the fix, so the history of what went wrong and why stays searchable.
+
+**Keep this file current in the same commit as the change it describes:**
+
+- **A bug is found** → add an entry under *Open bugs* with **Symptom**, **Root cause** (if known), and **Fix (not yet done)**.
+- **A bug is fixed** → move its entry to *Fixed in development (not yet released)*, rewrite **Fix** to describe what actually changed, and add the matching line to `docs/unreleased.md`.
+- **A release goes out** → retitle that section to *Fixed in vX.Y.Z* and open a fresh empty *Fixed in development* section above it, at the same time `docs/unreleased.md` is cleared.
+
+---
+
+## Open bugs
+
+### `mdcms fetch-deps` crashes immediately (`NameError`)
+
+**Symptom:** Running `mdcms fetch-deps [name]` or `mdcms fetch-deps --path <path>` aborts with `NameError: name 'CDN_DEPS' is not defined`. The offline-bundling command is completely non-functional.
+
+**Root cause:** `fetch_deps()` in `mdcms.py` references three names — `CDN_DEPS`, `_fetch_bunny_fonts()`, and `_patch_index_html()` — that are used but never defined anywhere in the module. They appear to have been dropped (or never landed) when the command was added.
+
+**Fix (not yet done):** Reintroduce a `CDN_DEPS` list mapping each CDN URL in `app/index.html` (js-yaml, marked, fuse.js, highlight.js + its two stylesheets) to a local `assets/required/vendors/` path, plus `_fetch_bunny_fonts()` (download Bunny Font CSS + font files referenced by `theme.yml`) and `_patch_index_html()` (rewrite the CDN `<script>`/`<link>` URLs and injected Bunny `@font-face` URLs to the local copies). Until then, offline bundling must be done by hand.
 
 ---
 
 ## Fixed in development (not yet released)
+
+_Nothing awaiting release._
+
+---
+
+## Fixed in v0.8.3
+
+### `mdcms register` aborts with HTTP 404 on every new site
+
+**Symptom:** `mdcms register <name>` printed the first few template files and then died with `Error: Download failed: HTTP Error 404: Not Found`, stopping at `assets/icons/dangerous.svg`. No site was registered and the target directory was left half-populated. Every new site was affected, on every platform.
+
+**Root cause:** `app/mdcms.json` — the manifest `register` downloads the starter template by, read straight off `main` — had drifted from the actual contents of `app/`. It is a checked-in static list, and nothing regenerated it when the template's file list changed: it still named the six icons dropped when the stock pack was trimmed (`dangerous`, `exclamation`, `history`, `mobile_arrow_down`, `report`, `text_compare`) and was missing the four panel icons added since (`left_panel_close`, `left_panel_open`, `right_panel_close`, `right_panel_open`). `_apply_manifest()` fetched every listed file with no tolerance for one being absent, so the first dead entry aborted the whole download — and had the download survived, the new site would have been missing the panel-toggle icons the renderer lists in `CORE_ICONS`.
+
+**Fix:** Three parts. `app/mdcms.json` was regenerated from the real `app/` tree. The release workflow's `publish` job now regenerates it (via `generate_site_manifest()`) and commits it alongside the version bump, so it cannot go stale again. And `_apply_manifest()` no longer treats a missing file as fatal: an entry that 404s is skipped, the skipped names are reported in a warning at the end, and the site is still created. `index.html` and `config.yml` (`ESSENTIAL_TEMPLATE_FILES`) remain fatal, as do network errors and any non-404 HTTP status.
+
+---
+
+## Fixed in v0.8.2
 
 ### `mdcms build` writes an unparseable `nav.yml` for some page titles
 
@@ -41,6 +77,8 @@ Once `nav.yml` was unparseable, the renderer's js-yaml load failed and the nav w
 
 ---
 
+## Fixed in v0.6.7
+
 ### Category-variant pages fail to load on servers with SPA routing
 
 **Symptom:** On Cloudflare Pages (and any other server configured to serve `index.html` with HTTP 200 for missing paths), clicking a nav item whose page only exists as a category-variant file (e.g. `page.current.md`, no plain `page.md`) showed garbled content — the raw HTML of `index.html` rendered as markdown, with the site's `<title>` text visible in the content area.
@@ -68,15 +106,3 @@ Once `nav.yml` was unparseable, the renderer's js-yaml load failed and the nav w
 **Root cause:** `read_config` caught `(OSError, yaml.YAMLError)` in a single block and silently returned `{}` on any error.
 
 **Fix:** `read_config` now raises `click.ClickException` on both `OSError` and `yaml.YAMLError`, aborting the build with a descriptive error message instead of continuing with an empty config.
-
----
-
-## Open bugs
-
-### `mdcms fetch-deps` crashes immediately (`NameError`)
-
-**Symptom:** Running `mdcms fetch-deps [name]` or `mdcms fetch-deps --path <path>` aborts with `NameError: name 'CDN_DEPS' is not defined`. The offline-bundling command is completely non-functional.
-
-**Root cause:** `fetch_deps()` in `mdcms.py` references three names — `CDN_DEPS`, `_fetch_bunny_fonts()`, and `_patch_index_html()` — that are used but never defined anywhere in the module. They appear to have been dropped (or never landed) when the command was added.
-
-**Fix (not yet done):** Reintroduce a `CDN_DEPS` list mapping each CDN URL in `app/index.html` (js-yaml, marked, fuse.js, highlight.js + its two stylesheets) to a local `assets/required/vendors/` path, plus `_fetch_bunny_fonts()` (download Bunny Font CSS + font files referenced by `theme.yml`) and `_patch_index_html()` (rewrite the CDN `<script>`/`<link>` URLs and injected Bunny `@font-face` URLs to the local copies). Until then, offline bundling must be done by hand.
