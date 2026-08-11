@@ -96,8 +96,12 @@ ALL_KNOWN_ICONS = frozenset(CORE_ICONS) | frozenset(OPTIONAL_ICONS)
 # anything (index.html, config.yml, or any theme in themes/) and were dropped from
 # it. Never downloaded — only cleaned up from assets/icons/ if a site still has one
 # left over from before the pack was trimmed and it's unreferenced.
+# `content_copy`/`check` briefly belonged to CORE_ICONS while the code-fence copy
+# button was built on the icon system; the button now inlines its own glyphs, so a
+# site that built against that interim version has two orphans to sweep up.
 LEGACY_ICONS = frozenset({
     "mobile_arrow_down", "exclamation", "dangerous", "report", "history", "text_compare",
+    "content_copy", "check",
 })
 
 GITHUB_URL_RE = re.compile(
