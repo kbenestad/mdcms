@@ -4,7 +4,7 @@
 
   Licensed under Apache 2.0 licence.
 
-  CURRENT VERSION: 0.9.0 - 11 August 2026
+  CURRENT VERSION: 0.9.1 - 20 August 2026
 -->
 <!--
   MD-CMS — Renderer
@@ -673,6 +673,9 @@ body {
 
 .md-content hr { border: none; height: 1px; background: var(--divider); margin: 2em 0; }
 .md-content img { max-width: 100%; height: auto; border-radius: 6px; margin: 0.5em 0; }
+/* A paragraph holding nothing but image(s) is centred on the page; images sitting
+   inline with text (badges, icons) keep the text flow. Class set in renderMarkdown. */
+.md-content p.md-image-block { text-align: center; }
 
 .md-content table { width: 100%; border-collapse: collapse; margin-bottom: 1.1em; font-size: 0.9em; }
 .md-content th {
@@ -2178,6 +2181,15 @@ body.scanlines-active::after {
       const esc = (codeText || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       const cls = codeLang ? ' class="language-' + codeLang + '"' : '';
       return '<pre><code' + cls + '>' + esc + '</code></pre>';
+    };
+
+    renderer.paragraph = function(text) {
+      const content = typeof text === 'object' ? text.text : text;
+      // Centre paragraphs whose whole content is image(s) — optionally wrapped in a
+      // link. Anything with real text alongside the image keeps the normal text flow.
+      const bare = content.replace(/<img\b[^>]*>/g, '').replace(/<\/?a\b[^>]*>/g, '').trim();
+      const imageOnly = bare === '' && /<img\b/.test(content);
+      return `<p${imageOnly ? ' class="md-image-block"' : ''}>${content}</p>\n`;
     };
 
     renderer.listitem = function(text, task, checked) {

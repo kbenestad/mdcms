@@ -311,6 +311,18 @@ Standard CommonMark plus GFM (GitHub-flavoured) extensions:
   copy button in its top-right corner (turn it off with `code-copy: no` in `config.yml`)
 - Autolinks
 
+**Images are centred by default.** An image that is the whole of its paragraph — on its
+own line, with or without a link wrapped around it — is centred on the page:
+
+```markdown
+![A cup of coffee](assets/images/hero.jpg)
+
+[![A cup of coffee](assets/images/hero.jpg)](https://example.com)
+```
+
+An image sitting inline with text (a badge, a small icon mid-sentence) is left where it
+falls in the text flow. Images never grow past the width of the content column.
+
 **Raw HTML** passes through to the DOM. You can embed HTML directly:
 
 ```markdown
