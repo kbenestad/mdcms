@@ -2166,6 +2166,14 @@ body.scanlines-active::after {
     return { text, footnotes };
   }
 
+  // A markdown table written with an empty header row (|||) is a plain grid of
+  // rows, not a headed table — drop the <thead> marked emits for it.
+  const EMPTY_TABLE_HEAD_RE = /<thead>\s*<tr>\s*(?:<th[^>]*>\s*<\/th>\s*)+<\/tr>\s*<\/thead>\s*/g;
+
+  function stripEmptyTableHead(html) {
+    return html.replace(EMPTY_TABLE_HEAD_RE, '');
+  }
+
   function renderMarkdown(mdBody) {
     marked.setOptions({ gfm: true, breaks: false, headerIds: true, mangle: false });
     const renderer = new marked.Renderer();
@@ -2239,7 +2247,7 @@ body.scanlines-active::after {
     marked.use({ renderer });
 
     const { text, footnotes } = extractFootnotes(mdBody);
-    let html = marked.parse(text);
+    let html = stripEmptyTableHead(marked.parse(text));
     if (footnotes.length) {
       const items = footnotes.map((fn, i) => {
         const n = i + 1;
@@ -2714,7 +2722,7 @@ function fmtDatetime(dtStr) {
     if (bodyMd) {
       var bodyEl = document.createElement('div');
       bodyEl.className = 'mdcms-callout-body';
-      bodyEl.innerHTML = marked.parse(bodyMd);
+      bodyEl.innerHTML = stripEmptyTableHead(marked.parse(bodyMd));
       container.appendChild(bodyEl);
     }
   }

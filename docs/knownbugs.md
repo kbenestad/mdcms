@@ -34,7 +34,13 @@ Every bug found in MD-CMS, open or fixed, with its symptom, root cause, and fix.
 
 ## Fixed in development (not yet released)
 
-_Nothing awaiting release._
+### A markdown table with an empty header row still renders an empty header
+
+**Symptom:** A table written with a blank header row — `|||` followed by the `|---|---|` separator — renders with an empty grey header band above the first data row, instead of as a plain two-column grid of key/value rows. There is no markdown way to write a headerless table, since GFM requires the header row.
+
+**Root cause:** GFM tables always have a header row, so `marked` always emits a `<thead>` for one — blank cells included. `renderMarkdown()` in `app/index.html` passed that output straight through, and `.md-content th` styles the empty cells as a visible header band.
+
+**Fix:** `stripEmptyTableHead()` in `app/index.html` removes a `<thead>` whose every `<th>` is empty (`EMPTY_TABLE_HEAD_RE`) from the parsed HTML, leaving `<tbody>` alone. Applied to both `marked.parse()` call sites — `renderMarkdown()` and the callout body renderer. A header row with at least one non-empty cell is untouched.
 
 ---
 
