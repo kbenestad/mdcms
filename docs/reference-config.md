@@ -192,12 +192,18 @@ default-category:              # The category used when no ?cat= parameter is in
   line-height: 2.8             # Line height override for this category. Useful for scripts like
                                # Nastaliq that need extra vertical space. Restores to theme default
                                # when switching away.
+  section-id: reference        # Limit this category to one or more nav sections. One code, a
+                               # comma-separated string, or a list. Omit for a site-wide category.
+                               # See "Scoped categories" below.
 
 categories:                    # Additional categories. Each entry supports the same keys as
                                # default-category above.
   - code: nb
     name: Norsk
     direction: ltr
+  - code: beta
+    name: Beta
+    section-id: [wmls, api]    # only offered on pages in the wmls and api sections
   - code: ar
     name: عربي
     name-latin: Arabic
@@ -225,6 +231,39 @@ Because a dated variant is a historical record of one page rather than a snapsho
 
 Manage all of this — `categories-use`, `categories-dates`, `default-category`, and the `categories:` list — interactively via `mdcms config` → *Manage categories*, or hand-edit `config.yml` directly.
 
+### Scoped categories (`section-id`)
+
+By default a category applies to the whole site: switch to it and every page
+without a variant for that code disappears from the nav. That is right for
+languages, but wrong for a category that only means something to one part of
+the site — a `beta` or `v1` edition of an API reference, say, where the rest of
+the site has no such notion.
+
+Give the category a `section-id:` and it is *scoped* to those nav sections:
+
+```yaml
+categories:
+  - code: beta
+    name: Beta
+    section-id: wmls           # or: section-id: [wmls, api]
+```
+
+Inside the named sections the category behaves exactly as an unscoped one:
+pages with a `.beta.md` variant are shown and served, pages without one follow
+the usual `notfoundmessage` / `visibilityifnocontent` rules.
+
+Everywhere else the site behaves as if `default-category` were active — the
+other sections keep their full page list, their default-category titles and
+section names, and default-category search results. The category is not offered
+in the selector on those pages at all, and navigating to one of them (by nav
+click, by a `?cat=` deep link, or by going Back) switches the selector back to
+`default-category`.
+
+The section codes are the `code:` values in `nav.yml`. `mdcms build` warns if a
+`section-id` matches no section, since such a category would never be offered.
+
+A category with no `section-id:` is unscoped and site-wide, as before.
+
 ### Per-category keys summary
 
 | Key | Required | Description |
@@ -239,6 +278,7 @@ Manage all of this — `categories-use`, `categories-dates`, `default-category`,
 | `pagenotfoundmessage` | No | Message shown in the content area when a page cannot be fetched for this category. Overrides the top-level `pagenotfoundmessage`. |
 | `font` | No | Font filename from `assets/fonts/`. Loaded on demand when this category is activated. |
 | `line-height` | No | Body line height override for this category. Restores to theme default when switching away. |
+| `section-id` | No | Nav section code, comma-separated codes, or a list. Limits the category to those sections. Omit for a site-wide category. See [Scoped categories](#scoped-categories-section-id). |
 
 ---
 

@@ -4,7 +4,7 @@
 
   Licensed under Apache 2.0 licence.
 
-  CURRENT VERSION: 0.9.1 - 20 August 2026
+  CURRENT VERSION: 0.10.0 - 20 September 2026
 -->
 <!--
   MD-CMS — Renderer
@@ -1708,8 +1708,44 @@ body.scanlines-active::after {
     if (!categoriesUse || sectionnamesMode !== 'per-category' || !activeCategory) {
       return section.defaultname;
     }
+    const scope = categoryScope(activeCategory);
+    const code = (scope && !scope.includes(section.code)) ? defaultCategoryCode : activeCategory;
     const cn = section.categorynames || {};
-    return cn[activeCategory] || section.defaultname;
+    return cn[code] || section.defaultname;
+  }
+
+  // ─── Scoped categories (a category's `section-id:`) ───────
+  // A category may declare `section-id:` — one code, a comma-separated string,
+  // or a list. Such a category only applies to pages in those nav sections:
+  // everywhere else the site behaves as if default-category were active (nav
+  // labels, nav visibility, per-category section names, search), the category
+  // is dropped from the selector, and navigating out of scope switches the
+  // selector back to default-category. A category with no `section-id:` is
+  // unscoped and applies site-wide, as before.
+  function categoryScope(code) {
+    const cat = code && categoriesByCode[code];
+    const raw = cat && cat['section-id'];
+    if (!raw) return null;
+    const list = (Array.isArray(raw) ? raw : String(raw).split(','))
+      .map(s => String(s).trim()).filter(Boolean);
+    return list.length ? list : null;
+  }
+
+  // `entry` is anything carrying a `section-id` — a nav.yml page or a
+  // search.json record. A missing entry is treated as out of scope.
+  function inCategoryScope(entry, code) {
+    const scope = categoryScope(code);
+    if (!scope) return true;
+    return !!entry && scope.includes(entry['section-id']);
+  }
+
+  // The category that nav labels, nav visibility and search results are based
+  // on for a given page — activeCategory normally, default-category when date
+  // categories exist or when activeCategory is scoped away from this page.
+  function navBasisCode(entry) {
+    if (categoriesNavFollowsDefault) return defaultCategoryCode;
+    if (!inCategoryScope(entry, activeCategory)) return defaultCategoryCode;
+    return activeCategory;
   }
 
   function pageDisplayTitle(page) {
@@ -1718,7 +1754,7 @@ body.scanlines-active::after {
     // own title. When date categories exist, nav labels stay pinned to
     // default-category so browsing the site doesn't inherit whatever historical
     // date happens to be active for the page currently open.
-    const navCode = categoriesNavFollowsDefault ? defaultCategoryCode : activeCategory;
+    const navCode = navBasisCode(page);
     if (categoriesUse && page.titles && navCode && page.titles[navCode]) {
       return page.titles[navCode];
     }
@@ -1741,7 +1777,7 @@ body.scanlines-active::after {
     if (!categoriesUse) return true;
     if (page.file === defaultPage()) return true;
     if (page.uncategorized) return true;
-    const navCode = categoriesNavFollowsDefault ? defaultCategoryCode : activeCategory;
+    const navCode = navBasisCode(page);
     const variants = page.variants || [];
     if (variants.includes(navCode)) return true;
     const cat = categoriesByCode[navCode];
@@ -3356,6 +3392,8 @@ function fmtDatetime(dtStr) {
       ? navData.find(p => p.file === currentPage)
       : null;
     categoriesList.forEach(cat => {
+      // A scoped category is only offered on the pages it covers.
+      if (!inCategoryScope(page, cat.code)) return;
       const hasVariant = !page || page.uncategorized || !(page.variants && page.variants.length) || page.variants.includes(cat.code);
       const alwaysVisible = !!cat.notfoundmessage || cat.visibilityifnocontent === 'visible';
       if (hasVariant || alwaysVisible || cat.code === activeCategory) out.add(cat.code);
@@ -3420,8 +3458,7 @@ function fmtDatetime(dtStr) {
     }
     let results = fuseInstance.search(query, { limit: 16 });
     if (categoriesUse && activeCategory) {
-      const navCode = categoriesNavFollowsDefault ? defaultCategoryCode : activeCategory;
-      results = results.filter(r => !r.item.category || r.item.category === navCode);
+      results = results.filter(r => !r.item.category || r.item.category === navBasisCode(r.item));
     }
     results = results.slice(0, 8);
     if (!results.length) {
@@ -3804,6 +3841,14 @@ function fmtDatetime(dtStr) {
     // If the active category is "hidden" (no notfoundmessage, not visibilityifnocontent:visible)
     // and this page has no variant for it, silently switch to the default category instead of
     // showing an error.
+    // Leaving the sections a scoped category covers drops back to the default
+    // category — the scoped category has nothing to say about this page.
+    if (categoriesUse && activeCategory !== defaultCategoryCode
+        && !inCategoryScope(navData.find(p => p.file === file), activeCategory)) {
+      setActiveCategory(defaultCategoryCode, { history: historyMode });
+      return;
+    }
+
     if (categoriesUse && activeCategory !== defaultCategoryCode && file !== defaultPage()) {
       const cat = categoriesByCode[activeCategory];
       const isHidden = cat && !cat.notfoundmessage && cat.visibilityifnocontent !== 'visible';

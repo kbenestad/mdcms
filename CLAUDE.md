@@ -216,6 +216,7 @@ For nested navigation, set `parent: <parent-section-code>` and `parent-sort` on 
 - `categories-sectionnames: per-category` requires each section in `nav.yml` to have a `categorynames` block with an entry per category code
 - RTL is set per category via `direction: rtl`
 - Line height is set per category via `line-height: 2.8` (useful for scripts like Nastaliq that need extra vertical space). Restores to theme default when switching to a category without this key.
+- A category may be **scoped** to nav sections with `section-id:` (one code, a comma-separated string, or a list). Inside those sections it behaves as any category; everywhere else nav visibility, nav titles, per-category section names and search all fall back to `default-category`, the category is dropped from the selector, and navigating out of scope switches the selector back to `default-category`. Renderer helpers: `categoryScope()`, `inCategoryScope()`, `navBasisCode()` in `index.html` — `navBasisCode(page)` is the single place nav-basis is decided (date categories included). `mdcms.py`'s `category_scope_sections()` parses the same three shapes for the build-time warning. Omitting `section-id:` keeps the old site-wide behaviour.
 
 ### Date categories (`categories-dates: yes`)
 
