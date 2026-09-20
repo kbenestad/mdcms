@@ -196,6 +196,19 @@ def resolve_site_path(name: "str | None", path_override: "str | None") -> Path:
     return Path.cwd()
 
 
+def complete_site_names(ctx, param, incomplete):
+    """Shell completion for site-name arguments — the names in the registry.
+
+    Names already typed are dropped, so `mdcms delete a <TAB>` does not offer
+    `a` again.
+    """
+    already = set(ctx.params.get("names") or ())
+    return [
+        name for name in sorted(load_registry()["sites"])
+        if name.startswith(incomplete) and name not in already
+    ]
+
+
 # ─── Config reading ───────────────────────────────────────────
 
 def read_config(site_path: Path) -> dict:
@@ -3136,9 +3149,59 @@ def upgrade(force):
     _upgrade_binary(latest)
 
 
+# Per-shell setup for tab completion. click generates the completion script
+# itself when it is run with _MDCMS_COMPLETE set; all this command does is
+# print the commands that capture that script and load it at shell startup.
+COMPLETION_SETUP = {
+    "bash": [
+        "mkdir -p ~/.config/mdcms",
+        "_MDCMS_COMPLETE=bash_source mdcms > ~/.config/mdcms/mdcms-complete.bash",
+        "echo '. ~/.config/mdcms/mdcms-complete.bash' >> ~/.bashrc",
+    ],
+    "zsh": [
+        "mkdir -p ~/.config/mdcms",
+        "_MDCMS_COMPLETE=zsh_source mdcms > ~/.config/mdcms/mdcms-complete.zsh",
+        "echo '. ~/.config/mdcms/mdcms-complete.zsh' >> ~/.zshrc",
+    ],
+    "fish": [
+        "mkdir -p ~/.config/fish/completions",
+        "_MDCMS_COMPLETE=fish_source mdcms > ~/.config/fish/completions/mdcms.fish",
+    ],
+}
+
+
+@cli.command()
+@click.argument("shell", required=False, type=click.Choice(sorted(COMPLETION_SETUP)))
+def completion(shell):
+    """Print the setup commands for shell tab completion.
+
+    Once set up, Tab completes command names, options, and the names of
+    registered sites — so `mdcms build <TAB>` offers your sites. SHELL defaults
+    to the shell named in $SHELL.
+    """
+    if not shell:
+        shell = Path(os.environ.get("SHELL", "")).name
+        if shell not in COMPLETION_SETUP:
+            raise click.ClickException(
+                "Could not tell which shell you are using from $SHELL. "
+                f"Run: mdcms completion [{'|'.join(sorted(COMPLETION_SETUP))}]"
+            )
+
+    click.echo(f"Tab completion for mdcms in {shell}. Run these commands once:\n")
+    for cmd in COMPLETION_SETUP[shell]:
+        click.echo(click.style(f"    {cmd}", fg="cyan"))
+    click.echo("\nThen open a new terminal window.")
+    if shell == "zsh":
+        click.echo(
+            "\nIf nothing completes, your ~/.zshrc may not be loading zsh's completion\n"
+            "system. Add this line above the one you just added, then try again:\n"
+        )
+        click.echo(click.style("    autoload -Uz compinit && compinit", fg="cyan"))
+
+
 @cli.command()
 @click.argument("name")
-@click.argument("path", required=False, default=None)
+@click.argument("path", required=False, default=None, type=click.Path(file_okay=False))
 @click.option("--from", "source", default=None, metavar="URL",
               help="Download template from a GitHub repo or deployed site URL.")
 def register(name, path, source):
@@ -3204,7 +3267,7 @@ def register(name, path, source):
 
 
 @cli.command("delete")
-@click.argument("names", nargs=-1, required=True)
+@click.argument("names", nargs=-1, required=True, shell_complete=complete_site_names)
 @click.option("-y", "--yes", is_flag=True, help="Skip the confirmation prompt.")
 def delete_site(names, yes):
     """Remove one or more registered sites. Does not delete any files."""
@@ -3228,7 +3291,7 @@ def delete_site(names, yes):
 
 
 @cli.command()
-@click.argument("name", required=False)
+@click.argument("name", required=False, shell_complete=complete_site_names)
 def view(name):
     """List all registered sites, or show details for NAME."""
     reg = load_registry()
@@ -3301,10 +3364,10 @@ def view(name):
 
 
 @cli.command()
-@click.argument("name", required=False)
+@click.argument("name", required=False, shell_complete=complete_site_names)
 @click.option(
     "--path", "path_override",
-    type=click.Path(),
+    type=click.Path(file_okay=False),
     default=None,
     help="Path to site root. Overrides NAME and current directory. Use this in CI/CD.",
 )
@@ -3324,10 +3387,10 @@ def build(name, path_override):
 
 
 @cli.command()
-@click.argument("name", required=False)
+@click.argument("name", required=False, shell_complete=complete_site_names)
 @click.option(
     "--path", "path_override",
-    type=click.Path(),
+    type=click.Path(file_okay=False),
     default=None,
     help="Explicit site path (no registry lookup).",
 )
@@ -3414,8 +3477,8 @@ def update(name, path_override, force):
 
 
 @cli.command("fetch-deps")
-@click.argument("name", required=False, default=None)
-@click.option("--path", "path_override", default=None, type=click.Path(),
+@click.argument("name", required=False, default=None, shell_complete=complete_site_names)
+@click.option("--path", "path_override", default=None, type=click.Path(file_okay=False),
               help="Explicit site path (no registry lookup).")
 def fetch_deps(name, path_override):
     """Download external JS/CSS dependencies and patch index.html for offline use."""
@@ -3447,8 +3510,8 @@ def fetch_deps(name, path_override):
 
 
 @cli.command()
-@click.argument("name", required=False, default=None)
-@click.option("--path", "path_override", default=None, type=click.Path(),
+@click.argument("name", required=False, default=None, shell_complete=complete_site_names)
+@click.option("--path", "path_override", default=None, type=click.Path(file_okay=False),
               help="Explicit site path (no registry lookup).")
 @click.option("--output", "output_override", default=None, type=click.Path(),
               help="Output file path. Defaults to bundle.html in the site root.")
@@ -3488,8 +3551,8 @@ def bundle(name, path_override, output_override, offline):
 
 
 @cli.command()
-@click.argument("name", required=False)
-@click.option("--path", "path_override", type=click.Path(), default=None,
+@click.argument("name", required=False, shell_complete=complete_site_names)
+@click.option("--path", "path_override", type=click.Path(file_okay=False), default=None,
               help="Explicit site path (no registry lookup).")
 @click.option("--set", "sets", multiple=True, metavar="KEY=VALUE",
               help="Set a config key non-interactively (repeatable).")

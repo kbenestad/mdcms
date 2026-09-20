@@ -73,6 +73,26 @@ Verify which version you have installed by running `mdcms --version`.
 
 MD-CMS consists of two separate pieces of software: The CLI tool (which you run from the terminal) and the renderer (the index.html file, which the browser reads). To update the CLI, simply rerun the installation command and overwrite `mdcms`. To update the renderer, download the latest index.html and overwrite it in your sites.
 
+## Tab completion
+
+The CLI can complete command names, options, and the names of your registered sites when you press Tab — so `mdcms build ` + Tab offers every site you have registered, and `mdcms bu` + Tab finishes to `build`/`bundle`.
+
+It is off until you set it up. Ask mdcms for the commands to run:
+
+```
+mdcms completion
+```
+
+That prints the two or three one-off commands for your shell (bash, zsh, and fish are supported; it reads `$SHELL` to pick, or name the shell yourself: `mdcms completion zsh`). Run them, open a new terminal window, and Tab works.
+
+What those commands do: `mdcms` can print a completion script for your shell when it is run with a special environment variable set. The setup saves that script to a file once and adds a line to your shell's startup file so it is loaded every time you open a terminal. Nothing is sent anywhere and no other file is touched.
+
+Two things worth knowing:
+
+- Completion attaches to the installed `mdcms` command. If you run the tool as `python3 mdcms.py` from a checkout, Tab completion does not apply to it.
+- Site names come from your registry (`~/.config/mdcms/sites.json`), so a site shows up the moment you `mdcms register` it — there is nothing to regenerate.
+- Every Tab press runs `mdcms` once to ask it what to offer. With the standalone binary on a slow machine (a Raspberry Pi, say) that can take a noticeable fraction of a second.
+
 ## Building your own binary
 
 The commands above download a pre-built binary from the latest GitHub release. If you want to build one yourself instead — from a local checkout, a branch that hasn't been released yet, or a modified copy of `mdcms.py` — you can produce the exact same kind of standalone executable with [PyInstaller](https://pyinstaller.org/), the same tool the release workflow (`.github/workflows/release.yml`) uses.
