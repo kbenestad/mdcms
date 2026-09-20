@@ -5,7 +5,7 @@
 #
 # Licensed under Apache 2.0 licence.
 #
-# CURRENT VERSION: 0.9.1 - 20 August 2026
+# CURRENT VERSION: 0.10.0 - 20 September 2026
 #
 # Copyright 2026 Kristian Benestad
 #
@@ -45,8 +45,8 @@ import certifi
 import click
 import yaml
 
-CLI_VERSION = "0.9.1"
-CLI_RELEASE_DATE = "20 August 2026"
+CLI_VERSION = "0.10.0"
+CLI_RELEASE_DATE = "20 September 2026"
 MIN_SUPPORTED_VERSION = "0.3"
 
 # Minimum theme-file format the renderer/build supports. Theme files carry their
@@ -220,6 +220,19 @@ def get_category_info(cfg: dict) -> dict:
     cats = cfg.get("categories") or []
     codes = [str(c["code"]) for c in cats if isinstance(c, dict) and "code" in c]
     return {"use": use, "default_code": default_code, "codes": codes}
+
+
+def category_scope_sections(cat_entry: dict) -> list:
+    """Section codes a category's `section-id:` limits it to, or [] if unscoped.
+
+    Accepts a single code, a comma-separated string, or a list — the same three
+    shapes the renderer parses.
+    """
+    raw = cat_entry.get("section-id") if isinstance(cat_entry, dict) else None
+    if not raw:
+        return []
+    items = raw if isinstance(raw, list) else str(raw).split(",")
+    return [str(i).strip() for i in items if str(i).strip()]
 
 
 def read_nav_yml(site_path: Path) -> dict:
@@ -983,6 +996,18 @@ def run_build(site_path: Path):
 
     primary_entries = [select_primary(v, cat["default_code"]) for v in page_groups.values()]
     sections, auto_created = merge_sections(primary_entries, existing_sections)
+
+    if cat["use"]:
+        section_codes = {s_["code"] for s_ in sections if s_.get("code")}
+        for entry in [cfg.get("default-category") or {}] + list(cfg.get("categories") or []):
+            if not isinstance(entry, dict):
+                continue
+            unknown = [c for c in category_scope_sections(entry) if c not in section_codes]
+            if unknown:
+                click.echo(click.style(
+                    f"Warning: category '{entry.get('code')}' has section-id {unknown}, "
+                    "which match no section in nav.yml — that category will never be offered.",
+                    fg="yellow"))
 
     page_nav = build_page_nav(
         page_groups, existing_pages,
