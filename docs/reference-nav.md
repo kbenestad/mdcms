@@ -10,6 +10,8 @@ python3 mdcms.py build --path app/
 
 **What is overwritten on rebuild:** Page `title`, `sort`, `section-id` — these are always taken from frontmatter. `date-categories` (see below) is also fully regenerated on every build.
 
+**Section codes are referenceable:** a section's `code` is what page frontmatter points at with `section-id:`, and what a *scoped* category names in its own `section-id:` in `config.yml` (see `reference-config.md`'s Categories section). Renaming a section code means updating both.
+
 Sections can also be added, renamed, reordered, reparented, and have their `pagesvisibility`/`pagination` toggled interactively via `mdcms config` → *Manage sections*, instead of hand-editing this file.
 
 ---
@@ -74,6 +76,9 @@ sections:
 
     categorynames:            # Per-category section display names.
                               # Required when categories-sectionnames: per-category in config.yml.
+                              # A category scoped to other sections (section-id: in config.yml)
+                              # resolves this to the default-category entry instead, so a section
+                              # outside that category's scope keeps its normal name.
       en: Guides
       nb: Veiledninger
       ar: أدلة

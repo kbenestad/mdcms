@@ -264,6 +264,62 @@ The section codes are the `code:` values in `nav.yml`. `mdcms build` warns if a
 
 A category with no `section-id:` is unscoped and site-wide, as before.
 
+#### Worked example
+
+```
+pages/
+  wrsrcli/
+    introduction.md
+    overview.md
+    page.md
+  wmls/
+    standard.md
+    standard.beta.md
+    standard.v1.md
+    other.md
+```
+
+`introduction.md`, `overview.md` and `page.md` carry `section-id: wrsrcli` in
+their frontmatter; the `wmls/` pages carry `section-id: wmls`. With `beta` and
+`v1` both scoped to `wmls`:
+
+| Where you are | Selector offers | Nav shows |
+|---|---|---|
+| any `wrsrcli` page | English only | all six pages, English titles |
+| `wmls/standard.md`, English | English, Beta, V1 | all six pages, English titles |
+| `wmls/standard.md`, Beta | English, Beta, V1 | `Standard (beta)` + all three `wrsrcli` pages |
+
+`other.md` disappears while Beta is active because it has no `.beta.md`
+variant — inside the scope, the ordinary per-category visibility rules still
+apply. Give `beta` a `notfoundmessage:` if you would rather it stayed listed
+and fell back to its English content.
+
+#### What counts as leaving the scope
+
+Anything that is not a page in one of the named sections, including:
+
+- the home page, which belongs to no section unless you give it one;
+- any post — posts live in `posts/` and are not part of a nav section;
+- a page in any other section.
+
+Opening one of these switches the selector back to `default-category`. That is
+true whether you got there by clicking a nav link, following a `?cat=` link, or
+pressing Back.
+
+#### Interaction with other category features
+
+- **Post lists** (the `posts-*` tags) filter on the category actually active,
+  not on scope, because posts have no section to be scoped by. In practice a
+  scoped category can only be active on one of its own pages, and posts with no
+  variant of their own are listed under every category regardless.
+- **Date categories** (`categories-dates: yes`) already pin the whole nav to
+  `default-category` whenever at least one date category exists. On such a site
+  scoping changes nothing about the nav — only which categories the selector
+  offers, and the switch back when you leave the scope.
+- **`categories-sectionnames: per-category`** resolves a section's
+  `categorynames` entry against `default-category` for sections outside the
+  active category's scope, so out-of-scope sections keep their normal names.
+
 ### Per-category keys summary
 
 | Key | Required | Description |

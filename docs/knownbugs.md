@@ -12,6 +12,16 @@ Every bug found in MD-CMS, open or fixed, with its symptom, root cause, and fix.
 
 ## Open bugs
 
+### A category switch forced by navigation leaves a stale `?cat=` in the URL
+
+**Symptom:** When the renderer switches back to `default-category` by itself — because the active category has no variant for the page being opened, or because a scoped category's sections were left — the selector and the content update correctly, but the address bar keeps the old `?cat=<code>`. The page then shows English while the URL claims `?cat=beta`. Only visible when the navigation came from a hash change or the Back/Forward buttons; clicking a nav link rewrites the URL correctly. Copying such a URL hands someone a link whose `?cat=` does not match what they will see (they still get the right page — the same revert runs again on load — so this is a cosmetic and link-sharing defect, not a wrong-content one).
+
+**Root cause:** `navigateTo()` in `app/index.html` takes `historyMode: 'none'` for popstate/hashchange navigations and deliberately skips all `history` writes, since the browser has already moved. Both auto-revert paths — the long-standing hidden-category one and the scoped-category one added in v0.10.0 — re-enter `navigateTo()` via `setActiveCategory(defaultCategoryCode, { history: historyMode })`, passing that same `'none'` through, so the branch that would strip `?cat=` never runs. Pre-existing: reproduced on the hidden-category path with no scoped category involved.
+
+**Fix (not yet done):** In `navigateTo()`, when `historyMode === 'none'`, still `replaceState` if the computed URL differs from `window.location.href`. `replaceState` rewrites only the current history entry, so it does not add an entry or disturb Back/Forward. Worth a browser check on both revert paths and on ordinary Back/Forward between two categories.
+
+---
+
 ### `mdcms fetch-deps` crashes immediately (`NameError`)
 
 **Symptom:** Running `mdcms fetch-deps [name]` or `mdcms fetch-deps --path <path>` aborts with `NameError: name 'CDN_DEPS' is not defined`. The offline-bundling command is completely non-functional.

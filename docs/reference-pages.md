@@ -60,6 +60,8 @@ language: en                   # BCP 47 code. Sets the <html lang=""> attribute 
 
 **Category variants** are not a frontmatter field — they are encoded in the filename. `about.nb.md` is the Norwegian variant of `about.md`, provided `nb` is declared in `config.yml` under `categories:`. Alternatively, `about.20260704.md` is a *date* category — no declaration needed, just `categories-dates: yes`; see `reference-config.md`'s Categories section.
 
+A category can also be limited to part of the site: give it a `section-id:` in `config.yml` and it only applies to pages in those nav sections, leaving the rest of the site on `default-category`. See *Scoped categories* in `reference-config.md`.
+
 Pages and posts can also be created, edited, and deleted interactively via `mdcms config` → *Manage pages*, instead of hand-writing files.
 
 ---
@@ -117,7 +119,7 @@ Body text supports **full markdown** — bold, *italics*, `code`,
 
 ### Table of contents — `toc`, `toc-section`, `toc-page`
 
-Three related tags render a table of contents. All exclude the page containing the tag from any page list and only list visible, non-draft pages in the active category.
+Three related tags render a table of contents. All exclude the page containing the tag from any page list and only list visible, non-draft pages in the active category — or, for sections outside a scoped category's reach (and on any site with date categories), in `default-category`, matching what the nav shows.
 
 **`toc`** — every section, grouped and sorted.
 
@@ -210,7 +212,7 @@ On narrow viewports (≤ 600px) each list item stacks into two lines — date an
 time on top, the title link underneath — with extra space below the link to
 separate it from the next item.
 
-**Category filtering:** When `categories-use: yes`, the listing automatically filters to the active category.
+**Category filtering:** When `categories-use: yes`, the listing automatically filters to the active category. Posts with no variant of their own are listed under every category. Scoping a category with `section-id:` does not change this — posts are not part of a nav section, so there is nothing to scope them by.
 
 ---
 
