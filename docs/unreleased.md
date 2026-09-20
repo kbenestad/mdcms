@@ -4,4 +4,4 @@ Changes merged into `development` that have not yet been released to `main`.
 
 ---
 
-_Nothing unreleased — everything on `development` has shipped in v0.10.0._
+_Nothing unreleased — everything on `development` has shipped in v0.11.0._

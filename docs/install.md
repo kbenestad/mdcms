@@ -73,6 +73,35 @@ Verify which version you have installed by running `mdcms --version`.
 
 MD-CMS consists of two separate pieces of software: The CLI tool (which you run from the terminal) and the renderer (the index.html file, which the browser reads). To update the CLI, simply rerun the installation command and overwrite `mdcms`. To update the renderer, download the latest index.html and overwrite it in your sites.
 
+## Tab completion
+
+Tab completion is set up for you. The first time you run any `mdcms` command after installing, it switches itself on and says so:
+
+```
+Tab completion installed for zsh (added one line to /home/you/.zshrc).
+Press Tab after `mdcms ` in a new terminal window to use it.
+```
+
+Open a new terminal window and Tab works:
+
+```
+mdcms bu<Tab>              →  mdcms build      (or bundle — it shows both)
+mdcms build mys<Tab>       →  mdcms build mysite
+```
+
+Pressing Tab only fills in text. Nothing runs until you press Enter, exactly as when you Tab-complete a filename. Site names come from your registry, so a new site can be completed the moment you `mdcms register` it.
+
+bash, zsh, and fish are supported. On bash and zsh, mdcms saves a completion script to `~/.config/mdcms/` and adds one line to `~/.bashrc` or `~/.zshrc` that loads it. On fish it writes `~/.config/fish/completions/mdcms.fish`, which fish picks up by itself.
+
+**If you would rather it did not**, set `MDCMS_NO_COMPLETION=1` in your environment before the first run, and mdcms will leave your shell alone. To remove completion after the fact, delete the script file and the line it added; mdcms will not put them back. Nothing is set up when mdcms is not run from a terminal, so CI/CD pipelines and scripts are unaffected.
+
+`mdcms completion` re-runs the setup by hand — useful to put completion back after removing it, or to set it up for a second shell (`mdcms completion fish`).
+
+Two things worth knowing:
+
+- Completion attaches to the installed `mdcms` command. If you run the tool as `python3 mdcms.py` from a checkout, Tab completion does not apply to it.
+- Every Tab press runs `mdcms` once to ask it what to offer. With the standalone binary on a slow machine (a Raspberry Pi, say) that can take a noticeable fraction of a second.
+
 ## Building your own binary
 
 The commands above download a pre-built binary from the latest GitHub release. If you want to build one yourself instead — from a local checkout, a branch that hasn't been released yet, or a modified copy of `mdcms.py` — you can produce the exact same kind of standalone executable with [PyInstaller](https://pyinstaller.org/), the same tool the release workflow (`.github/workflows/release.yml`) uses.
