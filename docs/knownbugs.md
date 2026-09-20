@@ -34,6 +34,12 @@ Every bug found in MD-CMS, open or fixed, with its symptom, root cause, and fix.
 
 ## Fixed in development (not yet released)
 
+_Nothing awaiting release._
+
+---
+
+## Fixed in v0.11.0
+
 ### A markdown table with an empty header row still renders an empty header
 
 **Symptom:** A table written with a blank header row — `|||` followed by the `|---|---|` separator — renders with an empty grey header band above the first data row, instead of as a plain two-column grid of key/value rows. There is no markdown way to write a headerless table, since GFM requires the header row.

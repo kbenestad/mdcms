@@ -5,7 +5,7 @@
 #
 # Licensed under Apache 2.0 licence.
 #
-# CURRENT VERSION: 0.10.0 - 20 September 2026
+# CURRENT VERSION: 0.11.0 - 20 September 2026
 #
 # Copyright 2026 Kristian Benestad
 #
@@ -46,7 +46,7 @@ import click
 from click.shell_completion import get_completion_class
 import yaml
 
-CLI_VERSION = "0.10.0"
+CLI_VERSION = "0.11.0"
 CLI_RELEASE_DATE = "20 September 2026"
 MIN_SUPPORTED_VERSION = "0.3"
 
