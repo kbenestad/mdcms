@@ -43,6 +43,7 @@ from pathlib import Path
 import certifi
 
 import click
+from click.shell_completion import get_completion_class
 import yaml
 
 CLI_VERSION = "0.10.0"
@@ -3104,6 +3105,7 @@ def cli(ctx):
 
     Manage and build MD-CMS sites locally or in CI/CD pipelines.
     """
+    _autoinstall_completion()
     if ctx.invoked_subcommand is None:
         click.clear()
         _print_startup_banner()
@@ -3149,54 +3151,95 @@ def upgrade(force):
     _upgrade_binary(latest)
 
 
-# Per-shell setup for tab completion. click generates the completion script
-# itself when it is run with _MDCMS_COMPLETE set; all this command does is
-# print the commands that capture that script and load it at shell startup.
-COMPLETION_SETUP = {
-    "bash": [
-        "mkdir -p ~/.config/mdcms",
-        "_MDCMS_COMPLETE=bash_source mdcms > ~/.config/mdcms/mdcms-complete.bash",
-        "echo '. ~/.config/mdcms/mdcms-complete.bash' >> ~/.bashrc",
-    ],
-    "zsh": [
-        "mkdir -p ~/.config/mdcms",
-        "_MDCMS_COMPLETE=zsh_source mdcms > ~/.config/mdcms/mdcms-complete.zsh",
-        "echo '. ~/.config/mdcms/mdcms-complete.zsh' >> ~/.zshrc",
-    ],
-    "fish": [
-        "mkdir -p ~/.config/fish/completions",
-        "_MDCMS_COMPLETE=fish_source mdcms > ~/.config/fish/completions/mdcms.fish",
-    ],
-}
+# ─── Shell tab completion ─────────────────────────────────────
+#
+# click generates the completion script itself; mdcms only has to write it
+# somewhere and make the shell load it at startup. This is done on the first
+# run after install (_autoinstall_completion, called from the cli group), so
+# completion is on without the user having to know it exists.
+
+COMPLETION_SHELLS = ("bash", "zsh", "fish")
+
+
+def completion_paths(shell: str) -> "tuple[Path, Path | None]":
+    """Return (script file, shell startup file) for SHELL.
+
+    fish auto-loads anything in its completions directory, so it has no startup
+    file to edit.
+    """
+    home = Path.home()
+    if shell == "fish":
+        return home / ".config" / "fish" / "completions" / "mdcms.fish", None
+    return REGISTRY_FILE.parent / f"mdcms-complete.{shell}", home / f".{shell}rc"
+
+
+def install_completion(shell: str) -> str:
+    """Write the completion script for SHELL and load it from the shell's startup file.
+
+    Both steps are idempotent: the script is rewritten in place, and the startup
+    file only gains the source line if it is not already there. Returns a
+    one-line description of what was done.
+    """
+    script_path, rc_path = completion_paths(shell)
+    cls = get_completion_class(shell)
+    script_path.parent.mkdir(parents=True, exist_ok=True)
+    script_path.write_text(cls(cli, {}, "mdcms", "_MDCMS_COMPLETE").source(), encoding="utf-8")
+
+    if rc_path is None:
+        return f"Tab completion installed for {shell} ({script_path})."
+
+    source_line = f". {script_path}"
+    current = rc_path.read_text(encoding="utf-8") if rc_path.exists() else ""
+    if source_line not in current:
+        prefix = "" if current.endswith("\n") or not current else "\n"
+        with rc_path.open("a", encoding="utf-8") as fh:
+            fh.write(f"{prefix}\n# mdcms tab completion\n{source_line}\n")
+        return f"Tab completion installed for {shell} (added one line to {rc_path})."
+    return f"Tab completion refreshed for {shell} ({script_path})."
+
+
+def _autoinstall_completion() -> None:
+    """Set completion up on the first run after install, then never again.
+
+    The script file doubles as the marker: once it exists this does nothing, so
+    deleting it and the startup-file line is how you opt out for good. Skipped
+    when not at a terminal (CI, pipelines, scripts) and when MDCMS_NO_COMPLETION
+    is set.
+    """
+    if os.environ.get("MDCMS_NO_COMPLETION") or not sys.stdout.isatty():
+        return
+    shell = Path(os.environ.get("SHELL", "")).name
+    if shell not in COMPLETION_SHELLS:
+        return
+    script_path, _ = completion_paths(shell)
+    if script_path.exists():
+        return
+    try:
+        message = install_completion(shell)
+    except OSError:
+        return  # read-only home, odd permissions — never block the real command
+    click.echo(click.style(message, fg="green"))
+    click.echo("Press Tab after `mdcms ` in a new terminal window to use it.\n")
 
 
 @cli.command()
-@click.argument("shell", required=False, type=click.Choice(sorted(COMPLETION_SETUP)))
+@click.argument("shell", required=False, type=click.Choice(COMPLETION_SHELLS))
 def completion(shell):
-    """Print the setup commands for shell tab completion.
+    """Set up Tab completion for your shell (normally already done for you).
 
-    Once set up, Tab completes command names, options, and the names of
-    registered sites — so `mdcms build <TAB>` offers your sites. SHELL defaults
-    to the shell named in $SHELL.
+    mdcms does this by itself the first time it runs after being installed, so
+    this command is only needed to put completion back after removing it, or to
+    set it up for a second shell. SHELL defaults to the shell in $SHELL.
     """
     if not shell:
         shell = Path(os.environ.get("SHELL", "")).name
-        if shell not in COMPLETION_SETUP:
+        if shell not in COMPLETION_SHELLS:
             raise click.ClickException(
                 "Could not tell which shell you are using from $SHELL. "
-                f"Run: mdcms completion [{'|'.join(sorted(COMPLETION_SETUP))}]"
+                f"Run: mdcms completion [{'|'.join(COMPLETION_SHELLS)}]"
             )
-
-    click.echo(f"Tab completion for mdcms in {shell}. Run these commands once:\n")
-    for cmd in COMPLETION_SETUP[shell]:
-        click.echo(click.style(f"    {cmd}", fg="cyan"))
-    click.echo("\nThen open a new terminal window.")
-    if shell == "zsh":
-        click.echo(
-            "\nIf nothing completes, your ~/.zshrc may not be loading zsh's completion\n"
-            "system. Add this line above the one you just added, then try again:\n"
-        )
-        click.echo(click.style("    autoload -Uz compinit && compinit", fg="cyan"))
+    click.echo(click.style(install_completion(shell), fg="green"))
+    click.echo("Press Tab after `mdcms ` in a new terminal window to use it.")
 
 
 @cli.command()
