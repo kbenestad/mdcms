@@ -3,7 +3,7 @@
 #
 # Licensed under Apache 2.0 licence.
 #
-# CURRENT VERSION: 0.11.0 - 20 September 2026
+# CURRENT VERSION: 0.12.0 - 10 November 2026
 #
 # Site configuration.
 #
@@ -58,6 +58,13 @@ offline-message: "This page is not available offline. Connect to the internet an
 # search: true
 # default-theme: system      # light | dark | system
 # code-copy: no              # yes (default) shows a copy button on every code fence
+
+# last-updated: yes          # show a "Last updated: d Mmmm YYYY HH:MM" button at the
+#                            # bottom of the nav; clicking it re-downloads every page
+#                            # and asset. Works with or without pwa: yes.
+# last-updated-label: "Last updated"   # or a per-category map, like offline-message:
+#   en: "Last updated"
+#   nb: "Sist oppdatert"
 
 # ──────────────────────────────────
 # Reusable callout messages (optional)

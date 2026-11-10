@@ -4,7 +4,7 @@
 
   Licensed under Apache 2.0 licence.
 
-  CURRENT VERSION: 0.11.0 - 20 September 2026
+  CURRENT VERSION: 0.12.0 - 10 November 2026
 -->
 <!--
   MD-CMS — Renderer
@@ -35,7 +35,15 @@
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+    navigator.serviceWorker.register('./service-worker.js').then(reg => {
+      // Stashed for the update checks further down, which need the registration
+      // to pull a new worker on demand.
+      window.__mdcmsSW = reg;
+      // A worker stuck in `waiting` (an older one installed before skipWaiting
+      // was called inside install) would otherwise never take over.
+      if (reg.waiting) reg.waiting.postMessage({ type: 'MDCMS_SKIP_WAITING' });
+      reg.update().catch(() => {});
+    }).catch(() => {});
   });
 }
 </script>
@@ -277,6 +285,42 @@ body {
 .layout-sidebar.nav-right .sidebar-footer-row {
   flex-direction: row-reverse;
 }
+
+/* "Last updated" / force-refresh button (config.yml: last-updated: yes).
+   Sits at the very bottom of the nav, directly under the dark-mode and panel
+   toggles so the two read as one footer block. */
+.last-updated-row { padding: 0 1.25rem 0.75rem; flex-shrink: 0; }
+.sidebar-footer-row + .last-updated-row { padding-top: 0; margin-top: -0.25rem; }
+.last-updated-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.4rem 0.55rem;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  line-height: 1.3;
+  text-align: left;
+  color: var(--nav-description-colour);
+  background: transparent;
+  border: 1px solid var(--divider);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.layout-sidebar.nav-right .last-updated-btn,
+.layout-topbar .mobile-nav-panel.nav-right .last-updated-btn {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+.last-updated-btn:hover { color: var(--nav-link-active-colour); border-color: var(--accent); }
+.last-updated-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.last-updated-btn .mdcms-icon { flex-shrink: 0; font-size: 0.95rem; }
+.last-updated-text { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.last-updated-btn.is-pending { color: var(--accent); border-color: var(--accent); font-weight: 600; }
+.last-updated-btn.is-busy { cursor: progress; }
+.last-updated-btn.is-busy .mdcms-icon { animation: mdcms-spin 0.9s linear infinite; }
+@keyframes mdcms-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 .search-box {
   width: 100%;
@@ -1350,6 +1394,24 @@ body.scanlines-active::after {
     set(key, value) { try { localStorage.setItem(key, value); } catch (e) { /* unavailable */ } },
   };
 
+  // Every fetch of site *content* — config.yml, nav.yml, search.json, theme.yml,
+  // page markdown — goes through here rather than straight to fetch().
+  //
+  // When a service worker controls the page the request is left alone: the
+  // worker already revalidates content against the server and owns the offline
+  // fallback. Without one, revalidate here, because a static host's own
+  // Cache-Control (GitHub Pages sends max-age=600) otherwise lets the browser
+  // answer from its HTTP cache and hides a rebuild from the reader for minutes.
+  // 'no-cache' is a conditional request, not a forced re-download — an unchanged
+  // file comes back as an empty 304.
+  function fetchContent(url, init) {
+    const controlled = ('serviceWorker' in navigator) && !!navigator.serviceWorker.controller;
+    if (controlled) return fetch(url, init);
+    const opts = Object.assign({}, init);
+    if (!opts.cache) opts.cache = 'no-cache';
+    return fetch(url, opts);
+  }
+
   // ─── State ────────────────────────────────────────────────
 
   // Capture the intended pathname before anything mutates the URL.
@@ -1661,7 +1723,7 @@ body.scanlines-active::after {
   async function fetchPageFile(conceptualFile) {
     // conceptualFile like "pages/foo.md". Returns { ok, text, resolvedFile } or { ok: false }.
     if (!categoriesUse) {
-      const r = await fetch(conceptualFile);
+      const r = await fetchContent(conceptualFile);
       if (r.ok && _isMdResponse(r)) return { ok: true, text: await r.text(), resolvedFile: conceptualFile };
       return { ok: false };
     }
@@ -1691,7 +1753,7 @@ body.scanlines-active::after {
     for (const url of tries) {
       if (seen.has(url)) continue;
       seen.add(url);
-      const r = await fetch(url);
+      const r = await fetchContent(url);
       if (r.ok && _isMdResponse(r)) return { ok: true, text: await r.text(), resolvedFile: url };
     }
     return { ok: false };
@@ -3107,6 +3169,245 @@ function fmtDatetime(dtStr) {
     });
   }
 
+  // ─── Content updates ──────────────────────────────────────
+  // A service worker is cache-first by design, which is exactly why a PWA can
+  // leave ordinary browser readers on yesterday's pages: nothing ever tells an
+  // open page that the site has been rebuilt, and nothing re-fetches what is
+  // already cached. `mdcms build` writes site-version.json — a content hash of
+  // every file in the site plus the build time — and this is the half that uses
+  // it: poll it (never from a cache), and when the hash changes, pull the new
+  // worker and reload into the new content.
+  //
+  // This runs on every site, whether or not the "Last updated" button is shown
+  // and whether or not the PWA is enabled; a site built by an older CLI simply
+  // has no site-version.json and all of it quietly no-ops.
+
+  const UPDATE_POLL_MS = 15 * 60 * 1000;
+  const UPDATE_MIN_GAP_MS = 60 * 1000;   // floor between checks, so tab focus can't spam
+  let siteVersion = null;                // { build, built, files, generator }
+  let updatePending = false;             // a new build is live but we didn't reload
+  let refreshBusy = false;
+  let lastUpdateCheck = 0;
+  const lastUpdatedButtons = [];
+  const BUILD_KEY = 'mdcms-build';
+  const BUILT_KEY = 'mdcms-built';
+
+  function rememberBuild(version) {
+    safeStorage.set(BUILD_KEY, version.build);
+    if (version.built) safeStorage.set(BUILT_KEY, version.built);
+  }
+
+  // Mirrors is_yes() in mdcms.py — PyYAML turns an unquoted `yes` into true, but
+  // a quoted "yes" stays a string, so both shapes have to be accepted.
+  function configFlag(key, dflt) {
+    const v = config[key];
+    if (v === undefined || v === null || v === '') return dflt;
+    if (typeof v === 'boolean') return v;
+    return ['yes', 'true', 'on', '1'].indexOf(String(v).trim().toLowerCase()) !== -1;
+  }
+
+  // A bundle is a frozen single file with no origin to update from.
+  function lastUpdatedEnabled() {
+    return configFlag('last-updated', false) && !window.__MDCMS_BUNDLE__;
+  }
+
+  // Accepts a plain string or a per-category map, same shape as offline-message.
+  function lastUpdatedLabel() {
+    const cfg = config['last-updated-label'];
+    if (!cfg) return 'Last updated';
+    if (typeof cfg === 'string') return cfg;
+    return cfg[defaultCategoryCode] || cfg['en'] || Object.values(cfg)[0] || 'Last updated';
+  }
+
+  // "10 November 2026 14:32", in the reader's own time zone — the same
+  // "d Mmmm YYYY" shape the date-category selector uses.
+  function formatBuildTime(iso) {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return null;
+    const pad = n => String(n).padStart(2, '0');
+    return d.getDate() + ' ' + _MONTH_NAMES[d.getMonth()] + ' ' + d.getFullYear()
+         + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  function sessionFlag(key, set) {
+    try {
+      if (set) { sessionStorage.setItem(key, '1'); return false; }
+      return sessionStorage.getItem(key) === '1';
+    } catch (e) { return false; }
+  }
+
+  async function fetchSiteVersion() {
+    try {
+      // cache: no-store on this side, and the service worker deliberately does
+      // not handle this path at all — otherwise the probe for new content could
+      // itself be answered out of the cache it is meant to invalidate.
+      const resp = await fetch('site-version.json', { cache: 'no-store' });
+      if (!resp.ok) return null;
+      const data = await resp.json();
+      return (data && data.build) ? data : null;
+    } catch (e) { return null; }
+  }
+
+  function getRegistration() {
+    if (window.__mdcmsSW) return Promise.resolve(window.__mdcmsSW);
+    if (!('serviceWorker' in navigator)) return Promise.resolve(null);
+    return navigator.serviceWorker.getRegistration().catch(() => null);
+  }
+
+  // Resolves once a newly-found worker has finished installing (or has gone
+  // redundant). Capped, because precaching a large site takes a while and the
+  // reload is correct either way: content requests revalidate against the
+  // network, so a reload never *needs* the new cache to be complete.
+  function awaitWorkerSettled(reg) {
+    const worker = reg && (reg.installing || reg.waiting);
+    if (!worker) return Promise.resolve();
+    return new Promise(resolve => {
+      let settled = false;
+      const finish = () => { if (!settled) { settled = true; resolve(); } };
+      const check = () => {
+        if (worker.state === 'activated' || worker.state === 'redundant') finish();
+      };
+      worker.addEventListener('statechange', check);
+      check();
+      setTimeout(finish, 60000);
+    });
+  }
+
+  function requestWorkerRefresh(worker) {
+    return new Promise(resolve => {
+      let settled = false;
+      const finish = result => { if (!settled) { settled = true; resolve(result || null); } };
+      try {
+        const channel = new MessageChannel();
+        channel.port1.onmessage = ev => finish(ev.data);
+        worker.postMessage({ type: 'MDCMS_FORCE_REFRESH' }, [channel.port2]);
+      } catch (e) { finish(null); return; }
+      // Never leave the button spinning on a worker that doesn't answer.
+      setTimeout(() => finish(null), 120000);
+    });
+  }
+
+  // Fallback for a page with no service worker (pwa: no, an unsupported browser,
+  // or the very first visit before the worker takes over). There is no SW cache
+  // to refill, so re-fetch what the renderer knows about past the HTTP cache;
+  // the reload that follows then reads the fresh copies.
+  async function rewarmHttpCache() {
+    const urls = new Set(['index.html', 'config.yml', 'nav.yml', 'search.json']);
+    if (config.theme) urls.add(config.theme);
+    (navData || []).forEach(p => { if (p && p.file) urls.add(p.file); });
+    (searchIndex || []).forEach(e => { if (e && e.file) urls.add(e.file); });
+    await Promise.all(Array.from(urls).map(
+      u => fetch(u, { cache: 'reload' }).catch(() => null)
+    ));
+  }
+
+  // The button's action: re-download every page and asset, then reload into them.
+  async function forceRefresh() {
+    if (refreshBusy) return;
+    refreshBusy = true;
+    renderLastUpdated();
+    try {
+      const reg = await getRegistration();
+      if (reg) {
+        try { await reg.update(); } catch (e) { /* offline, or no change */ }
+        await awaitWorkerSettled(reg);
+      }
+      const controller = ('serviceWorker' in navigator) ? navigator.serviceWorker.controller : null;
+      if (controller) await requestWorkerRefresh(controller);
+      else await rewarmHttpCache();
+      const fresh = await fetchSiteVersion();
+      if (fresh) {
+        siteVersion = fresh;
+        // Don't let the reload be mistaken for "a new build arrived while you
+        // were reading" and trigger a second one.
+        sessionFlag('mdcms-applied-' + fresh.build, true);
+        rememberBuild(fresh);
+      }
+    } catch (e) { /* a failed refresh still ends in a reload */ }
+    window.location.reload();
+  }
+
+  async function checkForUpdate(initial) {
+    const now = Date.now();
+    if (!initial && now - lastUpdateCheck < UPDATE_MIN_GAP_MS) return;
+    lastUpdateCheck = now;
+
+    const next = await fetchSiteVersion();
+    if (!next) return;                         // offline, or built by an older CLI
+    const previous = siteVersion;
+    siteVersion = next;
+    renderLastUpdated();
+
+    if (initial) { rememberBuild(next); return; }
+    if (previous && previous.build === next.build) return;
+
+    // A rebuild landed while this page sat open. Guarded per build id so a site
+    // that somehow reports a new hash on every poll degrades to showing the
+    // button rather than putting the page in a reload loop.
+    const guard = 'mdcms-applied-' + next.build;
+    if (sessionFlag(guard)) { updatePending = true; renderLastUpdated(); return; }
+    sessionFlag(guard, true);
+    rememberBuild(next);
+
+    refreshBusy = true;
+    renderLastUpdated();
+    const reg = await getRegistration();
+    if (reg) {
+      try { await reg.update(); } catch (e) { /* reload still gets fresh content */ }
+      await awaitWorkerSettled(reg);
+    }
+    window.location.reload();
+  }
+
+  function initUpdateChecks() {
+    checkForUpdate(true);
+    setInterval(() => { if (!document.hidden) checkForUpdate(false); }, UPDATE_POLL_MS);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) checkForUpdate(false);
+    });
+    window.addEventListener('online', () => checkForUpdate(false));
+  }
+
+  function renderLastUpdated() {
+    if (!lastUpdatedButtons.length) return;
+    const built = (siteVersion && siteVersion.built) || safeStorage.get(BUILT_KEY);
+    const stamp = built ? formatBuildTime(built) : null;
+    let text, title, busy = false, pending = false;
+    if (refreshBusy) {
+      text = 'Updating…';
+      title = 'Downloading every page and asset';
+      busy = true;
+    } else if (updatePending) {
+      text = 'New content available';
+      title = 'Click to download the new version';
+      pending = true;
+    } else {
+      text = stamp ? lastUpdatedLabel() + ': ' + stamp : lastUpdatedLabel();
+      title = 'Re-download every page and asset';
+    }
+    lastUpdatedButtons.forEach(btn => {
+      const span = btn.querySelector('.last-updated-text');
+      if (span) span.textContent = text;
+      btn.title = title;
+      btn.setAttribute('aria-label', title);
+      btn.classList.toggle('is-busy', busy);
+      btn.classList.toggle('is-pending', pending);
+      btn.disabled = busy;
+    });
+  }
+
+  function buildLastUpdatedRow() {
+    const row = el('div', { className: 'last-updated-row' });
+    const btn = el('button', { className: 'last-updated-btn', type: 'button' });
+    btn.appendChild(iconEl('refresh'));
+    btn.appendChild(el('span', { className: 'last-updated-text' }));
+    btn.addEventListener('click', () => forceRefresh());
+    row.appendChild(btn);
+    lastUpdatedButtons.push(btn);
+    renderLastUpdated();
+    return row;
+  }
+
   // ─── Shell ────────────────────────────────────────────────
   // Standard sidebar/panel side when nothing overrides it: right for an
   // RTL default-category, left otherwise (including sites with no category
@@ -3184,6 +3485,10 @@ function fmtDatetime(dtStr) {
     sidebar.appendChild(navLinksEl);
 
     if (!hasSearch) sidebar.appendChild(toggleRow);
+    // Always last, so it reads as the bottom of the nav — and sits directly under
+    // the dark-mode/panel toggles as one footer block when no search bar has
+    // pulled those to the top.
+    if (lastUpdatedEnabled()) sidebar.appendChild(buildLastUpdatedRow());
 
     const reopenBtn = el('button', { className: 'sidebar-reopen-btn', 'aria-label': 'Expand sidebar' });
     reopenBtn.appendChild(iconEl(navPos === 'right' ? 'right_panel_open' : 'left_panel_open'));
@@ -3276,6 +3581,7 @@ function fmtDatetime(dtStr) {
     const mobileNavLinks = el('div', { className: 'nav-links', id: 'mobileNavLinks' });
     mobilePanel.appendChild(mobileNavLinks);
     if (!hasSearch) mobilePanel.appendChild(toggleRow);
+    if (lastUpdatedEnabled()) mobilePanel.appendChild(buildLastUpdatedRow());
 
     const overlay = el('div', { className: 'mobile-overlay' });
     overlay.addEventListener('click', () => closeDrawer());
@@ -4026,7 +4332,7 @@ function fmtDatetime(dtStr) {
   // ─── Boot ────────────────────────────────────────────────
   async function boot() {
     try {
-      const configResp = await fetch('config.yml');
+      const configResp = await fetchContent('config.yml');
       if (!configResp.ok) throw new Error('config.yml not found');
       config = jsyaml.load(await configResp.text()) || {};
 
@@ -4052,7 +4358,7 @@ function fmtDatetime(dtStr) {
 
       if (activeThemePath) {
         try {
-          const themeResp = await fetch(activeThemePath);
+          const themeResp = await fetchContent(activeThemePath);
           if (themeResp.ok) themeConfig = jsyaml.load(await themeResp.text()) || {};
         } catch (e) { /* fall back to hardcoded CSS defaults */ }
       }
@@ -4069,6 +4375,7 @@ function fmtDatetime(dtStr) {
       initCategories();
 
       const iconsToPreload = [...CORE_ICONS];
+      if (lastUpdatedEnabled()) iconsToPreload.push('refresh');
       if (config['categories-selecticon']) iconsToPreload.push(config['categories-selecticon']);
       if (themeConfig['nav-section-expand-icon']) iconsToPreload.push(themeConfig['nav-section-expand-icon']);
       if (themeConfig['nav-section-collapse-icon']) iconsToPreload.push(themeConfig['nav-section-collapse-icon']);
@@ -4090,7 +4397,7 @@ function fmtDatetime(dtStr) {
 
       // nav.yml — phase 2 expects `sections:` + `pages:` blocks; phase 1 flat
       // list is accepted for backwards compatibility.
-      const navResp = await fetch('nav.yml');
+      const navResp = await fetchContent('nav.yml');
       if (navResp.ok) {
         const parsed = jsyaml.load(await navResp.text()) || {};
         if (Array.isArray(parsed)) {
@@ -4107,7 +4414,7 @@ function fmtDatetime(dtStr) {
 
       if (config.search !== false) {
         try {
-          const searchResp = await fetch('search.json');
+          const searchResp = await fetchContent('search.json');
           if (searchResp.ok) {
             searchIndex = await searchResp.json();
             fuseInstance = new Fuse(searchIndex, {
@@ -4135,6 +4442,11 @@ function fmtDatetime(dtStr) {
       // First paint replaces the initial entry rather than pushing, so the very
       // first Back leaves the site instead of cycling on the landing page.
       await navigateTo(routeFromPath || hashPage || defaultPage(), { history: 'replace' });
+
+      // Last, so a slow or missing site-version.json can never hold up first
+      // paint, and so nav/search data is already loaded for the no-worker
+      // refresh path.
+      initUpdateChecks();
     } catch (err) {
       document.getElementById('app').innerHTML = `<div style="max-width:600px;margin:4rem auto;padding:2rem;text-align:center;font-family:system-ui;">
         <h1 style="color:#EF4444;font-size:1.5rem;">MD-CMS Error</h1>

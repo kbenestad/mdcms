@@ -46,6 +46,7 @@
     "pages/synthesis.md",
     "search.json",
     "service-worker.js",
+    "site-version.json",
     "theme.yml"
   ]
 }

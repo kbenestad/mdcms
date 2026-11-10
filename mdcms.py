@@ -5,7 +5,7 @@
 #
 # Licensed under Apache 2.0 licence.
 #
-# CURRENT VERSION: 0.11.0 - 20 September 2026
+# CURRENT VERSION: 0.12.0 - 10 November 2026
 #
 # Copyright 2026 Kristian Benestad
 #
@@ -25,6 +25,7 @@
 
 import base64
 import datetime
+import hashlib
 import json
 import mimetypes
 import os
@@ -46,8 +47,8 @@ import click
 from click.shell_completion import get_completion_class
 import yaml
 
-CLI_VERSION = "0.11.0"
-CLI_RELEASE_DATE = "20 September 2026"
+CLI_VERSION = "0.12.0"
+CLI_RELEASE_DATE = "10 November 2026"
 MIN_SUPPORTED_VERSION = "0.3"
 
 # Minimum theme-file format the renderer/build supports. Theme files carry their
@@ -89,7 +90,7 @@ CORE_ICONS = [
 ]
 OPTIONAL_ICONS = [
     "keyboard_arrow_down", "keyboard_double_arrow_right", "keyboard_double_arrow_down",
-    "expand_content", "collapse_content", "add", "minimize", "language",
+    "expand_content", "collapse_content", "add", "minimize", "language", "refresh",
 ]
 ALL_KNOWN_ICONS = frozenset(CORE_ICONS) | frozenset(OPTIONAL_ICONS)
 
@@ -109,6 +110,20 @@ GITHUB_URL_RE = re.compile(
     r"https?://github\.com/([^/]+)/([^/]+?)(?:\.git)?"
     r"(?:/tree/([^/]+?)(?:/(.+?))?)?/?$"
 )
+
+
+def is_yes(value, default: bool = False) -> bool:
+    """Truthiness for config.yml's yes/no keys.
+
+    PyYAML already turns an unquoted `yes` into True, but a quoted "yes" stays a
+    string, so both shapes have to be accepted. Mirrors configFlag() in
+    app/index.html — keep the two in sync.
+    """
+    if value is None or value == "":
+        return default
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in ("yes", "true", "on", "1")
 
 
 # ─── Version helpers ──────────────────────────────────────────
@@ -844,6 +859,11 @@ def compute_referenced_icons(site_path: Path, cfg: dict) -> set:
     if selecticon:
         icons.add(selecticon)
 
+    # The sidebar's "Last updated" / force-refresh button is the only user of
+    # `refresh`, and it only renders when last-updated is on.
+    if is_yes(cfg.get("last-updated")):
+        icons.add("refresh")
+
     theme_file = cfg.get("theme")
     theme_data: dict = {}
     if theme_file:
@@ -1054,9 +1074,15 @@ def run_build(site_path: Path):
 
     _patch_html_title(site_path, cfg.get("sitename", ""))
 
-    pwa_enabled = str(cfg.get("pwa", "no")).lower() in ("yes", "true")
-    if pwa_enabled:
-        generate_pwa(site_path, cfg)
+    # Fingerprint the finished site (nav.yml, search.json and the <title> patch are
+    # all already written above) so site-version.json and the service worker agree
+    # on one build id.
+    site_files = collect_site_files(site_path, cfg)
+    build_id = compute_build_id(site_path, site_files)
+    write_site_version(site_path, build_id, len(site_files))
+
+    if is_yes(cfg.get("pwa")):
+        generate_pwa(site_path, cfg, build_id, site_files)
     else:
         cleanup_pwa(site_path)
 
@@ -1078,7 +1104,275 @@ def run_build(site_path: Path):
     generate_site_manifest(site_path)
 
 
+# ─── Build fingerprint / site-version.json ────────────────────
+
+# OS and editor droppings that are in the site tree but are not part of the site.
+# They were previously handed to the service worker's precache list, where a host
+# that refuses to serve them (or simply 404s) failed the whole install.
+_IGNORED_SITE_FILENAMES = frozenset({".DS_Store", "Thumbs.db", "desktop.ini"})
+
+
+def _is_ignored_site_file(path: Path) -> bool:
+    return path.name in _IGNORED_SITE_FILENAMES or path.name.startswith(".")
+
+
+def collect_site_files(site_path: Path, cfg: dict) -> list:
+    """Every file the renderer can ask for at runtime, site-root-relative.
+
+    Shared by the build fingerprint and the service worker's precache list so the
+    two can never disagree about what "the site" is. Only files that actually
+    exist are listed: a precache entry for a missing file is a guaranteed install
+    failure, and an install failure means the previous worker — and the previous
+    content — stays in place.
+    """
+    files: list = []
+    for name in ("index.html", "config.yml", "nav.yml", "search.json"):
+        if (site_path / name).is_file():
+            files.append(name)
+
+    theme_file = cfg.get("theme")
+    if theme_file:
+        theme_rel = str(theme_file).replace("\\", "/")
+        if (site_path / theme_rel).is_file():
+            files.append(theme_rel)
+
+    for folder in ("pages", "posts", "assets"):
+        d = site_path / folder
+        if not d.is_dir():
+            continue
+        for f in sorted(d.rglob("*")):
+            if f.is_file() and not _is_ignored_site_file(f):
+                files.append(str(f.relative_to(site_path)).replace("\\", "/"))
+
+    seen, unique = set(), []
+    for rel in files:
+        if rel not in seen:
+            seen.add(rel)
+            unique.append(rel)
+    return unique
+
+
+def compute_build_id(site_path: Path, files: list) -> str:
+    """A short hash over the path *and contents* of every file in `files`.
+
+    This is what makes a rebuild visible to a browser that already has the site
+    cached. The previous implementation hashed only the sorted file *list*, so
+    editing a page without adding or removing one produced an identical cache
+    name — and, because Python salts `hash()` of a string per process, it also
+    produced a different name on every build when nothing had changed at all.
+    """
+    digest = hashlib.sha256()
+    for rel in sorted(files):
+        digest.update(rel.encode("utf-8"))
+        digest.update(b"\0")
+        try:
+            digest.update(hashlib.sha256((site_path / rel).read_bytes()).digest())
+        except OSError:
+            digest.update(b"?unreadable")
+        digest.update(b"\n")
+    return digest.hexdigest()[:16]
+
+
+def write_site_version(site_path: Path, build_id: str, file_count: int) -> None:
+    """Write site-version.json — the probe an open page polls to notice a rebuild.
+
+    Written on every build, PWA or not: it is also what the sidebar's "Last
+    updated" button displays, and that is independent of the service worker.
+    Deliberately *not* part of the precache list, and excluded from the service
+    worker's fetch handling, so it can never be answered from a cache.
+    """
+    built = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
+    payload = {
+        "build": build_id,
+        "built": built.isoformat().replace("+00:00", "Z"),
+        "files": file_count,
+        "generator": f"mdcms {CLI_VERSION}",
+    }
+    (site_path / "site-version.json").write_text(
+        json.dumps(payload, indent=2) + "\n", encoding="utf-8"
+    )
+    click.echo(f"  Wrote site-version.json (build {build_id}, {file_count} files)")
+
+
 # ─── PWA generation ───────────────────────────────────────────
+
+_SERVICE_WORKER_JS = r"""// mdcms service worker — generated by mdcms build. Do not edit by hand.
+//
+// Update model
+// ------------
+// BUILD_ID is a content hash of every file in the site, so any edit to any page,
+// asset or config file produces a different worker script and a different cache
+// name — which is what makes the browser notice a rebuild at all.
+//
+// Content (markdown, YAML, JSON, HTML) and navigations are network-first with
+// the cache as the fallback, and revalidated against the server rather than
+// trusted from the browser's HTTP cache. That is the whole fix for "readers keep
+// being served yesterday's pages": a cache-first worker never re-fetches what it
+// already holds, so an edit stayed invisible until the entire cache was replaced.
+// Here the cache's job is to make the site work offline, not to answer first.
+// Binary assets do stay cache-first — they are effectively immutable, and a
+// changed one arrives with the next build's cache anyway.
+//
+// The page polls site-version.json (never cached, never intercepted here) to
+// notice a new build while it sits open — nothing re-fetches a page the reader
+// is already looking at — and can ask for a full re-download of every page and
+// asset with a MDCMS_FORCE_REFRESH message.
+
+const BUILD_ID = '__BUILD_ID__';
+const CACHE_PREFIX = 'mdcms-';
+const CACHE_NAME = CACHE_PREFIX + BUILD_ID;
+const PRECACHE_URLS = __PRECACHE_URLS__;
+
+const CONTENT_RE = /\.(?:md|ya?ml|json|html?)$/i;
+const NEVER_HANDLE_RE = /(?:^|\/)(?:site-version\.json|service-worker\.js|manifest\.json)$/;
+
+// Fills `cache` one URL at a time, reporting what failed instead of giving up.
+// cache.addAll() was the obvious choice here and was the single worst bug in the
+// old worker: it rejects as a unit, so one unfetchable file — a 404, a stray
+// .DS_Store, a flaky asset — aborted the whole install, left the previous worker
+// active, and froze the site on its old content silently and permanently.
+//
+// `mode` is the HTTP cache mode: 'no-cache' revalidates every file against the
+// server (cheap 304s) rather than trusting the browser cache, which could
+// otherwise copy stale bytes straight into a brand-new cache; 'reload' bypasses
+// it outright and is what the force-refresh button uses.
+async function fillCache(cache, urls, mode) {
+  let stored = 0;
+  const failed = [];
+  await Promise.all(urls.map(async url => {
+    try {
+      const resp = await fetch(new Request(url, { cache: mode }));
+      if (!resp || !resp.ok) { failed.push(url); return; }
+      await cache.put(url, resp);
+      stored += 1;
+    } catch (e) {
+      failed.push(url);
+    }
+  }));
+  return { stored: stored, failed: failed };
+}
+
+self.addEventListener('install', event => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    const result = await fillCache(cache, PRECACHE_URLS, 'no-cache');
+    if (result.failed.length) {
+      console.warn('[mdcms] ' + result.failed.length + ' file(s) not precached:', result.failed);
+    }
+    await self.skipWaiting();
+  })());
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(
+      keys.filter(k => k.indexOf(CACHE_PREFIX) === 0 && k !== CACHE_NAME)
+          .map(k => caches.delete(k))
+    );
+    await self.clients.claim();
+  })());
+});
+
+async function cacheFirst(event) {
+  const cache = await caches.open(CACHE_NAME);
+  const cached = await cache.match(event.request);
+  if (cached) return cached;
+  const resp = await fetch(event.request);
+  if (resp && resp.ok) {
+    event.waitUntil(cache.put(event.request, resp.clone()).catch(() => {}));
+  }
+  return resp;
+}
+
+// Network-first, falling back to the cache when the network can't answer.
+//
+// `shellFallback` is for navigations: the renderer is a single-page app, so a
+// deep link has no cached entry of its own and falls back to index.html — which
+// is what makes a bookmarked page work offline.
+async function networkFirst(event, shellFallback) {
+  const cache = await caches.open(CACHE_NAME);
+
+  async function fromCache() {
+    const cached = await cache.match(event.request);
+    if (cached) return cached;
+    if (shellFallback) {
+      const shell = await cache.match('index.html');
+      if (shell) return shell;
+    }
+    return null;
+  }
+
+  // A navigation request cannot be cloned with a different cache mode, so it
+  // goes as-is; everything else is revalidated against the server, because a
+  // static host's own Cache-Control (GitHub Pages sends max-age=600) would
+  // otherwise let the HTTP cache answer with content the server has replaced.
+  let request = event.request;
+  if (!shellFallback) {
+    try {
+      request = new Request(event.request.url, { cache: 'no-cache', credentials: 'same-origin' });
+    } catch (e) { request = event.request; }
+  }
+
+  try {
+    const resp = await fetch(request);
+    if (resp && resp.ok) {
+      event.waitUntil(cache.put(event.request, resp.clone()).catch(() => {}));
+      return resp;
+    }
+    // A 404/5xx from a flaky host shouldn't blank a page we already have.
+    return (await fromCache()) || resp;
+  } catch (e) {
+    return (await fromCache()) || Response.error();
+  }
+}
+
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  if (request.method !== 'GET') return;
+
+  let url;
+  try { url = new URL(request.url); } catch (e) { return; }
+  if (url.origin !== self.location.origin) return;   // CDN libraries: leave to the HTTP cache
+  if (NEVER_HANDLE_RE.test(url.pathname)) return;
+
+  if (request.mode === 'navigate') event.respondWith(networkFirst(event, true));
+  else if (CONTENT_RE.test(url.pathname)) event.respondWith(networkFirst(event, false));
+  else event.respondWith(cacheFirst(event));
+});
+
+self.addEventListener('message', event => {
+  const data = event.data || {};
+
+  // The "update now" button: re-download every page and every asset with the
+  // HTTP cache bypassed, so the reader really gets today's bytes, then report
+  // back so the page can reload into them.
+  if (data.type === 'MDCMS_FORCE_REFRESH') {
+    event.waitUntil((async () => {
+      let reply;
+      try {
+        const cache = await caches.open(CACHE_NAME);
+        const result = await fillCache(cache, PRECACHE_URLS, 'reload');
+        reply = {
+          type: 'MDCMS_REFRESHED', build: BUILD_ID,
+          stored: result.stored, total: PRECACHE_URLS.length, failed: result.failed.length,
+        };
+      } catch (e) {
+        reply = { type: 'MDCMS_REFRESH_FAILED', build: BUILD_ID, error: String(e) };
+      }
+      if (event.ports && event.ports.length) {
+        event.ports[0].postMessage(reply);
+        return;
+      }
+      const clients = await self.clients.matchAll({ includeUncontrolled: true });
+      clients.forEach(client => client.postMessage(reply));
+    })());
+  } else if (data.type === 'MDCMS_SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+"""
+
 
 def cleanup_pwa(site_path: Path):
     """When pwa: no, write a self-unregistering service worker and remove manifest.json.
@@ -1089,10 +1383,19 @@ def cleanup_pwa(site_path: Path):
     """
     sw = site_path / "service-worker.js"
     sw.write_text(
-        "// mdcms: PWA disabled — unregisters any previously installed service worker.\n"
+        "// mdcms: PWA disabled — unregisters any previously installed service worker\n"
+        "// and drops the caches it left behind, so nothing keeps serving old content.\n"
         "self.addEventListener('install', () => self.skipWaiting());\n"
         "self.addEventListener('activate', event => {\n"
-        "  event.waitUntil(self.registration.unregister());\n"
+        "  event.waitUntil((async () => {\n"
+        "    try {\n"
+        "      const keys = await caches.keys();\n"
+        "      await Promise.all(keys.filter(k => k.indexOf('mdcms-') === 0).map(k => caches.delete(k)));\n"
+        "      const clients = await self.clients.matchAll({ type: 'window' });\n"
+        "      await self.registration.unregister();\n"
+        "      clients.forEach(client => { try { client.navigate(client.url); } catch (e) {} });\n"
+        "    } catch (e) { await self.registration.unregister(); }\n"
+        "  })());\n"
         "});\n",
         encoding="utf-8",
     )
@@ -1103,7 +1406,7 @@ def cleanup_pwa(site_path: Path):
     click.echo("  Wrote service-worker.js (self-unregistering stub, pwa: no)")
 
 
-def generate_pwa(site_path: Path, cfg: dict):
+def generate_pwa(site_path: Path, cfg: dict, build_id: str, precache: list):
     """Generate manifest.json and service-worker.js when pwa: yes."""
     pwa_name      = cfg.get("pwa-name", cfg.get("sitename", "MD-CMS Site"))
     pwa_shortname = cfg.get("pwa-shortname", pwa_name)
@@ -1134,56 +1437,15 @@ def generate_pwa(site_path: Path, cfg: dict):
     )
     click.echo("  Wrote manifest.json")
 
-    # Collect all files to precache
-    precache: list = [
-        "index.html", "config.yml", "nav.yml", "search.json",
-    ]
-    theme_file = cfg.get("theme")
-    if theme_file and (site_path / theme_file).exists():
-        precache.append(theme_file)
-
-    for folder in ("pages", "posts", "assets"):
-        d = site_path / folder
-        if not d.is_dir():
-            continue
-        for f in sorted(d.rglob("*")):
-            if f.is_file():
-                precache.append(str(f.relative_to(site_path)).replace("\\", "/"))
-
-    # Version hash — deterministic from sorted file list
-    cache_hash = format(hash(tuple(sorted(precache))) & 0xFFFFFFFF, "08x")
-    cache_name = f"mdcms-{cache_hash}"
-
-    urls_js = json.dumps(precache, indent=2, ensure_ascii=False)
-    sw = f"""// mdcms service worker — generated by mdcms build
-const CACHE_NAME = '{cache_name}';
-const PRECACHE_URLS = {urls_js};
-
-self.addEventListener('install', event => {{
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE_URLS))
-  );
-  self.skipWaiting();
-}});
-
-self.addEventListener('activate', event => {{
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    sw = (
+        _SERVICE_WORKER_JS
+        .replace("__BUILD_ID__", build_id)
+        .replace("__PRECACHE_URLS__", json.dumps(precache, indent=2, ensure_ascii=False))
     )
-  );
-  self.clients.claim();
-}});
-
-self.addEventListener('fetch', event => {{
-  if (event.request.method !== 'GET') return;
-  event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request))
-  );
-}});
-"""
     (site_path / "service-worker.js").write_text(sw, encoding="utf-8")
-    click.echo(f"  Wrote service-worker.js (cache: {cache_name})")
+    click.echo(
+        f"  Wrote service-worker.js (cache: mdcms-{build_id}, {len(precache)} files precached)"
+    )
 
 # ─── HTTP helpers ─────────────────────────────────────────────
 
@@ -1777,6 +2039,7 @@ EDITABLE_KEYS = [
     "sitename", "navigation", "theme", "homepage", "sitedescription",
     "logo", "favicon", "footer", "nav-position", "search", "default-theme",
     "pwa", "pwa-name", "pwa-shortname", "pwa-colour", "offline-message",
+    "last-updated",
     "categories-use", "categories-dates", "categories-sectionnames",
 ]
 
@@ -2253,6 +2516,12 @@ def _edit_pwa(site_path: Path, cfg: dict):
         updates["pwa-colour"] = click.prompt(
             "PWA theme colour (hex)", default=str(cfg.get("pwa-colour", "#2563EB"))
         )
+    # Not PWA-only — the button works without a service worker too, where it
+    # re-fetches the site's content past the browser's HTTP cache.
+    updates["last-updated"] = "yes" if click.confirm(
+        'Show a "Last updated" / refresh button at the bottom of the nav?',
+        default=is_yes(cfg.get("last-updated")),
+    ) else "no"
     set_config_keys(site_path, updates)
     click.echo(click.style("  PWA settings updated.", fg="green"))
     if new_enabled and not (site_path / "assets" / "images" / str(cfg.get("favicon", "favicon.png"))).exists():
@@ -2865,7 +3134,7 @@ def _interactive_config(site_path: Path):
              lambda c: _prompt_scalar(site_path, c, "default-theme", "Default mode", choices=_THEME_MODE_CHOICES)),
             ("Navigation position (left/right)",
              lambda c: _prompt_scalar(site_path, c, "nav-position", "Nav position", choices=_NAV_POS_CHOICES)),
-            ("PWA settings", lambda c: _edit_pwa(site_path, c)),
+            ("PWA and update settings", lambda c: _edit_pwa(site_path, c)),
             ("Manage pages", lambda c: _manage_pages(site_path)),
             ("Manage sections", lambda c: _manage_sections(site_path)),
             ("Manage categories", lambda c: _manage_categories(site_path)),

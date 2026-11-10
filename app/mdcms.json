@@ -1,5 +1,5 @@
 {
-  "mdcms": "0.10.0",
+  "mdcms": "0.12.0",
   "files": [
     "404.html",
     "assets/icons/add.svg",
@@ -20,6 +20,7 @@
     "assets/icons/light_mode.svg",
     "assets/icons/menu.svg",
     "assets/icons/minimize.svg",
+    "assets/icons/refresh.svg",
     "assets/icons/right_panel_close.svg",
     "assets/icons/right_panel_open.svg",
     "assets/icons/search.svg",
@@ -36,6 +37,7 @@
     "pages/tabs-accordions.md",
     "search.json",
     "service-worker.js",
+    "site-version.json",
     "theme.yml"
   ],
   "dirs": [

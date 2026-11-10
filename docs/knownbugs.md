@@ -34,7 +34,28 @@ Every bug found in MD-CMS, open or fixed, with its symptom, root cause, and fix.
 
 ## Fixed in development (not yet released)
 
-_Nothing awaiting release._
+### A PWA site never served updated content to its readers
+
+**Symptom:** With `pwa: yes`, a visitor who had been to the site before kept seeing the version of every page they saw the first time. Rebuilding and redeploying changed nothing for them: edited pages showed their old text, new pages 404'd or were missing from the nav, and a plain reload did not help. Only clearing site data or unregistering the service worker by hand brought the site up to date. Readers on a desktop browser were affected exactly as much as readers who had installed the PWA — "PWA enabled" effectively froze the site for everyone who had already loaded it once.
+
+**Root cause:** Four independent faults in `generate_pwa()` in `mdcms.py`, each enough on its own to stop updates.
+
+1. *The cache name did not depend on the content.* `cache_hash` was `hash(tuple(sorted(precache)))` — a hash of the sorted **file list**. Editing a page without adding or removing a file left the list identical, so `service-worker.js` was byte-identical, so the browser saw no new worker and never reinstalled. (The same expression was also wrong in the other direction: Python salts `hash()` of a string per process, so the name *did* change on every build when nothing had changed at all, contradicting the `# deterministic` comment and causing pointless full-cache wipes.)
+2. *The precache was all-or-nothing.* `cache.addAll(PRECACHE_URLS)` rejects as a unit. One unfetchable entry — a 404, a `.DS_Store` the host won't serve, a missing `search.json`, a flaky asset — failed the whole `install`, so the new worker never activated and the previous one kept serving the previous content indefinitely, with nothing logged and nothing shown to the reader.
+3. *Nothing was ever revalidated.* The fetch handler was `caches.match(request).then(cached => cached || fetch(request))` — pure cache-first with no write-back. A cached `index.html`, `nav.yml`, `search.json` or `.md` was returned unchanged forever; the only way a cached entry could change was a full reinstall, which fault 1 and 2 prevented.
+4. *An open page was never told anything.* The registration in `app/index.html` called `register()` and nothing else — no `update()`, no `updatefound` handling. The renderer is a hash/push-state SPA, so a reader with the tab open triggers no navigation and the browser never even checks for a new worker.
+
+**Fix:** The worker is now generated from `_SERVICE_WORKER_JS` and versioned by `compute_build_id()` — a SHA-256 over the path *and bytes* of every file `collect_site_files()` lists, so the worker script changes when and only when the site's content changes. `fillCache()` replaces `cache.addAll()`, caching each URL independently and reporting what failed instead of aborting the install, and `collect_site_files()` only lists files that exist and skips dotfiles and OS droppings (`_is_ignored_site_file()`). Content (`.md`, `.yml`, `.json`, `.html`) and navigations are served by `networkFirst()` — network with cache fallback, revalidated with `cache: 'no-cache'` so a host's own `Cache-Control` (GitHub Pages sends `max-age=600`) cannot answer with content the server has replaced — while binary assets stay cache-first. `run_build()` writes `site-version.json` via `write_site_version()` (build id + build time, excluded from the precache list and from the worker's fetch handling), and `initUpdateChecks()`/`checkForUpdate()` in `app/index.html` poll it on load, on tab focus, on `online`, and every 15 minutes, pulling the new worker and reloading once per build id when the hash changes.
+
+---
+
+### Turning `pwa: no` back off left the old caches in place
+
+**Symptom:** Switching a site from `pwa: yes` to `pwa: no` and rebuilding unregistered the service worker, but the content it had cached stayed in the browser's CacheStorage.
+
+**Root cause:** `cleanup_pwa()`'s stub worker called `self.registration.unregister()` and nothing else. Unregistering stops a worker from controlling future loads; it does not delete the caches it created.
+
+**Fix:** The stub now deletes every cache whose name starts with `mdcms-` before unregistering, and navigates any window it still controls so the reader lands on uncached content immediately rather than at the next manual reload.
 
 ---
 

@@ -50,6 +50,7 @@
     "posts/2026-05-01-developer-survey-2026.md",
     "search.json",
     "service-worker.js",
+    "site-version.json",
     "theme.yml"
   ]
 }

@@ -156,6 +156,37 @@ Requires a `favicon.png` (192×192 px recommended) at `assets/images/favicon.png
 
 ---
 
+## Content updates
+
+Every build writes `site-version.json` — a content hash of the whole site plus the build time. This happens whether or not `pwa` is enabled and needs no configuration.
+
+An open page polls that file on load, when the tab regains focus, when the browser comes back online, and every 15 minutes. When the hash changes, the page pulls the rebuilt service worker and reloads itself into the new content, so a site left open in a tab keeps up with the server on its own.
+
+The service worker fetches pages, config, nav and the search index network-first and falls back to its cache when there is no network, so a reader is never served content the server has already replaced. Binary assets (images, fonts) stay cache-first.
+
+```yaml
+last-updated: yes              # Show a refresh button at the bottom of the nav, reading
+                               # "Last updated: 10 November 2026 14:32" — the build time,
+                               # in the reader's own time zone. Clicking it re-downloads
+                               # every page and asset and reloads. Default: no.
+
+last-updated-label: "Last updated"
+                               # Optional. Overrides the label text. Supports per-language
+                               # values, the same shape as offline-message.
+```
+
+Multi-language label:
+
+```yaml
+last-updated-label:
+  en: "Last updated"
+  nb: "Sist oppdatert"
+```
+
+The button works with or without `pwa: yes`. With a service worker it tells the worker to re-fetch every precached file with the HTTP cache bypassed; without one it re-fetches the site's content past the browser's own cache. Either way it reloads when the download finishes.
+
+---
+
 ## Categories
 
 Categories allow one site to serve multiple language or audience variants of the same content. Each page can have a variant per category using the filename suffix convention (`page.nb.md` for Norwegian).
@@ -393,6 +424,11 @@ pwa-colour: "#2563EB"
 offline-message:
   en: "You are offline. Connect to the internet and reload."
   nb: "Du er frakoblet. Koble til og last inn på nytt."
+
+last-updated: yes
+last-updated-label:
+  en: "Last updated"
+  nb: "Sist oppdatert"
 
 language: en
 pagenotfoundmessage: "Please select a page to continue."
